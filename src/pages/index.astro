@@ -1,30 +1,26 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Markdown from '../components/Markdown.astro';
-
-// Itt definiálod a bemutatkozó szöveget
-const explainer = `
-Precíz épületgépészeti tervezés, műszaki tanácsadás és engedélyeztetés. 
-Segítek megvalósítani modern, energiatakarékos fűtési, vízellátási és csatornázási rendszereit, legyen szó családi házról vagy ipari létesítményről.
-`;
 ---
 
-<Layout title="Nyári Terv - Épületgépészeti Tervezés">
-    <h1 class="mb-10">Nyári Terv – Mérnöki Szolgáltatások</h1>
-    <Markdown content={explainer} class="mb-10 text-lg" />
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-        <div class="p-4 border rounded shadow-sm">
-            <h3 class="font-bold">Tervezés</h3>
-            <p>Víz-, gáz-, fűtés- és légtechnikai rendszerek teljes körű tervezése.</p>
+<Layout title="Nyári Terv - Fejlesztés alatt">
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <h1 class="text-4xl font-bold mb-4">Nyári Terv</h1>
+        <h2 class="text-2xl text-gray-600 mb-8">Épületgépészeti Tervezés</h2>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8 max-w-2xl">
+            <p class="text-lg text-blue-700 italic">
+                "Weboldalunk megújul, hogy hamarosan még pontosabb információkkal segíthessük épületgépészeti projektjeit."
+            </p>
         </div>
-        <div class="p-4 border rounded shadow-sm">
-            <h3 class="font-bold">Engedélyeztetés</h3>
-            <p>Gáztervek és közműnyilatkozatok ügyintézése a szolgáltatóknál.</p>
+
+        <div class="space-y-4">
+            <p class="text-xl font-semibold">Kapcsolat és ajánlatkérés:</p>
+            <p class="text-lg">📧 <a href="mailto:info@nyariterv.hu" class="text-blue-600 hover:underline">info@nyariterv.hu</a></p>
+            <p class="text-lg">📞 <a href="tel:+36XXXXXXXXX" class="text-blue-600 hover:underline">+36 (az Ön száma)</a></p>
+        </div>
+
+        <div class="mt-12 text-sm text-gray-400">
+            <p>Engedélyezési tervek • Kiviteli tervek • Műszaki tanácsadás</p>
         </div>
     </div>
-
-    <p>
-        <a href="mailto:info@nyariterv.hu" class="btn btn-lg sm:min-w-64">Ajánlatot kérek</a>
-    </p>
 </Layout>
