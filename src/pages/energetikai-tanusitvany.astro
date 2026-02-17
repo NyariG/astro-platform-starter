@@ -1,0 +1,183 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Contact from '../components/Contact.astro';
+import { Image } from 'astro:assets';
+// Reuse existing assets or placeholders if specific ones aren't available yet
+import heroBg from '../assets/hero-bg.png'; 
+
+const features = [
+    {
+        title: "Gyors Ügyintézés",
+        description: "A helyszíni felmérést követően akár 24-48 órán belül elkészítjük és hitelesítjük a tanúsítványt.",
+        iconPath: "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+    },
+    {
+        title: "Hivatalos Jogosultság",
+        description: "Teljes körű jogosultsággal rendelkezünk, így tanúsítványainkat minden hivatalos ügyhöz elfogadják (adásvétel, bérbeadás, pályázat).",
+        iconPath: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    },
+    {
+        title: "Rugalmas Időpontok",
+        description: "Alkalmazkodunk időbeosztásához: vállalunk felmérést munkaidő után vagy akár hétvégén is, felár nélkül.",
+        iconPath: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+    },
+    {
+        title: "Rejtett Költségek Nélkül",
+        description: "Előre egyeztetett fix áron dolgozunk. Nincsenek utólagos díjak vagy kiszállási költségek a megjelölt körzetben.",
+        iconPath: "M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    }
+];
+
+const processSteps = [
+    {
+        step: "1",
+        title: "Kapcsolatfelvétel",
+        description: "Keressen minket telefonon vagy emailben időpont egyeztetés céljából."
+    },
+    {
+        step: "2",
+        title: "Helyszíni Felmérés",
+        description: "Szakemberünk felméri az ingatlant (kb. 30-60 perc), rögzíti a szükséges adatokat."
+    },
+    {
+        step: "3",
+        title: "Számítás és Hitelesítés",
+        description: "Irodánkban elvégezzük a számításokat és feltöltjük az adatokat az Országos Építésügyi Nyilvántartásba."
+    },
+    {
+        step: "4",
+        title: "Tanúsítvány Átadása",
+        description: "A hitelesített tanúsítványt elektronikus úton (emailben) küldjük meg Önnek."
+    }
+];
+---
+
+<Layout title="Hiteles Energetikai Tanúsítvány - Nyári Terv" description="Hivatalos energetikai tanúsítvány készítése Győrben és környékén. Gyors, rejtett költségek nélkül.">
+    <!-- Hero Section -->
+    <section class="relative bg-slate-50 overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="container-custom relative z-10 py-20 sm:py-28 lg:pb-32">
+            <div class="mx-auto max-w-2xl text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl mb-6">
+                    Hiteles Energetikai <span class="text-primary">Tanúsítvány</span>
+                </h1>
+                <p class="mt-6 text-lg leading-8 text-slate-600">
+                    Hivatalos dokumentum ingatlan eladáshoz, bérbeadáshoz vagy pályázathoz. Gyors ügyintézés, garantált minőség Győrben és vonzáskörzetében.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <a href="#kapcsolat" class="btn text-base px-8 py-3">
+                        Ajánlatkérés
+                    </a>
+                    <a href="#folyamat" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary transition">
+                        Hogyan működik? <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="section bg-white">
+        <div class="container-custom">
+            <div class="mx-auto max-w-2xl text-center mb-16">
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Miért válasszon minket?</h2>
+                <p class="mt-4 text-lg text-slate-600">
+                    Megbízható, gyors és ügyfélközpontú szolgáltatást nyújtunk versenyképes áron.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                {features.map((feature) => (
+                    <div class="bg-slate-50 rounded-xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="p-3 bg-blue-100 rounded-lg text-primary">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d={feature.iconPath} />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">{feature.title}</h3>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed">
+                            {feature.description}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="folyamat" class="section bg-slate-900 text-white">
+        <div class="container-custom">
+            <div class="mx-auto max-w-2xl text-center mb-16">
+                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">A Tanúsítás Folyamata</h2>
+                <p class="mt-4 text-lg text-slate-400">
+                    Egyszerű, átlátható lépések a megrendeléstől a kész dokumentumig.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {processSteps.map((step) => (
+                    <div class="relative">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-white font-bold text-xl mb-6 shadow-lg shadow-primary/30 z-10 relative">
+                                {step.step}
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-3">{step.title}</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                {step.description}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ / Info Section -->
+    <section class="section bg-blue-50">
+        <div class="container-custom">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 mb-6">Mikor szükséges az energetikai tanúsítvány?</h2>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start gap-3">
+                            <svg class="h-6 w-6 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Ingatlan eladáskor:</strong> Az adásvételi szerződés megkötéséhez kötelező.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="h-6 w-6 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Bérbeadáskor:</strong> Egy évnél hosszabb bérleti szerződés esetén szükséges.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="h-6 w-6 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Pályázatokhoz:</strong> Felújítási pályázatok (pl. energetikai korszerűsítés) igényléséhez elengedhetetlen.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <svg class="h-6 w-6 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span><strong>Használatbavételhez:</strong> Új építésű ingatlanok használatbavételi engedélyéhez.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-100">
+                    <h3 class="text-xl font-bold text-slate-900 mb-4">Mennyibe kerül?</h3>
+                    <p class="text-slate-600 mb-6">
+                        Az ár függ az ingatlan típusától (lakás/családi ház), méretétől és elhelyezkedésétől. Kérjen pontos árajánlatot kötelezettségek nélkül!
+                    </p>
+                    <a href="#kapcsolat" class="btn w-full">Ajánlatkérés</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <Contact />
+</Layout>

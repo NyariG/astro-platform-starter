@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Contact from '../components/Contact.astro';
 import { Image } from 'astro:assets';
 import heroBg from '../assets/hatterkep_jo.png';
 import planningImg from '../assets/planning.jpg';
@@ -16,6 +17,13 @@ const services = [
         description: "Többlakásos épületek komplex gépészeti tervezése. Rendszerszintű gondolkodás, gazdaságos üzemeltetés és precíz kivitelezési tervek.",
         iconPath: "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5M12 6.75h1.5M15 6.75h1.5M9 10.5h1.5M12 10.5h1.5M15 10.5h1.5M9 14.25h1.5M12 14.25h1.5M15 14.25h1.5M9 18h1.5M12 18h1.5M15 18h1.5",
         features: ["Központi gépészet", "Egyedi mérési megoldások", "Tűzvédelmi rendszerek", "Szennyvíz elvezetés"]
+    },
+    {
+        title: "Energetikai Tanúsítvány",
+        description: "Hiteles energetikai tanúsítványok készítése gyors határidővel, rejtett költségek nélkül. Hivatalos dokumentum adásvételhez és pályázathoz.",
+        iconPath: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+        features: ["Akár 24 órán belül", "Hivatalos jogosultság", "Helyszíni felmérés", "Teljes körű ügyintézés"],
+        link: "/energetikai-tanusitvany"
     }
 ];
 
@@ -37,7 +45,7 @@ const systems = [
                     Nyári Terv <span class="block text-primary text-2xl sm:text-4xl mt-2 font-medium">Precíz épületgépészeti tervezés Győrben és környékén</span>
                 </h1>
                 <p class="mt-6 text-lg leading-8 text-slate-600">
-                    Fűtés, hűtés, szellőzés, víz, szennyvíz és esővíz rendszerek tervezése, különös tekintettel a hőszivattyús megoldásokra.
+                    Fűtés, hűtés, szellőzés, víz, szennyvíz és esővíz rendszerek tervezése, valamint <strong>hiteles energetikai tanúsítványok készítése</strong>.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     <a href="#kapcsolat" class="btn text-base px-8 py-3">
@@ -61,9 +69,9 @@ const systems = [
                 </p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
                 {services.map((service) => (
-                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:shadow-lg transition-shadow duration-300">
+                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
                         <div class="text-primary mb-6">
                             <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d={service.iconPath} />
@@ -73,7 +81,7 @@ const systems = [
                         <p class="text-slate-600 mb-6 leading-relaxed">
                             {service.description}
                         </p>
-                        <ul class="space-y-3">
+                        <ul class="space-y-3 mb-6 flex-grow">
                             {service.features.map((feature) => (
                                 <li class="flex items-center text-slate-700">
                                     <svg class="h-5 w-5 text-primary mr-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -83,6 +91,9 @@ const systems = [
                                 </li>
                             ))}
                         </ul>
+                        {service.link && (
+                            <a href={service.link} class="btn w-full mt-auto">Részletek</a>
+                        )}
                     </div>
                 ))}
             </div>
@@ -117,54 +128,5 @@ const systems = [
     </section>
 
     <!-- Contact Section -->
-    <section id="kapcsolat" class="section bg-blue-50">
-        <div class="container-custom">
-            <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-2">
-                    <div class="p-8 sm:p-12 lg:p-16">
-                        <h2 class="text-3xl font-bold tracking-tight text-slate-900 mb-6">Lépjen velünk kapcsolatba!</h2>
-                        <p class="text-lg text-slate-600 mb-8">
-                            Kérjen ajánlatot vagy egyeztessen időpontot konzultációra. Állunk rendelkezésére Győrben és vonzáskörzetében.
-                        </p>
-                        
-                        <div class="space-y-6">
-                            <div class="flex items-start gap-4">
-                                <div class="bg-blue-100 p-3 rounded-lg text-primary">
-                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900">Email</h3>
-                                    <a href="mailto:info@nyariterv.hu" class="text-primary hover:underline">info@nyariterv.hu</a>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start gap-4">
-                                <div class="bg-blue-100 p-3 rounded-lg text-primary">
-                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-900">Telefon</h3>
-                                    <a href="tel:+36703187843" class="text-primary hover:underline">+36 70 318 7843</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-100 flex flex-col justify-center items-center p-8 text-center">
-                        <h3 class="text-xl font-semibold mb-4 text-slate-800">Miben segíthetünk?</h3>
-                        <p class="text-slate-600 mb-8 max-w-sm">
-                            Gépészeti tervezés engedélyezéshez, kivitelezéshez vagy tanácsadás.
-                        </p>
-                        <a href="mailto:info@nyariterv.hu" class="btn w-full max-w-xs">
-                            Írjon nekünk
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <Contact />
 </Layout>

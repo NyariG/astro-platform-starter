@@ -3,8 +3,9 @@ import Logo from '../components/Logo.astro';
 
 const navItems = [
     { linkText: 'Kezdőlap', href: '/' },
-    { linkText: 'Szolgáltatások', href: '#szolgaltatasok' },
-    { linkText: 'Kapcsolat', href: '#kapcsolat' },
+    { linkText: 'Szolgáltatások', href: '/#szolgaltatasok' },
+    { linkText: 'Energetikai Tanúsítvány', href: '/energetikai-tanusitvany' },
+    { linkText: 'Kapcsolat', href: '/#kapcsolat' },
 ];
 ---
 
@@ -27,7 +28,7 @@ const navItems = [
             <a href="tel:+36703187843" class="hidden sm:inline-flex btn btn-secondary text-sm px-4 py-2">
                 +36 70 318 7843
             </a>
-            <a href="#kapcsolat" class="btn text-sm px-4 py-2">
+            <a href="/#kapcsolat" class="btn text-sm px-4 py-2">
                 Ajánlatkérés
             </a>
         </div>
