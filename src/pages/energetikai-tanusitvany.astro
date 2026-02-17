@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Contact from '../components/Contact.astro';
 import { Image } from 'astro:assets';
 // Reuse existing assets or placeholders if specific ones aren't available yet
-import heroBg from '../assets/hero-bg.png'; 
+
 import heroBg from '../assets/tanusitvanyl.png'; 
 
 const features = [
@@ -54,22 +54,33 @@ const processSteps = [
 ---
 
 <Layout title="Hiteles Energetikai Tanúsítvány - Nyári Terv" description="Hivatalos energetikai tanúsítvány készítése Győrben és környékén. Gyors, rejtett költségek nélkül.">
-    <!-- Hero Section -->
-    <section class="relative bg-slate-50 overflow-hidden">
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div class="container-custom relative z-10 py-20 sm:py-28 lg:pb-32">
-            <div class="mx-auto max-w-2xl text-center">
-                <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl mb-6">
-                    Hiteles Energetikai <span class="text-primary">Tanúsítvány</span>
+    
+    <section class="relative bg-slate-900 overflow-hidden text-white">
+        <div class="absolute inset-0">
+            <Image 
+                src={heroBg} 
+                alt="Energetikai tanúsítás háttér" 
+                class="w-full h-full object-cover opacity-30" 
+            />
+            <div class="absolute inset-0 bg-slate-900/60"></div>
+        </div>
+
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+        <div class="container-custom relative z-10 py-24 sm:py-32 lg:pb-40">
+            <div class="mx-auto max-w-3xl text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl mb-6">
+                    Hiteles Energetikai <span class="text-primary-light">Tanúsítvány</span>
                 </h1>
-                <p class="mt-6 text-lg leading-8 text-slate-600">
-                    Hivatalos dokumentum ingatlan eladáshoz, bérbeadáshoz vagy pályázathoz. Gyors ügyintézés, garantált minőség Győrben és vonzáskörzetében.
+                <p class="mt-6 text-lg leading-8 text-slate-200">
+                    Hivatalos dokumentum ingatlan eladáshoz, bérbeadáshoz vagy pályázathoz. 
+                    <strong>Gyors ügyintézés, garantált minőség</strong> Győrben és vonzáskörzetében.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a href="#kapcsolat" class="btn text-base px-8 py-3">
+                    <a href="#kapcsolat" class="btn bg-primary hover:bg-primary-dark text-white text-base px-8 py-3 border-none">
                         Ajánlatkérés
                     </a>
-                    <a href="#folyamat" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary transition">
+                    <a href="#folyamat" class="text-sm font-semibold leading-6 text-white hover:text-primary-light transition">
                         Hogyan működik? <span aria-hidden="true">→</span>
                     </a>
                 </div>
