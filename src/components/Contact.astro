@@ -58,7 +58,11 @@ const phone = "+36 70 318 7843";
 
                 <!-- Contact Form -->
                 <div class="p-8 sm:p-12 bg-white">
-                    <form name="contact" method="POST" data-netlify="true" class="space-y-6">
+                    <form action="https://formsubmit.co/nyariterv@gmail.com" method="POST" class="space-y-6">
+                        <input type="hidden" name="_subject" value="Új üzenet a weboldalról - Nyári Terv" />
+                        <input type="hidden" name="_captcha" value="true" />
+                        <input type="hidden" name="_template" value="table" />
+                        <input type="text" name="_honey" style="display:none" />
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-slate-700 mb-2">Név</label>
@@ -69,12 +73,12 @@ const phone = "+36 70 318 7843";
                                 <input type="tel" name="phone" id="phone" class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition" placeholder="+36 20 123 4567" />
                             </div>
                         </div>
-                        
+
                         <div>
                             <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email cím</label>
                             <input type="email" name="email" id="email" required class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition" placeholder="pelda@email.com" />
                         </div>
-                        
+
                         <div>
                             <label for="message" class="block text-sm font-medium text-slate-700 mb-2">Üzenet</label>
                             <textarea name="message" id="message" rows="4" required class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition resize-none" placeholder="Miben segíthetünk?"></textarea>
