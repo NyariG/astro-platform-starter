@@ -8,9 +8,10 @@ import Footer from '../components/Footer.astro';
 interface Props {
     title: string;
     description?: string;
+    minimal?: boolean;
 }
 
-const { title, description = "Nyári Terv - Precíz épületgépészeti tervezés" } = Astro.props;
+const { title, description = "Nyári Terv - Precíz épületgépészeti tervezés", minimal = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -25,10 +26,10 @@ const { title, description = "Nyári Terv - Precíz épületgépészeti tervezé
         <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
     </head>
     <body class="flex flex-col min-h-screen">
-        <Header />
+        {!minimal && <Header />}
         <main class="grow">
             <slot />
         </main>
-        <Footer />
+        {!minimal && <Footer />}
     </body>
 </html>

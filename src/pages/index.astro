@@ -1,138 +1,382 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Contact from '../components/Contact.astro';
 import { Image } from 'astro:assets';
-import heroBg from '../assets/hatterkep_jo.png';
-import planningImg from '../assets/planning.jpg';
+import Layout from '../layouts/Layout.astro';
+import Logo from '../components/Logo.astro';
+import planningImage from '../assets/planning.jpg';
 
-const services = [
-    {
-        title: "Családi Házak",
-        description: "Teljes körű gépészeti tervezés új építésű és felújítandó családi házakhoz. Energiahatékony, modern megoldások személyre szabva.",
-        iconPath: "M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25",
-        features: ["Fűtés és hűtés", "Szellőztető rendszerek", "Víz- és csatornahálózat", "Hőszivattyús rendszerek"]
-    },
-    {
-        title: "Társasházak",
-        description: "Többlakásos épületek komplex gépészeti tervezése. Rendszerszintű gondolkodás, gazdaságos üzemeltetés és precíz kivitelezési tervek.",
-        iconPath: "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5M12 6.75h1.5M15 6.75h1.5M9 10.5h1.5M12 10.5h1.5M15 10.5h1.5M9 14.25h1.5M12 14.25h1.5M15 14.25h1.5M9 18h1.5M12 18h1.5M15 18h1.5",
-        features: ["Központi gépészet", "Egyedi mérési megoldások", "Tűzvédelmi rendszerek", "Szennyvíz elvezetés"]
-    },
-    {
-        title: "Energetikai Tanúsítvány",
-        description: "Hiteles energetikai tanúsítványok készítése gyors határidővel, rejtett költségek nélkül. Hivatalos dokumentum adásvételhez és pályázathoz.",
-        iconPath: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-        features: ["Akár 24 órán belül", "Hivatalos jogosultság", "Helyszíni felmérés", "Teljes körű ügyintézés"],
-        link: "/energetikai-tanusitvany"
-    },
-    {
-        title: "Tervezés és Kivitelezés",
-        description: "Új építésű és felújítási munkálatokat is vállalunk: először elkészítjük a mérnöki terveket, majd ezek alapján profi kivitelezést biztosítunk teljes körű garanciával.",
-        iconPath: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z",
-        features: ["Új építésű ingatlanok", "Felújítási munkálatok", "Mérnöki tervek alapján", "Teljes körű garancia"]
-    }
+const propertyTypes = [
+    { value: 'Lakóingatlan', label: 'Lakóingatlan', description: 'Családi ház, lakás vagy társasházi ingatlan', icon: 'home' },
+    { value: 'Ipari ingatlan', label: 'Ipari ingatlan', description: 'Üzem, műhely, csarnok vagy telephely', icon: 'factory' },
+    { value: 'Egyéb', label: 'Egyéb', description: 'Kereskedelmi vagy más rendeltetésű épület', icon: 'building' },
 ];
 
-const systems = [
-    "Fűtés", "Hűtés", "Szellőzés", "Vízellátás", "Szennyvíz", "Esővíz elvezetés"
+const projectPurposes = [
+    { value: 'Felújítás', label: 'Felújítás', description: 'Meglévő épület korszerűsítése vagy átalakítása', icon: 'renovation' },
+    { value: 'Új építés', label: 'Új építés', description: 'Új épület teljes gépészeti megtervezése', icon: 'new' },
+];
+
+const propertyAreas = ['100 m² alatt', '100–150 m²', '151–200 m²', '200 m² felett'];
+
+const services = [
+    'Műszaki leírás az egyszerű bejelentéshez',
+    'Fűtési terv',
+    'Hűtési terv',
+    'Klímatechnikai terv',
+    'Szellőzési terv',
+    'Vízellátási és csatornázási terv',
+    'Csapadékvíz-gyűjtési és -elvezetési terv',
+    'Központi porszívó terv',
+    'Kertterv',
+    'Öntözőrendszer terve',
 ];
 ---
 
-<Layout title="Nyári Terv – Precíz épületgépészeti tervezés">
-    <!-- Hero Section -->
-    <section class="relative bg-slate-50 overflow-hidden">
-        <div class="absolute inset-0">
-            <Image src={heroBg} alt="Épületgépészeti tervek" class="w-full h-full object-cover opacity-20" />
-        </div>
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div class="container-custom relative z-10 py-24 sm:py-32 lg:pb-40">
-            <div class="mx-auto max-w-2xl text-center">
-                <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6">
-                    Nyári Terv <span class="block text-primary text-2xl sm:text-4xl mt-2 font-medium">Precíz épületgépészeti tervezés Győrben és környékén</span>
+<Layout
+    title="Díjmentes épületgépészeti árajánlat | Nyári Terv"
+    description="Kérjen személyre szabott épületgépészeti árajánlatot néhány egyszerű lépésben, díjmentesen és kötelezettségek nélkül."
+    minimal
+>
+    <div class="landing-shell min-h-screen overflow-hidden">
+        <header class="relative z-20 mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+            <a href="/" class="brand-link flex items-center gap-3 text-slate-950" aria-label="Nyári Terv kezdőlap">
+                <Logo />
+                <span class="text-[1.05rem] font-extrabold tracking-[-0.03em]"><span class="text-blue-600">Nyári</span> Terv</span>
+            </a>
+            <div class="hidden items-center gap-2 text-sm font-semibold text-slate-600 sm:flex">
+                <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_5px_rgba(16,185,129,0.12)]"></span>
+                Átlagosan 1 munkanapon belül válaszolunk
+            </div>
+        </header>
+
+        <main class="relative z-10 mx-auto grid w-full max-w-[1440px] gap-12 px-5 pb-16 pt-6 sm:px-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start lg:gap-16 lg:px-12 lg:pb-24 lg:pt-12">
+            <section class="lg:sticky lg:top-24 lg:pt-5">
+                <div class="mb-7 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-blue-700">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m7.5 12 3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Ingyenes és kötelezettségmentes
+                </div>
+
+                <h1 class="max-w-2xl text-[clamp(2.75rem,5.7vw,5.5rem)] font-black leading-[0.95] tracking-[-0.065em] text-slate-950">
+                    Pontos terv.<br /><span class="text-blue-600">Gyors ajánlat.</span>
                 </h1>
-                <p class="mt-6 text-lg leading-8 text-slate-600">
-                    Fűtés, hűtés, szellőzés, víz, szennyvíz és esővíz rendszerek tervezése, <strong>profi kivitelezése</strong>, valamint hiteles energetikai tanúsítványok készítése.
+                <p class="mt-7 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
+                    Válaszoljon néhány egyszerű kérdésre, és összeállítjuk az épületéhez illő, személyre szabott gépészeti ajánlatot.
                 </p>
-                <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a href="#kapcsolat" class="btn text-base px-8 py-3">
-                        Ajánlatkérés
-                    </a>
-                    <a href="#szolgaltatasok" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary transition">
-                        Szolgáltatások megtekintése <span aria-hidden="true">→</span>
-                    </a>
+
+                <div class="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-sm font-semibold text-slate-700">
+                    <span class="flex items-center gap-2">
+                        <svg class="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+                        Mindössze 2 perc
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <svg class="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11V8a4 4 0 1 1 8 0v3m-9 0h10a1 1 0 0 1 1 1v7H6v-7a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                        Biztonságos adatkezelés
+                    </span>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Services Section -->
-    <section id="szolgaltatasok" class="section bg-white">
-        <div class="container-custom">
-            <div class="mx-auto max-w-2xl text-center mb-16">
-                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Szolgáltatásaink</h2>
-                <p class="mt-4 text-lg text-slate-600">
-                    Mérnöki precizitással tervezünk, és a tervekre építve teljes körű kivitelezést is vállalunk magánszemélyeknek és beruházóknak.
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-                {services.map((service) => (
-                    <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
-                        <div class="text-primary mb-6">
-                            <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d={service.iconPath} />
-                            </svg>
-                        </div>
-                        <h3 class="text-2xl font-bold text-slate-900 mb-4">{service.title}</h3>
-                        <p class="text-slate-600 mb-6 leading-relaxed">
-                            {service.description}
-                        </p>
-                        <ul class="space-y-3 mb-6 flex-grow">
-                            {service.features.map((feature) => (
-                                <li class="flex items-center text-slate-700">
-                                    <svg class="h-5 w-5 text-primary mr-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        {service.link && (
-                            <a href={service.link} class="btn w-full mt-auto">Részletek</a>
-                        )}
+                <div class="relative mt-12 hidden max-w-lg overflow-hidden rounded-[2rem] border border-white/70 shadow-[0_30px_80px_-35px_rgba(15,23,42,0.35)] lg:block">
+                    <Image src={planningImage} alt="Épületgépészeti tervrajz készítése" class="aspect-[16/9] w-full object-cover" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 rounded-full border border-white/30 bg-white/90 px-4 py-2 text-xs font-bold text-slate-800 backdrop-blur">
+                        Mérnöki precizitás, érthető folyamat
                     </div>
-                ))}
-            </div>
-        </div>
-    </section>
+                </div>
+            </section>
 
-    <!-- Detailed Systems Section -->
-    <section class="section bg-slate-900 text-white">
-        <div class="container-custom">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl mb-6 text-white">
-                        Korszerű Rendszerek Tervezése
-                    </h2>
-                    <p class="text-slate-300 text-lg mb-8 leading-relaxed">
-                        A modern épületgépészet nem csak a csövekről szól. Energiahatékony, fenntartható és kényelmes otthonokat tervezünk. Kiemelt figyelmet fordítunk a <strong>hőszivattyús megoldásokra</strong>, melyek a jövő zálogai.
-                    </p>
-                    <div class="grid grid-cols-2 gap-4">
-                        {systems.map((system) => (
-                            <div class="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
-                                <div class="h-2 w-2 rounded-full bg-primary"></div>
-                                <span class="font-medium">{system}</span>
+            <section id="ajanlatkeres" class="scroll-mt-6" aria-labelledby="form-title">
+                <div id="quote-card" class="form-card overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_32px_90px_-35px_rgba(15,23,42,0.28)]">
+                    <div class="border-b border-slate-100 px-6 py-6 sm:px-9 sm:py-7">
+                        <div class="flex items-end justify-between gap-6">
+                            <div>
+                                <p id="step-eyebrow" class="text-xs font-extrabold uppercase tracking-[0.18em] text-blue-600">1. lépés az 5-ből</p>
+                                <h2 id="form-title" class="mt-2 text-2xl font-black tracking-[-0.035em] text-slate-950 sm:text-3xl">Kérjen személyre szabott ajánlatot</h2>
                             </div>
-                        ))}
+                            <span id="step-percent" class="shrink-0 text-sm font-extrabold text-slate-400">20%</span>
+                        </div>
+                        <div class="mt-5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                            <div id="progress-bar" class="h-full w-1/5 rounded-full bg-blue-600 transition-[width] duration-500 ease-out"></div>
+                        </div>
+                    </div>
+
+                    <form id="quote-form" name="ajanlatkeres" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+                        <input type="hidden" name="form-name" value="ajanlatkeres" />
+                        <p class="hidden"><label>Ne töltse ki ezt a mezőt: <input name="bot-field" /></label></p>
+
+                        <div class="form-step px-6 py-8 sm:px-9 sm:py-10" data-step="1">
+                            <fieldset>
+                                <legend class="text-2xl font-black tracking-[-0.035em] text-slate-950">Milyen típusú az ingatlan?</legend>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">Válassza ki az ajánlat szempontjából leginkább megfelelő kategóriát.</p>
+                                <div class="mt-7 grid gap-3">
+                                    {propertyTypes.map((item) => (
+                                        <label class="choice-card group relative flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 p-4 transition hover:border-blue-300 hover:bg-blue-50/40 sm:p-5">
+                                            <input class="peer sr-only" type="radio" name="ingatlan-tipusa" value={item.value} required />
+                                            <span class="choice-icon grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-600 transition group-hover:bg-white peer-checked:bg-blue-600 peer-checked:text-white">
+                                                {item.icon === 'home' && <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 11 9-7 9 7v9H6a3 3 0 0 1-3-3v-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 20v-6h6v6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>}
+                                                {item.icon === 'factory' && <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V9l6 3V8l6 4V4h4v16H4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 16h1m4 0h1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>}
+                                                {item.icon === 'building' && <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 20V5h10v15M15 10h4v10M3 20h18M9 9h2m-2 4h2m-2 4h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>}
+                                            </span>
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block font-extrabold text-slate-900">{item.label}</span>
+                                                <span class="mt-0.5 block text-sm text-slate-500">{item.description}</span>
+                                            </span>
+                                            <span class="choice-mark grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-slate-300 text-transparent transition peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white">
+                                                <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                            <p class="step-error mt-4 hidden text-sm font-semibold text-red-600" role="alert">Kérjük, válasszon egy lehetőséget.</p>
+                            <div class="mt-8 flex justify-end"><button type="button" class="next-button primary-button">Tovább <span aria-hidden="true">→</span></button></div>
+                        </div>
+
+                        <div class="form-step hidden px-6 py-8 sm:px-9 sm:py-10" data-step="2">
+                            <fieldset>
+                                <legend class="text-2xl font-black tracking-[-0.035em] text-slate-950">Mi a projekt célja?</legend>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">Ez segít meghatározni a tervezési feladat részletességét.</p>
+                                <div class="mt-7 grid gap-4 sm:grid-cols-2">
+                                    {projectPurposes.map((item) => (
+                                        <label class="tile-choice group relative min-h-44 cursor-pointer rounded-2xl border border-slate-200 p-5 transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-950/5">
+                                            <input class="peer sr-only" type="radio" name="projekt-celja" value={item.value} required />
+                                            <span class="mb-8 grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-blue-600 peer-checked:bg-blue-600 peer-checked:text-white">
+                                                {item.icon === 'renovation' ? <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6 4 4M4 20l4.5-1 10-10a2.8 2.8 0 0 0-4-4l-10 10L4 20Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg> : <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 11 9-7 9 7M5 10v10h14V10M9 20v-6h6v6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>}
+                                            </span>
+                                            <span class="block font-extrabold text-slate-900">{item.label}</span>
+                                            <span class="mt-1 block text-sm leading-5 text-slate-500">{item.description}</span>
+                                            <span class="absolute right-4 top-4 h-5 w-5 rounded-full border-2 border-slate-300 transition peer-checked:border-[6px] peer-checked:border-blue-600"></span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                            <p class="step-error mt-4 hidden text-sm font-semibold text-red-600" role="alert">Kérjük, válasszon egy lehetőséget.</p>
+                            <div class="mt-8 flex items-center justify-between gap-4"><button type="button" class="back-button secondary-button">← Vissza</button><button type="button" class="next-button primary-button">Tovább →</button></div>
+                        </div>
+
+                        <div class="form-step hidden px-6 py-8 sm:px-9 sm:py-10" data-step="3">
+                            <fieldset>
+                                <legend class="text-2xl font-black tracking-[-0.035em] text-slate-950">Mekkora az ingatlan alapterülete?</legend>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">Egy hozzávetőleges érték is elegendő az előzetes ajánlathoz.</p>
+                                <div class="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    {propertyAreas.map((area) => (
+                                        <label class="area-choice relative cursor-pointer rounded-2xl border border-slate-200 px-5 py-6 text-center transition hover:border-blue-300 hover:bg-blue-50/40">
+                                            <input class="peer sr-only" type="radio" name="alapterulet" value={area} required />
+                                            <span class="block text-lg font-black tracking-[-0.02em] text-slate-900 peer-checked:text-blue-700">{area}</span>
+                                            <span class="absolute inset-0 rounded-2xl ring-0 ring-inset ring-blue-600 transition peer-checked:ring-2"></span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                            <p class="step-error mt-4 hidden text-sm font-semibold text-red-600" role="alert">Kérjük, válasszon egy lehetőséget.</p>
+                            <div class="mt-8 flex items-center justify-between gap-4"><button type="button" class="back-button secondary-button">← Vissza</button><button type="button" class="next-button primary-button">Tovább →</button></div>
+                        </div>
+
+                        <div class="form-step hidden px-6 py-8 sm:px-9 sm:py-10" data-step="4">
+                            <fieldset>
+                                <legend class="text-2xl font-black tracking-[-0.035em] text-slate-950">Milyen tervekre van szüksége?</legend>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">Több szolgáltatást is kiválaszthat. Ha bizonytalan, továbbléphet választás nélkül.</p>
+                                <div class="mt-7 grid gap-3">
+                                    {services.map((service, index) => (
+                                        <div>
+                                            <label class="service-choice group flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 px-4 py-3.5 transition hover:border-blue-300">
+                                                <input class="peer sr-only" type="checkbox" name="szolgaltatasok" value={service} data-heating={index === 1 ? 'true' : undefined} />
+                                                <span class="grid h-6 w-6 shrink-0 place-items-center rounded-md border-2 border-slate-300 text-transparent transition peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white">
+                                                    <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                </span>
+                                                <span class="text-sm font-bold leading-5 text-slate-700 peer-checked:text-slate-950 sm:text-[0.95rem]">{service}</span>
+                                            </label>
+                                            {index === 1 && (
+                                                <div id="heating-options" class="mt-2 hidden grid-cols-1 gap-2 pl-5 sm:grid-cols-2 sm:pl-10">
+                                                    {['1 hőtermelő', 'Több hőtermelő'].map((option) => (
+                                                        <label class="relative cursor-pointer rounded-xl border border-slate-200 px-4 py-3 text-center text-sm font-bold text-slate-600 transition hover:border-blue-300">
+                                                            <input class="peer sr-only" type="radio" name="futesi-hotermelo" value={option} />
+                                                            <span class="relative z-10 peer-checked:text-blue-700">{option}</span>
+                                                            <span class="absolute inset-0 rounded-xl bg-blue-50 opacity-0 ring-1 ring-inset ring-blue-500 transition peer-checked:opacity-100"></span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </fieldset>
+                            <div class="mt-8 flex items-center justify-between gap-4"><button type="button" class="back-button secondary-button">← Vissza</button><button type="button" class="next-button primary-button">Tovább →</button></div>
+                        </div>
+
+                        <div class="form-step hidden px-6 py-8 sm:px-9 sm:py-10" data-step="5">
+                            <fieldset>
+                                <legend class="text-2xl font-black tracking-[-0.035em] text-slate-950">Hová küldhetjük az ajánlatot?</legend>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">Adja meg elérhetőségeit, hogy pontosíthassuk a részleteket.</p>
+                                <div class="mt-7 grid gap-5 sm:grid-cols-2">
+                                    <label class="field-label">Település<input class="text-field" type="text" name="telepules" autocomplete="address-level2" placeholder="pl. Győr" required /></label>
+                                    <label class="field-label">Név<input class="text-field" type="text" name="nev" autocomplete="name" placeholder="Az Ön neve" required /></label>
+                                    <label class="field-label">Telefonszám<input class="text-field" type="tel" name="telefonszam" autocomplete="tel" placeholder="+36 30 123 4567" required /></label>
+                                    <label class="field-label">E-mail-cím<input class="text-field" type="email" name="email" autocomplete="email" placeholder="nev@pelda.hu" required /></label>
+                                    <label class="field-label sm:col-span-2">Kedvezménykupon <span class="font-medium text-slate-400">(nem kötelező)</span><input class="text-field" type="text" name="kedvezmenykupon" placeholder="Kuponkód" /></label>
+                                </div>
+                            </fieldset>
+
+                            <label class="mt-7 flex cursor-pointer items-start gap-3 rounded-xl bg-slate-50 p-4">
+                                <input id="privacy-checkbox" class="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-blue-600" type="checkbox" name="adatkezeles" value="Elfogadva" required />
+                                <span class="text-sm font-semibold leading-5 text-slate-600">Elfogadom az adatkezelési nyilatkozatot.</span>
+                            </label>
+
+                            <p id="submit-error" class="mt-4 hidden rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">Az ajánlatkérés küldése nem sikerült. Kérjük, próbálja újra.</p>
+                            <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <button type="button" class="back-button secondary-button">← Vissza</button>
+                                <button id="submit-button" type="submit" class="primary-button min-w-52 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none" disabled>
+                                    <span class="submit-label">Ajánlatot kérek</span>
+                                    <span class="submit-loading hidden">Küldés…</span>
+                                    <span aria-hidden="true">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div id="thank-you" class="hidden px-6 py-16 text-center sm:px-12 sm:py-20" tabindex="-1">
+                        <div class="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-50 text-emerald-600 shadow-[0_0_0_12px_rgba(16,185,129,0.06)]">
+                            <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4L19 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <p class="mt-9 text-xs font-extrabold uppercase tracking-[0.18em] text-emerald-600">Sikeres ajánlatkérés</p>
+                        <h2 class="mx-auto mt-3 max-w-lg text-3xl font-black tracking-[-0.045em] text-slate-950 sm:text-4xl">Köszönjük ajánlatkérését!</h2>
+                        <p class="mx-auto mt-4 max-w-md text-lg leading-7 text-slate-600">Hamarosan e-mailben küldjük a részleteket.</p>
+                        <a href="/" class="mt-9 inline-flex items-center gap-2 text-sm font-extrabold text-blue-600 hover:text-blue-700">Vissza a kezdőlapra <span aria-hidden="true">→</span></a>
                     </div>
                 </div>
-                <div class="relative h-64 lg:h-96 rounded-2xl overflow-hidden bg-slate-800 flex items-center justify-center border border-slate-700">
-                    <Image src={planningImg} alt="Tervezés folyamatban" class="w-full h-full object-cover" />
-                </div>
-            </div>
-        </div>
-    </section>
+                <p class="mt-5 text-center text-xs font-semibold leading-5 text-slate-400">Az ajánlatkérés elküldése nem jár fizetési kötelezettséggel.</p>
+            </section>
+        </main>
 
-    <!-- Contact Section -->
-    <Contact />
+        <div class="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[760px] overflow-hidden" aria-hidden="true">
+            <div class="absolute -right-32 -top-48 h-[600px] w-[600px] rounded-full bg-blue-100/70 blur-3xl"></div>
+            <div class="blueprint-grid absolute inset-0 opacity-45"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#f8fafc]/50 to-[#f8fafc]"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.querySelector<HTMLFormElement>('#quote-form');
+        const steps = Array.from(document.querySelectorAll<HTMLElement>('.form-step'));
+        const progressBar = document.querySelector<HTMLElement>('#progress-bar');
+        const stepEyebrow = document.querySelector<HTMLElement>('#step-eyebrow');
+        const stepPercent = document.querySelector<HTMLElement>('#step-percent');
+        const privacyCheckbox = document.querySelector<HTMLInputElement>('#privacy-checkbox');
+        const submitButton = document.querySelector<HTMLButtonElement>('#submit-button');
+        const heatingToggle = document.querySelector<HTMLInputElement>('[data-heating="true"]');
+        const heatingOptions = document.querySelector<HTMLElement>('#heating-options');
+        let currentStep = 0;
+
+        const showStep = (index: number) => {
+            currentStep = index;
+            steps.forEach((step, stepIndex) => step.classList.toggle('hidden', stepIndex !== currentStep));
+            const percent = Math.round(((currentStep + 1) / steps.length) * 100);
+            if (progressBar) progressBar.style.width = `${percent}%`;
+            if (stepEyebrow) stepEyebrow.textContent = `${currentStep + 1}. lépés az ${steps.length}-ből`;
+            if (stepPercent) stepPercent.textContent = `${percent}%`;
+            document.querySelector('#quote-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        const validateStep = (step: HTMLElement) => {
+            const requiredFields = Array.from(step.querySelectorAll<HTMLInputElement>('[required]'));
+            const invalidField = requiredFields.find((field) => !field.checkValidity());
+            const error = step.querySelector('.step-error');
+            if (invalidField) {
+                error?.classList.remove('hidden');
+                invalidField.focus();
+                return false;
+            }
+            error?.classList.add('hidden');
+            return true;
+        };
+
+        document.querySelectorAll('.next-button').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (validateStep(steps[currentStep])) showStep(Math.min(currentStep + 1, steps.length - 1));
+            });
+        });
+
+        document.querySelectorAll('.back-button').forEach((button) => {
+            button.addEventListener('click', () => showStep(Math.max(currentStep - 1, 0)));
+        });
+
+        document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((input) => {
+            input.addEventListener('change', () => input.closest('.form-step')?.querySelector('.step-error')?.classList.add('hidden'));
+        });
+
+        heatingToggle?.addEventListener('change', () => {
+            const isEnabled = heatingToggle.checked;
+            heatingOptions?.classList.toggle('hidden', !isEnabled);
+            heatingOptions?.classList.toggle('grid', isEnabled);
+            const firstOption = heatingOptions?.querySelector<HTMLInputElement>('input');
+            if (firstOption) firstOption.required = isEnabled;
+            if (!isEnabled) heatingOptions?.querySelectorAll<HTMLInputElement>('input').forEach((input) => input.checked = false);
+        });
+
+        privacyCheckbox?.addEventListener('change', () => {
+            if (submitButton) submitButton.disabled = !privacyCheckbox.checked;
+        });
+
+        form?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!form || !submitButton || !privacyCheckbox) return;
+            if (!validateStep(steps[currentStep]) || !form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const submitError = document.querySelector('#submit-error');
+            const submitLabel = submitButton.querySelector('.submit-label');
+            const submitLoading = submitButton.querySelector('.submit-loading');
+            submitError?.classList.add('hidden');
+            submitButton.disabled = true;
+            submitLabel?.classList.add('hidden');
+            submitLoading?.classList.remove('hidden');
+
+            try {
+                const encodedData = new URLSearchParams();
+                new FormData(form).forEach((value, key) => encodedData.append(key, String(value)));
+                const response = await fetch('/__forms.html', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: encodedData.toString(),
+                });
+                if (!response.ok) throw new Error('Submission failed');
+
+                form.classList.add('hidden');
+                document.querySelector('#quote-card > div:first-child')?.classList.add('hidden');
+                const thankYou = document.querySelector('#thank-you');
+                thankYou?.classList.remove('hidden');
+                thankYou?.focus();
+            } catch (error) {
+                submitError?.classList.remove('hidden');
+                submitButton.disabled = !privacyCheckbox.checked;
+                submitLabel?.classList.remove('hidden');
+                submitLoading?.classList.add('hidden');
+            }
+        });
+    </script>
 </Layout>
+
+<style>
+    :global(body) { background: #f8fafc; }
+    :global(.brand-link img) { height: 2.75rem; width: 2.75rem; }
+    .landing-shell { position: relative; background: #f8fafc; }
+    .blueprint-grid {
+        background-image: linear-gradient(rgba(37, 99, 235, 0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.055) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: linear-gradient(to bottom, black, transparent 90%);
+    }
+    .choice-card:has(input:checked), .tile-choice:has(input:checked), .service-choice:has(input:checked) { border-color: #2563eb; background-color: rgba(239, 246, 255, 0.7); box-shadow: inset 0 0 0 1px #2563eb; }
+    .area-choice:has(input:checked) { border-color: #2563eb; background-color: #eff6ff; }
+    .primary-button { display: inline-flex; min-height: 3.25rem; align-items: center; justify-content: center; gap: .75rem; border-radius: .9rem; background: #2563eb; padding: .8rem 1.4rem; color: white; font-size: .9rem; font-weight: 800; box-shadow: 0 12px 25px -10px rgba(37, 99, 235, .65); transition: transform .2s, background .2s, box-shadow .2s; }
+    .primary-button:hover:not(:disabled) { transform: translateY(-1px); background: #1d4ed8; box-shadow: 0 16px 30px -10px rgba(37, 99, 235, .65); }
+    .primary-button:focus-visible, .secondary-button:focus-visible { outline: 3px solid rgba(37, 99, 235, .25); outline-offset: 3px; }
+    .secondary-button { min-height: 3rem; border-radius: .9rem; padding: .75rem .4rem; color: #64748b; font-size: .9rem; font-weight: 800; transition: color .2s; }
+    .secondary-button:hover { color: #0f172a; }
+    .field-label { display: grid; gap: .55rem; color: #334155; font-size: .82rem; font-weight: 800; }
+    .text-field { min-height: 3.25rem; width: 100%; border: 1px solid #cbd5e1; border-radius: .85rem; background: white; padding: .8rem 1rem; color: #0f172a; font-size: .95rem; font-weight: 600; outline: none; transition: border-color .2s, box-shadow .2s; }
+    .text-field::placeholder { color: #94a3b8; font-weight: 500; }
+    .text-field:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, .1); }
+    .text-field:invalid:not(:placeholder-shown) { border-color: #ef4444; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+</style>
