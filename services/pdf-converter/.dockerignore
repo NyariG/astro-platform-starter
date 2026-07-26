@@ -1,0 +1,9 @@
+.venv/
+tests/
+__pycache__/
+*.pyc
+.pytest_cache/
+requirements-dev.txt
+render.yaml
+README.md
+.dockerignore

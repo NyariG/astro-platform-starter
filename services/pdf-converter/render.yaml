@@ -1,0 +1,23 @@
+# Render blueprint a DOCX → PDF konverziós szolgáltatáshoz.
+#
+# Deploy: a Render „Blueprint" funkciójával, vagy a szolgáltatás kézi
+# létrehozásával (Docker runtime, a Dockerfile ezen a mappán).
+#
+# A CONVERTER_TOKEN titkot a Render felületén kell megadni (sync: false),
+# és UGYANEZT az értéket kell a Netlify PDF_CONVERTER_TOKEN env-jébe tenni.
+services:
+  - type: web
+    name: nyariterv-pdf-converter
+    runtime: docker
+    dockerfilePath: ./services/pdf-converter/Dockerfile
+    dockerContext: ./services/pdf-converter
+    healthCheckPath: /health
+    # A pixelhű, hidegindítás-mentes kiszolgáláshoz „starter" (always-on) terv
+    # ajánlott; a „free" terv hidegindítása a Netlify-oldali rövid timeout miatt
+    # a CloudConvert fallbackre eshet.
+    plan: starter
+    envVars:
+      - key: CONVERTER_TOKEN
+        sync: false
+      - key: CONVERT_TIMEOUT_S
+        value: "45"
