@@ -1,0 +1,22 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-slate-900 py-12 text-white">
+    <div class="container-custom flex flex-col items-center text-center">
+        <p class="text-xl font-bold text-white"><span class="text-primary">Nyári</span>Terv</p>
+        <p class="mt-3 max-w-prose text-sm text-slate-400">
+            Precíz épületgépészeti tervezés Győrben és környékén. Családi házak, társasházak fűtés, hűtés, szellőzés tervezése.
+        </p>
+
+        <div class="mt-8 flex w-full max-w-prose flex-col items-center gap-2 border-t border-slate-800 pt-6 text-sm text-slate-500">
+            <p>&copy; {year} Nyári Terv. Minden jog fenntartva.</p>
+            <a
+                href="/adatkezelesi"
+                class="transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+                Adatvédelmi és Adatkezelési Szabályzat
+            </a>
+        </div>
+    </div>
+</footer>

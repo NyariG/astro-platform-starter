@@ -4,13 +4,17 @@ import '@fontsource-variable/inter/wght.css';
 import interWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import MinimalHeader from '../components/MinimalHeader.astro';
+import MinimalFooter from '../components/MinimalFooter.astro';
 
 interface Props {
     title: string;
     description?: string;
+
+    minimal?: boolean;
 }
 
-const { title, description = "Nyári Terv - Precíz épületgépészeti tervezés" } = Astro.props;
+const { title, description = "Nyári Terv - Precíz épületgépészeti tervezés", minimal = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -25,10 +29,10 @@ const { title, description = "Nyári Terv - Precíz épületgépészeti tervezé
         <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
     </head>
     <body class="flex flex-col min-h-screen">
-        <Header />
+        {minimal ? <MinimalHeader /> : <Header />}
         <main class="grow">
             <slot />
         </main>
-        <Footer />
+        {minimal ? <MinimalFooter /> : <Footer />}
     </body>
 </html>

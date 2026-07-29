@@ -1,0 +1,655 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const HATALYOS = '2026. július 1.';
+
+type Blokk =
+    | { t: 'p'; v: string }
+    | { t: 'ul'; v: string[] }
+    | { t: 'dl'; v: [string, string][] }
+    | { t: 'kv'; cim?: string; v: [string, string][] };
+
+type Alszakasz = { cim: string; blokkok: Blokk[] };
+type Szakasz = { id: string; szam: number; cim: string; alszakaszok: Alszakasz[] };
+
+const szakaszok: Szakasz[] = [
+    {
+        id: 'bevezetes',
+        szam: 1,
+        cim: 'Bevezetés',
+        alszakaszok: [
+            {
+                cim: 'Az adatkezelési tájékoztató célja',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Jelen Adatkezelési Tájékoztató (a továbbiakban: „Tájékoztató”) célja, hogy átlátható módon és részletesen bemutassa, miként kezeljük a személyes adatokat a Nyári Gergő Mátyás egyéni vállalkozó (a továbbiakban: „Adatkezelő”) tevékenysége során, valamint hogy tájékoztatást nyújtson az érintetti jogokról és azok gyakorlásának módjáról.'
+                    }
+                ]
+            },
+            {
+                cim: 'Jogszabályi megfelelés (GDPR, 2011. évi CXII. törvény)',
+                blokkok: [
+                    {
+                        t: 'ul',
+                        v: [
+                            'Az Európai Parlament és a Tanács (EU) 2016/679 rendelete (GDPR): meghatározza a személyes adatok védelmére vonatkozó egységes uniós szabályokat.',
+                            '2011. évi CXII. törvény (Infotv.): a magyar adatvédelmi szabályozás alapját képező törvény, amely az információs önrendelkezési jogról és az információszabadságról szól.'
+                        ]
+                    },
+                    { t: 'p', v: 'Ez a Tájékoztató a fenti jogszabályokban foglalt követelményeknek igyekszik megfelelni.' }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'adatkezelo',
+        szam: 2,
+        cim: 'Adatkezelő adatai',
+        alszakaszok: [
+            {
+                cim: 'Az adatkezelő megnevezése és elérhetőségei',
+                blokkok: [
+                    {
+                        t: 'kv',
+                        cim: 'Adatkezelő',
+                        v: [
+                            ['Név', 'Nyári Gergő Mátyás egyéni vállalkozó'],
+                            ['Székhely', '9151 Abda, Bécsi utca 2/c'],
+                            ['Regisztrációs szám', '62546834'],
+                            ['Adószám', '92201952-1-28'],
+                            ['E-mail', 'info@nyariterv.hu'],
+                            ['Telefonszám', '+36 70 318 7843']
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Az adatkezelési tájékoztató elérhetősége',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'A jelen Tájékoztató elektronikus formában elérhető a www.nyariterv.hu/adatkezelesi oldalon, illetve nyomtatott formában kérésre az ügyfélfogadási irodánkban is megtekinthető.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'fogalmak',
+        szam: 3,
+        cim: 'Fogalommeghatározások',
+        alszakaszok: [
+            {
+                cim: 'GDPR alapfogalmak',
+                blokkok: [
+                    {
+                        t: 'dl',
+                        v: [
+                            ['Személyes adat', 'azonosított vagy azonosítható természetes személyre („érintett”) vonatkozó bármely információ.'],
+                            ['Adatkezelő', 'az a természetes vagy jogi személy, amely a személyes adatok kezelésének céljait és eszközeit meghatározza.'],
+                            ['Adatfeldolgozó', 'az a természetes vagy jogi személy, amely az Adatkezelő nevében személyes adatokat kezel.'],
+                            ['Hozzájárulás', 'az érintett akaratának önkéntes és kifejezett kinyilvánítása, amellyel beleegyezését adja a rá vonatkozó személyes adatok kezeléséhez.'],
+                            ['Érintett', 'bármely azonosított vagy azonosítható természetes személy, akire a személyes adat vonatkozik.']
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Adatvédelmi incidens meghatározása',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Adatvédelmi incidensnek minősül minden olyan esemény, amely az átadott, tárolt vagy más módon kezelt személyes adatok véletlen vagy jogellenes megsemmisítését, elvesztését, megváltoztatását, jogosulatlan közlését vagy az azokhoz való jogosulatlan hozzáférést eredményezi.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'iranyelvek',
+        szam: 4,
+        cim: 'Az adatkezelés irányelvei',
+        alszakaszok: [
+            {
+                cim: 'Jogalapok és alapelvek',
+                blokkok: [
+                    {
+                        t: 'dl',
+                        v: [
+                            ['Jogszerűség, tisztességes eljárás és átláthatóság', 'Csak meghatározott és jogszerű célból kezeljük az adatokat.'],
+                            ['Célhoz kötöttség', 'Csak előre meghatározott célból, a cél eléréséhez szükséges mértékben.'],
+                            ['Adattakarékosság', 'Kizárólag a cél megvalósításához elengedhetetlen személyes adatokat gyűjtjük és kezeljük.'],
+                            ['Pontosság', 'Gondoskodunk róla, hogy a kezelt személyes adatok pontosak és szükség esetén naprakészek legyenek.'],
+                            ['Korlátozott tárolhatóság', 'A személyes adatokat csak a cél megvalósulásához szükséges ideig tároljuk.'],
+                            ['Integritás és bizalmas jelleg', 'Megfelelő technikai és szervezési intézkedéseket alkalmazunk a személyes adatok védelme érdekében.']
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Adatok pontossága és biztonsága',
+                blokkok: [
+                    {
+                        t: 'ul',
+                        v: [
+                            'Az adatok rendszeres frissítéséért mind az Adatkezelő, mind az érintett felelős; utóbbi köteles jelezni, ha változás történt a személyes adataiban.',
+                            'Az Adatkezelő mindent megtesz, hogy a nyilvántartott adatok pontosak legyenek, és megfelelő védelmi intézkedésekkel óvja azokat a jogosulatlan hozzáféréstől.'
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'celok',
+        szam: 5,
+        cim: 'Adatkezelési célok és jogalapok',
+        alszakaszok: [
+            {
+                cim: 'Weboldalon történő ajánlatkérés, díjmentes mérnöki elő-kalkuláció és üzleti kapcsolattartás',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Cél: Az ügyfél kérésére történő díjmentes mérnöki elő-kalkuláció, az ajánlattal kapcsolatos közvetlen szakmai egyeztetés (e-mailen vagy telefonon), valamint szerződéskötés esetén az épületgépészeti tervezési és energetikai tanúsítási feladatok teljes körű ellátása, a jogszabályban előírt számítások elvégzése és a hivatalos tanúsítványok/tervdokumentációk kiállítása.'
+                    },
+                    {
+                        t: 'p',
+                        v: 'Jogalap: A szerződés megkötését megelőző, az érintett kérésére történő lépések megtétele (GDPR 6. cikk (1) bekezdés b) pont), szerződés létrejötte után pedig a létrejött mérnöki/tervezési szerződés teljesítése (GDPR 6. cikk (1) bekezdés b) pont).'
+                    },
+                    {
+                        t: 'dl',
+                        v: [
+                            ['Személyes és elérhetőségi adatok', 'Név, e-mail cím, telefonszám, számlázási név és cím, megrendelő lakcíme.'],
+                            ['Ingatlan-azonosító adatok', 'A tervezéssel/tanúsítással érintett ingatlan pontos címe, helyrajzi száma (HRSZ).'],
+                            [
+                                'Részletes épületműszaki adatok',
+                                'Az ingatlan alapterülete, építésének és felújításainak pontos éve, a határoló szerkezetek rétegrendje és anyaga, a meglévő vagy tervezett gépészeti rendszerek paraméterei (fűtési-, hűtési-, szellőzési rendszerek, hőtermelők típusa és száma, vízellátás, csatornázás és megújuló energiaforrások adatai), valamint minden egyéb olyan műszaki részlet, amely az energetikai számításokhoz vagy tervdokumentációkhoz jogszabályilag vagy szakmailag szükséges.'
+                            ]
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Megrendelések kezelése',
+                blokkok: [
+                    { t: 'p', v: 'Cél: A megrendelések feldolgozása, a szerződés teljesítése, számlázás és kiszállítás.' },
+                    { t: 'p', v: 'Jogalap: Szerződés teljesítése (GDPR 6. cikk (1) b) pont).' },
+                    { t: 'p', v: 'Kezelt adatok köre: Név, szállítási és számlázási cím, elérhetőségek (telefonszám, e-mail), megrendelés adatai.' }
+                ]
+            },
+            {
+                cim: 'Számlakiállítás',
+                blokkok: [
+                    { t: 'p', v: 'Cél: A hatályos számviteli jogszabályoknak (pl. 2000. évi C. törvény) való megfelelés.' },
+                    { t: 'p', v: 'Jogalap: Jogszabályi kötelezettség teljesítése (GDPR 6. cikk (1) c) pont).' },
+                    { t: 'p', v: 'Kezelt adatok köre: Név/cégnév, cím, adószám (jogi személy esetén), egyéb számlázáshoz szükséges adatok.' }
+                ]
+            },
+            {
+                cim: 'Sütik (cookie-k) használata',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Cél: A weboldal megfelelő működésének biztosítása, a felhasználói élmény javítása, látogatottsági adatok elemzése, marketingcélok.'
+                    },
+                    {
+                        t: 'ul',
+                        v: [
+                            'Hozzájárulás (GDPR 6. cikk (1) a) pont) – minden olyan süti esetében, amely nem a weboldal működésének alapvető feltétele.',
+                            'Jogos érdek vagy szerződés teljesítése (GDPR 6. cikk (1) f) vagy b) pont) – a működéshez elengedhetetlen technikai sütik esetében.'
+                        ]
+                    },
+                    { t: 'p', v: 'Bővebb leírás: Lásd a jelen Tájékoztató „Sütik (cookie-k) használata” fejezetét (11. pont).' }
+                ]
+            },
+            {
+                cim: 'Közösségi oldalak adatkezelése',
+                blokkok: [
+                    { t: 'p', v: 'Cél: Kapcsolattartás, információk megosztása (Facebook, Instagram, stb.).' },
+                    { t: 'p', v: 'Jogalap: Önkéntes döntés, hozzájárulás (GDPR 6. cikk (1) a) pont).' },
+                    {
+                        t: 'p',
+                        v: 'Megjegyzés: A közösségi platformok saját adatkezelési gyakorlatát az adott platform adatkezelési tájékoztatójában kell megtekinteni.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'kezelt-adatok',
+        szam: 6,
+        cim: 'Kezelt adatok köre',
+        alszakaszok: [
+            {
+                cim: 'Személyes adatok típusai',
+                blokkok: [
+                    {
+                        t: 'dl',
+                        v: [
+                            ['Azonosító adatok', 'név.'],
+                            ['Elérhetőségi adatok', 'e-mail cím, telefonszám, cím.'],
+                            ['Technikai adatok', 'IP-cím, böngésző típusa, sütik, bejelentkezés időpontja.'],
+                            ['Számlázási adatok', 'számlázási név, cím, adószám (cégek esetén).']
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Adatok tárolási módja és időtartama',
+                blokkok: [
+                    { t: 'p', v: 'Elektronikus formában védett szervereken, jelszóval és egyéb védelmi megoldásokkal ellátva.' },
+                    {
+                        t: 'p',
+                        v: 'Tárolási idő: a jogszabályi kötelezettségek és az adatkezelési cél megvalósulásáig, illetve a hozzájárulás visszavonásáig. Ezt követően az adatokat töröljük vagy anonimizáljuk.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'jogok',
+        szam: 7,
+        cim: 'Az érintettek jogai',
+        alszakaszok: [
+            {
+                cim: 'Tájékoztatáshoz való jog',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Az érintett jogosult tájékoztatást kérni arról, hogy a rá vonatkozó személyes adatokat milyen célból, milyen jogalapon, milyen forrásból, milyen ideig kezeljük, és kik férhetnek hozzá.'
+                    }
+                ]
+            },
+            {
+                cim: 'Helyesbítéshez való jog',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Ha az érintett úgy véli, hogy a kezelt személyes adatai pontatlanok vagy hiányosak, kérheti azok helyesbítését vagy kiegészítését.'
+                    }
+                ]
+            },
+            {
+                cim: 'Törléshez való jog („elfeledtetéshez való jog”)',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Az érintett kérheti személyes adatainak törlését, ha már nincs szükség az adatokra azok eredeti céljára, vagy ha az érintett visszavonja a hozzájárulását, és nincs más jogalap az adatkezelésre.'
+                    }
+                ]
+            },
+            {
+                cim: 'Adathordozhatósághoz való jog',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Az érintett jogosult arra, hogy az általa rendelkezésre bocsátott adatokat széles körben használt, géppel olvasható formátumban megkapja, illetve kérheti ezek más adatkezelőhöz történő továbbítását.'
+                    }
+                ]
+            },
+            {
+                cim: 'Tiltakozáshoz való jog',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Az érintett bármikor tiltakozhat személyes adatainak kezelése ellen, amennyiben az adatkezelés jogalapja az Adatkezelő jogos érdeke.'
+                    },
+                    {
+                        t: 'p',
+                        v: 'Az érintett külön jogosult tiltakozni a személyes adatok közvetlen üzletszerzés (direkt marketing) céljából történő kezelése ellen.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'adatbiztonsag',
+        szam: 8,
+        cim: 'Adatbiztonság',
+        alszakaszok: [
+            {
+                cim: 'Elektronikus adatok védelme',
+                blokkok: [{ t: 'ul', v: ['Többszintű jogosultsági rendszer.', 'Rendszeres biztonsági mentések.', 'Vírusvédelem és tűzfalhasználat.'] }]
+            },
+            {
+                cim: 'Technikai és szervezési intézkedések',
+                blokkok: [
+                    {
+                        t: 'ul',
+                        v: [
+                            'Zárt irodai hálózat és biztonságos Wi-Fi használata.',
+                            'Papír alapú dokumentumok zárt szekrényben történő tárolása.',
+                            'Munkavállalók és adatfeldolgozók részére rendszeres adatvédelmi oktatás.'
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'incidensek',
+        szam: 9,
+        cim: 'Adatvédelmi incidensek kezelése',
+        alszakaszok: [
+            {
+                cim: 'Incidens bejelentése a hatóságoknak (72 órás szabály)',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Adatvédelmi incidens esetén az Adatkezelő indokolatlan késedelem nélkül, és ha lehetséges, legkésőbb 72 órán belül bejelenti azt a Nemzeti Adatvédelmi és Információszabadság Hatóságnál (NAIH), kivéve, ha valószínűsíthetően nem jár kockázattal az érintettek jogaira és szabadságaira nézve.'
+                    }
+                ]
+            },
+            {
+                cim: 'Érintettek tájékoztatása magas kockázat esetén',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Ha az incidens valószínűsíthetően magas kockázattal jár az érintettek jogaira és szabadságaira nézve, az Adatkezelő késedelem nélkül tájékoztatja az érintetteket is, ismertetve az incidens lényegét és a megtett intézkedéseket.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'adatfeldolgozok',
+        szam: 10,
+        cim: 'Adatfeldolgozók és harmadik felek',
+        alszakaszok: [
+            {
+                cim: 'Tárhelyszolgáltató',
+                blokkok: [
+                    {
+                        t: 'kv',
+                        cim: 'Tárhelyszolgáltató',
+                        v: [
+                            ['Név', 'Netlify, Inc.'],
+                            ['Székhely', '44 Montgomery St, Suite 300, San Francisco, CA 94104, USA'],
+                            ['Elérhetőség', 'privacy@netlify.com · www.netlify.com']
+                        ]
+                    },
+                    {
+                        t: 'p',
+                        v: 'Adatfeldolgozói tevékenység: A webszerver és a felhőalapú infrastruktúra üzemeltetése, a weboldal fájljainak kiszolgálása, az online űrlapok adatainak fogadása, valamint a háttérben futó serverless függvények biztosítása a technikai karbantartás és kiszolgálás érdekében. A szolgáltató kizárólag az Adatkezelő technikai utasításai alapján, a GDPR szerinti megfelelő garanciák (Standard Contractual Clauses) mellett biztosítja a szolgáltatást.'
+                    }
+                ]
+            },
+            {
+                cim: 'Könyvelő és egyéb partnerek',
+                blokkok: [
+                    { t: 'p', v: 'Az Adatkezelő igénybe vehet könyvelőt és egyéb partnereket a személyes adatok kezeléséhez.' },
+                    { t: 'p', v: 'Könyvelő: Sziráki Erika e.v., tevékenység: könyvelés, bérszámfejtés, adózással kapcsolatos feladatok ellátása.' },
+                    {
+                        t: 'p',
+                        v: 'Ezekkel a partnerekkel (adatfeldolgozókkal) az Adatkezelő mindig írásbeli szerződést köt a GDPR követelményeinek megfelelően. A szerződések rögzítik, hogy a partnerek kizárólag az Adatkezelő utasításai alapján, a megjelölt céllal, és a szükséges ideig kezelhetik az adatokat.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'sutik',
+        szam: 11,
+        cim: 'Sütik (cookie-k) használata',
+        alszakaszok: [
+            {
+                cim: 'A sütik célja és típusai',
+                blokkok: [
+                    {
+                        t: 'dl',
+                        v: [
+                            ['Munkamenet sütik', 'a weboldal működéséhez nélkülözhetetlenek, a böngésző bezárásakor törlődnek.'],
+                            ['Funkcionális sütik', 'segítik a felhasználó kényelmét, például megjegyzik a bejelentkezési adatokat vagy a kiválasztott nyelvet.'],
+                            ['Elemző sütik (pl. Google Analytics)', 'statisztikai célokat szolgálnak, segítenek megismerni a felhasználói viselkedést, és javítani a weboldal működését.'],
+                            ['Marketing sütik', 'releváns hirdetések megjelenítését és a hirdetések hatékonyságának mérését támogatják.']
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Felhasználói beállítások kezelése',
+                blokkok: [
+                    {
+                        t: 'ul',
+                        v: [
+                            'A felhasználók a böngészőjük beállításaiban szabályozhatják a sütik kezelését, így letilthatják vagy törölhetik azokat.',
+                            'A sütibeállítások módosításakor előfordulhat, hogy a weboldal egyes funkciói nem működnek megfelelően.',
+                            'A weboldal első látogatásakor lehetőség nyílik a nem alapvető (pl. marketing) sütik engedélyezésére vagy elutasítására egy felugró ablakon keresztül.'
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'jogervenyesites',
+        szam: 12,
+        cim: 'Az érintettek jogérvényesítési lehetőségei',
+        alszakaszok: [
+            {
+                cim: 'Panasz benyújtása a NAIH-hoz',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Ha az érintett úgy véli, hogy személyes adatainak kezelése sérti a hatályos jogszabályokat, panaszt nyújthat be a Nemzeti Adatvédelmi és Információszabadság Hatósághoz:'
+                    },
+                    {
+                        t: 'kv',
+                        cim: 'Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH)',
+                        v: [
+                            ['Cím', '1055 Budapest, Falk Miksa utca 9-11.'],
+                            ['Telefon', '+36 (1) 391-1400'],
+                            ['E-mail', 'ugyfelszolgalat@naih.hu']
+                        ]
+                    }
+                ]
+            },
+            {
+                cim: 'Bírósági jogorvoslat lehetősége',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Az érintett jogainak megsértése esetén bírósághoz fordulhat. A pert – az érintett választása szerint – a lakóhelye vagy tartózkodási helye szerinti törvényszéken is megindíthatja.'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'jogszabalyok',
+        szam: 13,
+        cim: 'Az adatkezelés alapjául szolgáló jogszabályok',
+        alszakaszok: [
+            {
+                cim: 'GDPR (2016/679 EU rendelet)',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Az Európai Parlament és a Tanács (EU) 2016/679 rendelete, amelynek célja a természetes személyek védelme a személyes adatok kezelése során, és az adatok szabad áramlásának biztosítása az EU-n belül.'
+                    }
+                ]
+            },
+            {
+                cim: '2011. évi CXII. törvény az információs önrendelkezési jogról',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'A magyar adatvédelmi törvény, amely a személyes adatok kezelésének hazai alapelveit és korlátait szabályozza.'
+                    }
+                ]
+            },
+            {
+                cim: 'Egyéb releváns magyar jogszabályok',
+                blokkok: [
+                    {
+                        t: 'ul',
+                        v: [
+                            '2000. évi C. törvény a számvitelről.',
+                            '2013. évi V. törvény a Polgári Törvénykönyvről (Ptk.).',
+                            '2008. évi XLVIII. törvény a gazdasági reklámtevékenység alapvető feltételeiről.'
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: 'zaro',
+        szam: 14,
+        cim: 'Záró rendelkezések',
+        alszakaszok: [
+            {
+                cim: 'A tájékoztató hatálya és módosításának lehetőségei',
+                blokkok: [
+                    { t: 'p', v: 'Jelen Tájékoztató 2026.07.01 napjától hatályos.' },
+                    {
+                        t: 'p',
+                        v: 'Az Adatkezelő jogosult a Tájékoztató egyoldalú módosítására, különösen a jogszabályi változások, új adatkezelési tevékenységek bevezetése vagy a felügyeleti hatóság ajánlásainak figyelembevétele érdekében.'
+                    },
+                    {
+                        t: 'p',
+                        v: 'A módosításokat a weboldalon közzétesszük, és a hatálybalépést követően az érintettek elfogadják az új szabályokat a szolgáltatások további használatával.'
+                    },
+                    { t: 'p', v: 'Kelt: Abda, 2026.07.01. — Nyári Gergő Mátyás e.v.' }
+                ]
+            }
+        ]
+    }
+];
+---
+
+<Layout
+    title="Adatvédelmi és Adatkezelési Szabályzat – Nyári Terv"
+    description="A Nyári Terv adatvédelmi és adatkezelési tájékoztatója a GDPR és a 2011. évi CXII. törvény szerint."
+>
+
+    <section class="bg-slate-50 border-b border-slate-200">
+        <div class="container-custom py-12 sm:py-16">
+            <p class="text-sm font-semibold uppercase tracking-wide text-primary">Adatvédelem</p>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Adatvédelmi és Adatkezelési Szabályzat</h1>
+            <p class="mt-4 max-w-2xl text-lg text-slate-600">
+                Ez a tájékoztató bemutatja, hogyan kezeljük az Ön személyes adatait, és milyen jogok illetik meg Önt a GDPR és a magyar adatvédelmi jog
+                szerint.
+            </p>
+            <div class="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700">
+                <svg class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008z" />
+                </svg>
+                Hatályos: {HATALYOS}
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container-custom">
+            <div class="lg:grid lg:grid-cols-[16rem_1fr] lg:gap-12">
+
+                <aside class="mb-8 lg:mb-0">
+
+                    <details class="rounded-lg border border-slate-200 bg-white lg:hidden">
+                        <summary class="cursor-pointer list-none px-4 py-3 font-semibold text-slate-900 [&::-webkit-details-marker]:hidden">
+                            <span class="flex items-center justify-between">
+                                Tartalomjegyzék
+                                <svg class="h-5 w-5 text-slate-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </span>
+                        </summary>
+                        <nav class="border-t border-slate-200 px-2 py-2">
+                            <ol class="flex flex-col">
+                                {
+                                    szakaszok.map((sz) => (
+                                        <li>
+                                            <a href={`#${sz.id}`} class="block rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary">
+                                                {sz.szam}. {sz.cim}
+                                            </a>
+                                        </li>
+                                    ))
+                                }
+                            </ol>
+                        </nav>
+                    </details>
+
+                    <nav class="sticky top-24 hidden max-h-[calc(100vh-8rem)] overflow-y-auto lg:block" aria-label="Tartalomjegyzék">
+                        <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Tartalomjegyzék</p>
+                        <ol class="flex flex-col gap-0.5 border-l border-slate-200">
+                            {
+                                szakaszok.map((sz) => (
+                                    <li>
+                                        <a
+                                            href={`#${sz.id}`}
+                                            class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-sm text-slate-600 transition hover:border-primary hover:text-primary"
+                                        >
+                                            <span class="text-slate-400">{sz.szam}.</span> {sz.cim}
+                                        </a>
+                                    </li>
+                                ))
+                            }
+                        </ol>
+                    </nav>
+                </aside>
+
+                <div class="min-w-0 max-w-3xl">
+                    <div class="flex flex-col gap-12">
+                        {
+                            szakaszok.map((sz) => (
+                                <section id={sz.id} class="scroll-mt-24">
+                                    <h2 class="group flex items-baseline gap-3 text-2xl font-bold tracking-tight text-slate-900">
+                                        <span class="text-lg font-semibold text-primary">{sz.szam}.</span>
+                                        <span>{sz.cim}</span>
+                                    </h2>
+                                    <div class="mt-6 flex flex-col gap-8">
+                                        {sz.alszakaszok.map((asz) => (
+                                            <div>
+                                                <h3 class="text-lg font-semibold text-slate-800">{asz.cim}</h3>
+                                                <div class="mt-3 flex flex-col gap-4">
+                                                    {asz.blokkok.map((b) =>
+                                                        b.t === 'p' ? (
+                                                            <p class="leading-relaxed text-slate-600">{b.v}</p>
+                                                        ) : b.t === 'ul' ? (
+                                                            <ul class="flex list-disc flex-col gap-2 pl-5 text-slate-600 marker:text-primary">
+                                                                {b.v.map((item) => (
+                                                                    <li class="leading-relaxed">{item}</li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : b.t === 'dl' ? (
+                                                            <dl class="flex flex-col gap-3">
+                                                                {b.v.map(([term, def]) => (
+                                                                    <div>
+                                                                        <dt class="font-semibold text-slate-800">{term}</dt>
+                                                                        <dd class="leading-relaxed text-slate-600">{def}</dd>
+                                                                    </div>
+                                                                ))}
+                                                            </dl>
+                                                        ) : (
+                                                            <div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                                                                {b.cim && <p class="border-b border-slate-200 bg-white px-5 py-3 font-semibold text-slate-900">{b.cim}</p>}
+                                                                <dl class="divide-y divide-slate-200">
+                                                                    {b.v.map(([k, val]) => (
+                                                                        <div class="grid gap-1 px-5 py-3 sm:grid-cols-[10rem_1fr] sm:gap-4">
+                                                                            <dt class="text-sm text-slate-500">{k}</dt>
+                                                                            <dd class="font-medium text-slate-900">{val}</dd>
+                                                                        </div>
+                                                                    ))}
+                                                                </dl>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            ))
+                        }
+                    </div>
+
+                    <div class="mt-16 border-t border-slate-200 pt-8">
+                        <a href="#top" class="text-sm font-semibold text-primary hover:text-primary/80">↑ Vissza a lap tetejére</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</Layout>
