@@ -104,12 +104,15 @@ describe('ipari / egyéb ügyfél-e-mail — nincs árajánlat', () => {
     it('tartalmazza a kapcsolatfelvételi ígéretet', () => {
         const level = altalanosUgyfelLevel(rekord({ ingatlanJelleg: 'egyeb' }));
         expect(level.text).toContain('felveszi Önnel a kapcsolatot');
-        expect(level.text).toContain('rögzítettük');
+        expect(level.text).toContain('megkaptuk');
     });
 
-    it('a lakóépület ügyfél-e-mail viszont továbbra is tartalmaz árat', () => {
+    it('a lakóépület ügyfél-e-mail a PDF-re utal, tételes árat a törzsben nem közöl', () => {
         const level = lakoepuletUgyfelLevel(rekord({ ingatlanJelleg: 'lakoepulet', szolgaltatasok: ['futesi_terv'], hotermelok: ['gazkazan'], alapterulet: 100 }));
-        expect(level.text).toContain('Ft');
+        expect(level.text).not.toContain('Ft');
+        expect(level.text).not.toContain('Végösszeg');
+        expect(level.text).toContain('PDF-ben mellékeltük');
+        expect(level.text).toContain('Kért szolgáltatások');
     });
 });
 

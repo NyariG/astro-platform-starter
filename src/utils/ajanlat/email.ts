@@ -1,4 +1,4 @@
-import { altalanosUgyfelLevel, ismeteltKiserletErtesito, lakoepuletUgyfelLevel, uzemeltetoiAdatlap, type EmailTorzs } from './templates';
+import { altalanosUgyfelLevel, ismeteltKiserletErtesito, lakoepuletUgyfelLevel, ugyfelHibaErtesito, uzemeltetoiAdatlap, type EmailTorzs } from './templates';
 import { readEnv, type QuoteRecord } from './store';
 import { PDF_FAJLNEV } from './pdf/generate';
 
@@ -49,7 +49,17 @@ export type Csatolmany = {
     mimetype: string;
 };
 
-async function kuldes(env: Kornyezet, cimzettek: string[], level: EmailTorzs, csatolmanyok: Csatolmany[] = []): Promise<void> {
+function debugBcc(): string[] {
+    const raw = readEnv('DEBUG_EMAIL_TO');
+    return raw
+        ? String(raw)
+              .split(',')
+              .map((cim) => cim.trim())
+              .filter(Boolean)
+        : [];
+}
+
+async function kuldes(env: Kornyezet, cimzettek: string[], level: EmailTorzs, csatolmanyok: Csatolmany[] = [], bcc: string[] = []): Promise<void> {
     const attachments = csatolmanyok.map((cs) => ({
         filename: cs.filename,
         fileblob: Buffer.from(cs.bytes).toString('base64'),
@@ -66,6 +76,7 @@ async function kuldes(env: Kornyezet, cimzettek: string[], level: EmailTorzs, cs
         body: JSON.stringify({
             sender: env.sender,
             to: cimzettek,
+            ...(bcc.length > 0 ? { bcc } : {}),
             subject: level.subject,
             html_body: level.html,
             text_body: level.text,
@@ -80,13 +91,34 @@ async function kuldes(env: Kornyezet, cimzettek: string[], level: EmailTorzs, cs
     }
 }
 
+function hibaSzoveg(hiba: unknown): string {
+    return hiba instanceof Error ? hiba.message : String(hiba);
+}
+
 export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null): Promise<void> {
     const env = kornyezet();
+    const bcc = debugBcc();
     const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record) : altalanosUgyfelLevel(record);
     const csatolmanyok: Csatolmany[] = pdf ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : [];
 
-    await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok);
-    await kuldes(env, [record.email], ugyfelLevel, csatolmanyok);
+    try {
+        await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok, bcc);
+    } catch (hiba) {
+        console.error('[ajanlat] admin értesítő sikertelen', { id: record.id, uzenet: hibaSzoveg(hiba) });
+    }
+
+    try {
+        await kuldes(env, [record.email], ugyfelLevel, csatolmanyok, bcc);
+    } catch (hiba) {
+        const uzenet = hibaSzoveg(hiba);
+        console.error('[ajanlat] ügyfél levél sikertelen', { id: record.id, uzenet });
+        try {
+            await kuldes(env, env.notify, ugyfelHibaErtesito(record, uzenet), [], bcc);
+        } catch (belso) {
+            console.error('[ajanlat] admin-riasztás (ügyfél-hiba) sikertelen', { id: record.id, uzenet: hibaSzoveg(belso) });
+        }
+        throw hiba;
+    }
 }
 
 /**
