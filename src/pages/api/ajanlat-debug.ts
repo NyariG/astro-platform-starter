@@ -10,8 +10,12 @@ export const prerender = false;
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-function engedelyezett(): boolean {
-    return Boolean(import.meta.env.DEV) || readEnv('QUOTE_DEBUG') === '1';
+function engedelyezett(request: Request, url: URL): boolean {
+    if (import.meta.env.DEV) return true;
+    const vart = readEnv('DEBUG_TOKEN');
+    if (!vart) return false;
+    const kapott = request.headers.get('x-debug-token') ?? url.searchParams.get('debug') ?? '';
+    return kapott.length > 0 && kapott === vart;
 }
 
 function bajttorzs(bytes: Uint8Array): ArrayBuffer {
@@ -83,7 +87,7 @@ function elonezetiRekord(ertekek: Record<string, unknown>): QuoteRecord {
 }
 
 export const POST: APIRoute = async ({ request, url }) => {
-    if (!engedelyezett()) {
+    if (!engedelyezett(request, url)) {
         return new Response('Not found', { status: 404 });
     }
 
