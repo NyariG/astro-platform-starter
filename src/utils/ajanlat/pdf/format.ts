@@ -13,16 +13,20 @@ export function negyzetmeterErtek(ertek: number): string {
     return ezresPont(ertek);
 }
 
+export function kerekitEzresre(osszeg: number): number {
+    return Math.ceil(osszeg / 1000) * 1000;
+}
+
 export function arSzoveg(tetel: Tetel): string {
     if (tetel.status === 'PRICED' && tetel.osszeg !== null) {
-        return `${ezresPont(tetel.osszeg)},- Ft`;
+        return `${ezresPont(kerekitEzresre(tetel.osszeg))},- Ft`;
     }
     return 'egyedi árajánlat szerint';
 }
 
 /** Fix összeg megjelenítése a PDF-ben (pl. a műszaki leírás díja): 60000 → „60.000,- Ft". */
 export function fixArSzoveg(osszeg: number): string {
-    return `${ezresPont(osszeg)},- Ft`;
+    return `${ezresPont(kerekitEzresre(osszeg))},- Ft`;
 }
 
 const SZINTNEV: Record<number, string> = {

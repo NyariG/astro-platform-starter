@@ -4,7 +4,7 @@ import { ENERGETIKAI_TANUSITVANY_DIJ } from '../pricing-config';
 import { kuponNormalizal } from '../coupons';
 import { HOTERMELOK, HUTES_OPCIOK, INGATLAN_JELLEG, MENNYEZET_HUTES, SZOLGALTATAS_OPCIOK, TERV_CELJA, labelOf, labelsOf } from '../options';
 import { negyzetmeter } from '../format';
-import { arSzoveg, datumMagyar, ezresPont, fixArSzoveg, ingatlanJellegSzoveg, negyzetmeterErtek, szintekSzoveg } from './format';
+import { arSzoveg, datumMagyar, ezresPont, fixArSzoveg, ingatlanJellegSzoveg, kerekitEzresre, negyzetmeterErtek, szintekSzoveg } from './format';
 
 const MUSZAKI = 'muszaki_leiras';
 const FUTESI = 'futesi_terv';
@@ -62,7 +62,7 @@ function osszesito(record: QuoteRecord): Osszesito {
     return {
         kuponVan: kupon !== null,
         KUPON_KEDVEZMENY: kupon ? `Kupon (${kuponNormalizal(kupon.kuponKod ?? '')} – ${kupon.szazalek}%)` : '',
-        KUPON_KEDVEZMENY_ARA: kupon ? `−${ezresPont(kupon.osszeg)},- Ft` : '',
+        KUPON_KEDVEZMENY_ARA: kupon ? `−${ezresPont(kerekitEzresre(kupon.osszeg))},- Ft` : '',
         VEGOSSZEG_ARA_ENERGETIKA_NELKUL: vegSzoveg,
         VEGOSSZEG_ARA_ENERGETIKAVAL: vegEnergetika
     };
@@ -125,7 +125,7 @@ export function buildTemplateData(record: QuoteRecord): SablonAdat {
         reszletek: reszletekSorok(record),
         muszakiVan: Boolean(muszaki),
         MUSZAKI_LEIRAS: muszaki ? MUSZAKI_NEV : '',
-        MUSZAKI_LEIRAS_ARA: muszaki && muszaki.osszeg !== null ? ezresPont(muszaki.osszeg) : '',
+        MUSZAKI_LEIRAS_ARA: muszaki && muszaki.osszeg !== null ? ezresPont(kerekitEzresre(muszaki.osszeg)) : '',
         RESZLETEZO_SZOVEG: muszaki ? RESZLETEZO : '',
         tovabbi,
         egyeb,

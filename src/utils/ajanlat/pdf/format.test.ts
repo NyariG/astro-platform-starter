@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { arSzoveg, datumMagyar, ezresPont, fixArSzoveg, ingatlanJellegSzoveg, negyzetmeterErtek, szintekSzoveg } from './format';
+import { arSzoveg, datumMagyar, ezresPont, fixArSzoveg, ingatlanJellegSzoveg, kerekitEzresre, negyzetmeterErtek, szintekSzoveg } from './format';
 import type { Tetel } from '../pricing';
 
 function tetel(felulir: Partial<Tetel>): Tetel {
@@ -97,5 +97,23 @@ describe('datumMagyar — hosszú magyar dátum, budapesti idő', () => {
     it('éjfél körül a budapesti naptári napot adja', () => {
 
         expect(datumMagyar('2026-07-24T23:30:00.000Z')).toBe('2026. július 25.');
+    });
+});
+
+describe('kerekitEzresre — mindig felfelé, ezresre', () => {
+    it('a nem ezres értéket a következő ezresre kerekíti', () => {
+        expect(kerekitEzresre(577278)).toBe(578000);
+        expect(kerekitEzresre(64142)).toBe(65000);
+        expect(kerekitEzresre(1)).toBe(1000);
+    });
+
+    it('a pontos ezrest változatlanul hagyja', () => {
+        expect(kerekitEzresre(577000)).toBe(577000);
+        expect(kerekitEzresre(0)).toBe(0);
+    });
+
+    it('az arSzoveg és fixArSzoveg felfelé kerekítve formázza az árat', () => {
+        expect(fixArSzoveg(577278)).toBe('578.000,- Ft');
+        expect(arSzoveg(tetel({ status: 'PRICED', osszeg: 64142 }))).toBe('65.000,- Ft');
     });
 });
