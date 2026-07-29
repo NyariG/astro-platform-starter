@@ -15,7 +15,10 @@ export async function gmailKuldes(cimzettek: string[], level: EmailTorzs, csatol
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
-        auth: { user: sender, pass: jelszo }
+        auth: { user: sender, pass: jelszo },
+        connectionTimeout: 8000,
+        greetingTimeout: 8000,
+        socketTimeout: 8000
     });
 
     await transport.sendMail({

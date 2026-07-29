@@ -29,12 +29,14 @@ describe('gmailKuldes', () => {
     it('smtp.gmail.com:587 STARTTLS transportot hoz létre a megadott auth-tal', async () => {
         readEnv.mockImplementation((k: string) => ({ GMAIL_SENDER: 'ajanlat@nyariterv.hu', GMAIL_APP_PASSWORD: 'titok', QUOTE_REPLY_TO: 'info@nyariterv.hu' })[k]);
         await gmailKuldes(['ugyfel@x.hu'], level);
-        expect(createTransport).toHaveBeenCalledWith({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            auth: { user: 'ajanlat@nyariterv.hu', pass: 'titok' }
-        });
+        expect(createTransport).toHaveBeenCalledWith(
+            expect.objectContaining({
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                auth: { user: 'ajanlat@nyariterv.hu', pass: 'titok' }
+            })
+        );
     });
 
     it('a levelet a feladóval, reply-to-val és a PDF melléklettel küldi', async () => {

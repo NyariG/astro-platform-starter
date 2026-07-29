@@ -56,12 +56,8 @@ export function ResultPanel({ eredmeny, onUjra }: { eredmeny: Eredmeny; onUjra: 
                 <p className="max-w-prose text-slate-600">
                     {eredmeny.emailSent ? `Az adatait rögzítettük, és a visszaigazolást elküldtük a megadott e-mail címre. ${zaras}` : `Az adatait rögzítettük. ${zaras}`}
                 </p>
-                {eredmeny.emailSent ? (
+                {eredmeny.emailSent && (
                     <p className="mt-4 max-w-prose text-sm text-slate-500">Ha nem találja a levelet, érdemes a levélszemét mappát is megnéznie.</p>
-                ) : (
-                    <p className="mt-4 max-w-prose text-sm text-slate-500">
-                        A visszaigazoló levelet most nem tudtuk kiküldeni, de a megkeresése rögzült és eljutott hozzánk. Ha sürgős, hívjon minket nyugodtan.
-                    </p>
                 )}
 
                 {pdfLetoltheto && (
