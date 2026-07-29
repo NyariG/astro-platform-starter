@@ -194,7 +194,11 @@ function osszefoglaloText(record: QuoteRecord): string {
     return `Ingatlan jellege: ${jelleg}\nKért szolgáltatások: ${szolg}`;
 }
 
-function lakoepuletUgyfelTorzs(record: QuoteRecord): { html: string; text: string } {
+function lakoepuletUgyfelTorzs(record: QuoteRecord, vanPdf: boolean): { html: string; text: string } {
+    const pdfBlokkHtml = vanPdf
+        ? '<strong>A részletes árajánlatot PDF-ben mellékeltük</strong> ehhez a levélhez.'
+        : 'Az elkészült részletes árajánlatot tervezőnk hamarosan megküldi Önnek.';
+    const pdfBlokkText = vanPdf ? 'A részletes árajánlatot PDF-ben mellékeltük ehhez a levélhez.' : 'Az elkészült részletes árajánlatot tervezőnk hamarosan megküldi Önnek.';
     const html = `
     <p style="margin:0 0 16px;font-size:16px;">Kedves ${esc(record.nev)}!</p>
     <p style="margin:0 0 18px;">
@@ -203,7 +207,7 @@ function lakoepuletUgyfelTorzs(record: QuoteRecord): { html: string; text: strin
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background:#eff6ff;border:1px solid #dbeafe;border-radius:10px;margin:0 0 22px;">
       <tr><td style="padding:16px 18px;font-size:14px;color:${SZOVEG};line-height:1.6;">
-        <strong>A részletes árajánlatot PDF-ben mellékeltük</strong> ehhez a levélhez.
+        ${pdfBlokkHtml}
       </td></tr>
     </table>
     <p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Az Ön kérése röviden</p>
@@ -222,7 +226,7 @@ function lakoepuletUgyfelTorzs(record: QuoteRecord): { html: string; text: strin
 
 Köszönjük, hogy a Nyári Tervet választotta. Árajánlatkérését megkaptuk, és a megadott paraméterek alapján összeállítottuk az Ön személyre szabott árajánlatát.
 
-A részletes árajánlatot PDF-ben mellékeltük ehhez a levélhez.
+${pdfBlokkText}
 
 Az Ön kérése röviden:
 ${osszefoglaloText(record)}
@@ -238,11 +242,11 @@ info@nyariterv.hu · +36 70 318 7843`;
     return { html, text };
 }
 
-export function lakoepuletUgyfelLevel(record: QuoteRecord): EmailTorzs {
-    const { html, text } = lakoepuletUgyfelTorzs(record);
+export function lakoepuletUgyfelLevel(record: QuoteRecord, vanPdf = true): EmailTorzs {
+    const { html, text } = lakoepuletUgyfelTorzs(record, vanPdf);
     return {
         subject: 'Az Ön árajánlata — Nyári Terv',
-        html: keret('Az Ön árajánlata', html, `${record.nev}, elkészült az árajánlata — a részletek a mellékelt PDF-ben.`),
+        html: keret('Az Ön árajánlata', html, `${record.nev}, elkészült az árajánlata${vanPdf ? ' — a részletek a mellékelt PDF-ben' : ''}.`),
         text
     };
 }

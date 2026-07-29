@@ -98,7 +98,7 @@ function hibaSzoveg(hiba: unknown): string {
 export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null): Promise<void> {
     const env = kornyezet();
     const bcc = debugBcc();
-    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record) : altalanosUgyfelLevel(record);
+    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record, pdf !== null) : altalanosUgyfelLevel(record);
     const csatolmanyok: Csatolmany[] = pdf ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : [];
 
     try {
