@@ -1,7 +1,6 @@
 import { altalanosUgyfelLevel, ismeteltKiserletErtesito, lakoepuletUgyfelLevel, uzemeltetoiAdatlap, type EmailTorzs } from './templates';
 import { readEnv, type QuoteRecord } from './store';
 import { PDF_FAJLNEV } from './pdf/generate';
-import { gmailKuldes } from './gmail';
 
 const SMTP2GO_ENDPOINT = 'https://api.smtp2go.com/v3/email/send';
 
@@ -81,22 +80,13 @@ async function kuldes(env: Kornyezet, cimzettek: string[], level: EmailTorzs, cs
     }
 }
 
-async function uzemeltetoiErtesites(record: QuoteRecord, csatolmanyok: Csatolmany[]): Promise<void> {
-    const env = kornyezet();
-    await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok);
-}
-
 export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null): Promise<void> {
+    const env = kornyezet();
     const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record) : altalanosUgyfelLevel(record);
     const csatolmanyok: Csatolmany[] = pdf ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : [];
 
-    try {
-        await uzemeltetoiErtesites(record, csatolmanyok);
-    } catch (hiba) {
-        console.error('[ajanlat] üzemeltetői értesítő sikertelen', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
-    }
-
-    await gmailKuldes([record.email], ugyfelLevel, csatolmanyok);
+    await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok);
+    await kuldes(env, [record.email], ugyfelLevel, csatolmanyok);
 }
 
 /**
