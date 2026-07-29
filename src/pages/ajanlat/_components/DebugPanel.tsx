@@ -28,10 +28,9 @@ export function DebugPanel({ values, arazas, kupon }: { values: FormValues; araz
         setLetoltes(formatum);
         setHiba(null);
         try {
-            const token = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('debug') ?? '' : '';
-            const valasz = await fetch(`/api/ajanlat-debug?format=${formatum}`, {
+            const valasz = await fetch(`/api/ajanlat-debug?format=${formatum}&debug=1`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-debug-token': token },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values)
             });
             if (!valasz.ok) {

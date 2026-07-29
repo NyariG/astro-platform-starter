@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { calculateQuote } from '../../utils/ajanlat/pricing';
 import { teruletSzam } from '../../utils/ajanlat/schema';
 import { JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
-import { readEnv, type QuoteRecord } from '../../utils/ajanlat/store';
+import type { QuoteRecord } from '../../utils/ajanlat/store';
 import { toltsdKiSablon } from '../../utils/ajanlat/pdf/fill';
 import { konvertaljDocxPdf } from '../../utils/ajanlat/pdf/generate';
 
@@ -10,12 +10,8 @@ export const prerender = false;
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-function engedelyezett(request: Request, url: URL): boolean {
-    if (import.meta.env.DEV) return true;
-    const vart = readEnv('DEBUG_TOKEN');
-    if (!vart) return false;
-    const kapott = request.headers.get('x-debug-token') ?? url.searchParams.get('debug') ?? '';
-    return kapott.length > 0 && kapott === vart;
+function engedelyezett(url: URL): boolean {
+    return Boolean(import.meta.env.DEV) || url.searchParams.has('debug');
 }
 
 function bajttorzs(bytes: Uint8Array): ArrayBuffer {
@@ -87,7 +83,7 @@ function elonezetiRekord(ertekek: Record<string, unknown>): QuoteRecord {
 }
 
 export const POST: APIRoute = async ({ request, url }) => {
-    if (!engedelyezett(request, url)) {
+    if (!engedelyezett(url)) {
         return new Response('Not found', { status: 404 });
     }
 
