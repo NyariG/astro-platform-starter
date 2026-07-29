@@ -1,6 +1,7 @@
 import { altalanosUgyfelLevel, ismeteltKiserletErtesito, lakoepuletUgyfelLevel, uzemeltetoiAdatlap, type EmailTorzs } from './templates';
 import { readEnv, type QuoteRecord } from './store';
 import { PDF_FAJLNEV } from './pdf/generate';
+import { gmailKuldes } from './gmail';
 
 const SMTP2GO_ENDPOINT = 'https://api.smtp2go.com/v3/email/send';
 
@@ -80,25 +81,22 @@ async function kuldes(env: Kornyezet, cimzettek: string[], level: EmailTorzs, cs
     }
 }
 
-/**
- * Sikeres beküldés utáni levelek.
- *
- * Az ügyfélnek szánt levél az ingatlan jellegétől függ; az üzemeltető
- * mindkét ágban a teljes adatlapot kapja. A két küldés egymástól függetlenül
- * fut le, de bármelyik hibája hibaként jelenik meg — a hívó ilyenkor
- * `failed` státuszra állítja a rekordot.
- */
-export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null): Promise<void> {
+async function uzemeltetoiErtesites(record: QuoteRecord, csatolmanyok: Csatolmany[]): Promise<void> {
     const env = kornyezet();
-    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record) : altalanosUgyfelLevel(record);
+    await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok);
+}
 
-    // A PDF-et — ha van — mind az üzemeltető, mind az ügyfél levele megkapja.
+export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null): Promise<void> {
+    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record) : altalanosUgyfelLevel(record);
     const csatolmanyok: Csatolmany[] = pdf ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : [];
 
-    // Az üzemeltetői adatlap megy előbb: ha csak az ügyfélnek szánt levél
-    // hibázna, a megkeresés akkor is megérkezett az irodába.
-    await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok);
-    await kuldes(env, [record.email], ugyfelLevel, csatolmanyok);
+    try {
+        await uzemeltetoiErtesites(record, csatolmanyok);
+    } catch (hiba) {
+        console.error('[ajanlat] üzemeltetői értesítő sikertelen', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+    }
+
+    await gmailKuldes([record.email], ugyfelLevel, csatolmanyok);
 }
 
 /**
