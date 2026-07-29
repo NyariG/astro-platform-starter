@@ -2,10 +2,10 @@
 
 @theme {
     --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --color-primary: #2563eb; /* Blue-600 */
+    --color-primary: #2563eb;
     --color-primary-content: #ffffff;
-    --color-secondary: #64748b; /* Slate-500 */
-    --color-accent: #0ea5e9; /* Sky-500 */
+    --color-secondary: #64748b;
+    --color-accent: #0ea5e9;
 }
 
 @layer base {
@@ -34,7 +34,7 @@
     .btn {
         @apply inline-flex items-center justify-center gap-2 bg-primary text-primary-content cursor-pointer text-center font-semibold no-underline transition-colors shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
         padding: 0.75rem 1.5rem;
-        border-radius: 0.375rem; /* rounded-md */
+        border-radius: 0.375rem;
     }
 
     .btn-secondary {
@@ -44,8 +44,50 @@
     .container-custom {
         @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
     }
-    
+
     .section {
         @apply py-16 sm:py-24;
     }
+
+    .field-input {
+        @apply w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm transition;
+        @apply placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none;
+        @apply aria-invalid:border-red-400 aria-invalid:focus:border-red-500 aria-invalid:focus:ring-red-200;
+    }
+
+    .field-error {
+        @apply text-sm font-medium text-red-700;
+    }
+}
+
+@layer utilities {
+
+    .collapsible {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition:
+            grid-template-rows 0.28s ease,
+            opacity 0.28s ease;
+        opacity: 0;
+    }
+
+    .collapsible.is-open {
+        grid-template-rows: 1fr;
+        opacity: 1;
+    }
+
+    .collapsible-inner {
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .collapsible {
+            transition: none;
+        }
+    }
+}
+
+.btn:disabled {
+    @apply cursor-not-allowed opacity-60 shadow-none;
 }

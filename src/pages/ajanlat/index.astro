@@ -1,0 +1,30 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import QuoteForm from './_components/QuoteForm.tsx';
+---
+
+<Layout
+    title="Árajánlatkérés – Nyári Terv"
+    description="Kérjen árajánlatot épületgépészeti tervezésre Győrben és környékén. Töltse ki az űrlapot, és tervezőnk hamarosan jelentkezik."
+    minimal
+>
+    <section class="section bg-slate-50">
+        <div class="container-custom">
+            <div class="mx-auto max-w-2xl text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Árajánlatkérés</h1>
+                <p class="mt-6 text-lg leading-8 text-slate-600">
+                    Néhány kérdés az ingatlanról és a tervezési igényeiről, és összeállítjuk Önnek a személyre szabott ajánlatot.
+                    A kitöltés körülbelül két percet vesz igénybe.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section pt-0">
+        <div class="container-custom">
+            <div class="mx-auto max-w-6xl">
+                <QuoteForm client:load />
+            </div>
+        </div>
+    </section>
+</Layout>
