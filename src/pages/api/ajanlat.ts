@@ -4,6 +4,7 @@ import { calculateQuote } from '../../utils/ajanlat/pricing';
 import { kuponKeres, kuponNormalizal, kuponTeljesKod } from '../../utils/ajanlat/coupons';
 import { JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
 import { ismeteltKiserletLevele, maszkoltEmail, sikeresBekuldesLevelei } from '../../utils/ajanlat/email';
+import { ertesitsUjAjanlat } from '../../utils/ajanlat/telegram-router';
 import { keszitsArajanlatPdf } from '../../utils/ajanlat/pdf/generate';
 import {
     claimQuota,
@@ -220,6 +221,12 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
 
             await releaseQuota(emailNormalized, datum);
             if (bevaltottKupon) await releaseCoupon(bevaltottKupon, emailNormalized);
+        }
+
+        try {
+            await ertesitsUjAjanlat(rekord);
+        } catch (hiba) {
+            console.error('[ajanlat] Telegram admin-értesítés sikertelen', { id, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
         }
 
         return json(

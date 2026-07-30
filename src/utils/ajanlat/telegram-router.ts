@@ -1,0 +1,169 @@
+import { answerCallbackQuery, sendMessage, telegramKonfiguralva, type InlineButton } from './telegram';
+import { checkRateLimit, consumeLinkToken, isAdmin, linkAdmin, listAdmins, markUpdateProcessed, unlinkAdmin } from './telegram-store';
+import { INGATLAN_JELLEG, SZOLGALTATAS_OPCIOK, labelOf, labelsOf } from './options';
+import { forint } from './format';
+import type { QuoteRecord } from './store';
+
+type Chat = { id: number };
+type From = { id: number; username?: string };
+type Message = { message_id: number; from?: From; chat: Chat; text?: string };
+type CallbackQuery = { id: string; from: From; message?: { chat: Chat }; data?: string };
+type Update = { update_id?: number; message?: Message; callback_query?: CallbackQuery };
+
+const TODO_PARANCSOK = new Set(['/ajanlatok']);
+
+function fomenu(): InlineButton[][] {
+    return [
+        [
+            { text: 'ℹ️ Súgó', callback_data: 'help' },
+            { text: '📶 Állapot', callback_data: 'status' }
+        ]
+    ];
+}
+
+function koszonto(linkelt: boolean): string {
+    if (linkelt) {
+        return 'Üdv újra! A fiókod össze van kötve a Nyári Terv botjával. Válassz az alábbi gombokból, vagy írd be a /help-et.';
+    }
+    return 'Üdv! Ez a Nyári Terv admin-botja.\n\nA parancsok használatához előbb össze kell kötnöd a fiókodat egy egyszer használatos linkkel. Írd be a /link-et a tudnivalókért.';
+}
+
+function helpSzoveg(linkelt: boolean): string {
+    const sorok = [
+        '<b>Nyári Terv admin-bot — parancsok</b>',
+        '',
+        '/start — indítás / összekötő link beváltása',
+        '/help — ez a súgó',
+        '/link — fiók-összekötés tudnivalói',
+        '/unlink — fiók leválasztása',
+        '/status — a kapcsolat állapota'
+    ];
+    if (!linkelt) {
+        sorok.push('', '⛔ A vezérlő parancsok csak összekötött fiókból érhetők el.');
+    }
+    return sorok.join('\n');
+}
+
+async function elutasit(chatId: number): Promise<void> {
+    await sendMessage(chatId, '⛔ Ehhez össze kell kötnöd a fiókodat. Írd be a /link-et, vagy nyisd meg az admin által kapott egyszer használatos linket.');
+}
+
+export async function kezelUpdate(update: Update): Promise<void> {
+    if (typeof update.update_id === 'number') {
+        const elso = await markUpdateProcessed(update.update_id);
+        if (!elso) return;
+    }
+    if (update.callback_query) {
+        await kezelCallback(update.callback_query);
+        return;
+    }
+    if (update.message?.text) {
+        await kezelParancs(update.message);
+    }
+}
+
+async function kezelParancs(message: Message): Promise<void> {
+    const chatId = message.chat.id;
+    if (!(await checkRateLimit(chatId))) return;
+
+    const [nyers, ...args] = message.text!.trim().split(/\s+/);
+    const parancs = nyers.split('@')[0].toLowerCase();
+    const linkelt = await isAdmin(chatId);
+
+    switch (parancs) {
+        case '/start': {
+            const token = args[0];
+            if (token) {
+                const sikeres = await consumeLinkToken(token);
+                if (sikeres) {
+                    await linkAdmin(chatId, message.from?.username ?? null);
+                    await sendMessage(chatId, '✅ Sikeresen összekötöttük a fiókodat a Nyári Terv botjával. Írd be a /help-et a parancsokért.', { keyboard: fomenu() });
+                } else {
+                    await sendMessage(chatId, '⚠️ Ez az összekötő link érvénytelen vagy lejárt (10 percig, egyszer használható). Kérj újat az adminfelületről.');
+                }
+                return;
+            }
+            await sendMessage(chatId, koszonto(linkelt), { keyboard: linkelt ? fomenu() : undefined });
+            return;
+        }
+        case '/help':
+            await sendMessage(chatId, helpSzoveg(linkelt), { keyboard: linkelt ? fomenu() : undefined });
+            return;
+        case '/link':
+            if (linkelt) {
+                await sendMessage(chatId, 'Ez a fiók már össze van kötve. A leválasztáshoz használd az /unlink-et.', { keyboard: fomenu() });
+                return;
+            }
+            await sendMessage(chatId, 'Az összekötéshez nyisd meg az adminfelületről kapott egyszer használatos linket (<code>t.me/&lt;bot&gt;?start=TOKEN</code>), vagy írd be: <code>/start &lt;token&gt;</code>');
+            return;
+        case '/unlink':
+            if (!linkelt) return elutasit(chatId);
+            await unlinkAdmin(chatId);
+            await sendMessage(chatId, '🔌 Leválasztottuk ezt a fiókot. A parancsok addig nem elérhetők, amíg újra össze nem kötöd.');
+            return;
+        case '/status': {
+            if (!linkelt) return elutasit(chatId);
+            const darab = (await listAdmins()).length;
+            await sendMessage(chatId, `🟢 <b>Összekötve.</b>\nChat azonosító: <code>${chatId}</code>\nÖsszekötött adminok: <b>${darab}</b>`, { keyboard: fomenu() });
+            return;
+        }
+        default:
+            if (TODO_PARANCSOK.has(parancs)) {
+                if (!linkelt) return elutasit(chatId);
+                await sendMessage(chatId, '🚧 Ez a vezérlő funkció a következő iterációban érkezik.');
+                return;
+            }
+            await sendMessage(chatId, 'Ismeretlen parancs. Írd be a /help-et.', { keyboard: linkelt ? fomenu() : undefined });
+    }
+}
+
+async function kezelCallback(cq: CallbackQuery): Promise<void> {
+    await answerCallbackQuery(cq.id);
+    const chatId = cq.message?.chat.id ?? cq.from.id;
+    if (!(await isAdmin(chatId))) {
+        await elutasit(chatId);
+        return;
+    }
+    switch (cq.data) {
+        case 'help':
+            await sendMessage(chatId, helpSzoveg(true), { keyboard: fomenu() });
+            return;
+        case 'status': {
+            const darab = (await listAdmins()).length;
+            await sendMessage(chatId, `🟢 <b>Összekötve.</b>\nChat azonosító: <code>${chatId}</code>\nÖsszekötött adminok: <b>${darab}</b>`, { keyboard: fomenu() });
+            return;
+        }
+        default:
+            await sendMessage(chatId, 'Ismeretlen művelet.', { keyboard: fomenu() });
+    }
+}
+
+function esc(value: string): string {
+    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+export async function ertesitsUjAjanlat(record: QuoteRecord): Promise<void> {
+    if (!telegramKonfiguralva()) return;
+    const adminok = await listAdmins();
+    if (adminok.length === 0) return;
+
+    const jelleg = labelOf(INGATLAN_JELLEG, record.ingatlanJelleg);
+    const szolg = labelsOf(SZOLGALTATAS_OPCIOK, record.szolgaltatasok).join(', ');
+    const vegosszeg = record.vanEgyediArazas || record.vegosszeg === null ? 'egyedi árajánlat' : forint(record.vegosszeg);
+    const szoveg = [
+        '📩 <b>Új árajánlatkérés</b>',
+        `👤 ${esc(record.nev)}`,
+        `✉️ ${esc(record.email)}${record.telefon ? ` · 📞 ${esc(record.telefon)}` : ''}`,
+        `🏠 ${esc(jelleg)}${record.varos ? ` · ${esc(record.varos)}` : ''}`,
+        `🧰 ${esc(szolg)}`,
+        `💰 ${esc(vegosszeg)}`
+    ].join('\n');
+
+    for (const admin of adminok) {
+        try {
+            await sendMessage(admin.chatId, szoveg);
+        } catch (hiba) {
+            console.error('[telegram] admin-értesítés sikertelen', { chatId: admin.chatId, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+        }
+    }
+}
