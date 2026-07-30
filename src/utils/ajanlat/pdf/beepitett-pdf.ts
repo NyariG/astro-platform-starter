@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFString, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { QuoteRecord } from '../store';
 import { ENERGETIKAI_TANUSITVANY_DIJ } from '../pricing-config';
@@ -7,6 +7,7 @@ import { ezresPont } from './format';
 import { DEJAVU_SERIF_B64, DEJAVU_SERIF_BOLD_B64 } from './dejavu-serif-b64';
 import { BANNER_B64 } from './banner-b64';
 import { FOOTER_B64 } from './footer-b64';
+import { ALAIRAS_BLOKK_B64 } from './alairas-blokk-b64';
 
 const A4: [number, number] = [595.28, 841.89];
 const M = 50;
@@ -134,6 +135,42 @@ function tablaSor(a: Allapot, cimke: string, ertek: string): void {
     a.y -= magas;
 }
 
+const FSIZE = 8;
+const FLH = 11;
+
+type RGB = ReturnType<typeof rgb>;
+type FSor = { text: string; font: PDFFont; color: RGB; link?: string };
+
+function linkAnnotacio(oldal: PDFPage, x: number, y: number, w: number, h: number, uri: string): void {
+    const ctx = oldal.doc.context;
+    const annot = ctx.obj({
+        Type: 'Annot',
+        Subtype: 'Link',
+        Rect: [x, y, x + w, y + h],
+        Border: [0, 0, 0],
+        A: ctx.obj({ Type: 'Action', S: 'URI', URI: PDFString.of(uri) })
+    });
+    const ref = ctx.register(annot);
+    let annots = oldal.node.Annots();
+    if (!annots) {
+        annots = ctx.obj([]);
+        oldal.node.set(PDFName.of('Annots'), annots);
+    }
+    annots.push(ref);
+}
+
+function footerBlokk(oldal: PDFPage, sorok: FSor[], xAnchor: number, jobbra: boolean): void {
+    const yC = 16 + FOOTER_MAG / 2;
+    let y = yC + ((sorok.length - 1) * FLH) / 2 - FSIZE / 2 + 1;
+    for (const s of sorok) {
+        const w = s.font.widthOfTextAtSize(s.text, FSIZE);
+        const x = jobbra ? xAnchor - w : xAnchor;
+        oldal.drawText(s.text, { x, y, size: FSIZE, font: s.font, color: s.color });
+        if (s.link) linkAnnotacio(oldal, x, y - 2, w, FSIZE + 3, s.link);
+        y -= FLH;
+    }
+}
+
 export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Array> {
     const adat = buildTemplateData(record);
     const doc = await PDFDocument.create();
@@ -203,19 +240,33 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     sor(a, 'Az árajánlat a kiállítástól számított 3 hónapig érvényes.', { size: 9, color: HALVANY });
     sor(a, 'Az ajánlat alanyi adómentes.', { size: 9, color: HALVANY, gap: 14 });
 
-    sor(a, `Abda, ${adat.AKTUALIS_DATUM}`, { gap: 20 });
-    sor(a, '_______________________', { color: HALVANY });
-    sor(a, 'Nyári Gergő Mátyás', { font: bold });
-    sor(a, 'Gépészmérnök', { color: HALVANY });
+    sor(a, `Abda, ${adat.AKTUALIS_DATUM}`, { gap: 10 });
+    const alairasKep = await doc.embedPng(b64(ALAIRAS_BLOKK_B64));
+    const alairasW = 230;
+    const alairasH = (alairasW * alairasKep.height) / alairasKep.width;
+    hely(a, alairasH);
+    a.page.drawImage(alairasKep, { x: M, y: a.y - alairasH, width: alairasW, height: alairasH });
+    a.y -= alairasH;
 
     const footerKep = await doc.embedPng(b64(FOOTER_B64));
     const footerW = (FOOTER_MAG * footerKep.width) / footerKep.height;
+    const balBlokk: FSor[] = [
+        { text: 'www.nyariterv.hu', font: reg, color: MARKA, link: 'https://nyariterv.hu' },
+        { text: 'info@nyariterv.hu', font: reg, color: MARKA, link: 'mailto:info@nyariterv.hu' }
+    ];
+    const jobbBlokk: FSor[] = [
+        { text: 'Nyári Gergő Mátyás', font: bold, color: SZOVEG },
+        { text: '+36 70 318 7843', font: reg, color: HALVANY },
+        { text: '9151 Abda, Bécsi utca 2/C', font: reg, color: HALVANY }
+    ];
     const oldalak = doc.getPages();
     oldalak.forEach((oldal, i) => {
         const szam = `${i + 1} / ${oldalak.length}`;
         const szamW = reg.widthOfTextAtSize(szam, 8);
-        oldal.drawText(szam, { x: (A4[0] - szamW) / 2, y: 16 + FOOTER_MAG + 5, size: 8, font: reg, color: HALVANY });
+        oldal.drawText(szam, { x: (A4[0] - szamW) / 2, y: 16 + FOOTER_MAG + 6, size: 8, font: reg, color: HALVANY });
         oldal.drawImage(footerKep, { x: (A4[0] - footerW) / 2, y: 16, width: footerW, height: FOOTER_MAG });
+        footerBlokk(oldal, balBlokk, M, false);
+        footerBlokk(oldal, jobbBlokk, A4[0] - M, true);
     });
 
     return doc.save();

@@ -22,7 +22,7 @@ npx vitest run         # teljes teszt-suite
 ## `/ajanlat` árajánlat-modul (kész, éles)
 
 - Beküldés: `POST /api/ajanlat` → validáció (zod) → árazás → Blobs mentés → PDF → 2 e-mail → Telegram-ping.
-- **PDF**: éles a beépített pdf-lib generátor (`pdf/beepitett-pdf.ts`), DejaVu Serif, banner+footer, `aktuális/összes` oldalszám.
+- **PDF**: éles a beépített pdf-lib generátor (`pdf/beepitett-pdf.ts`), DejaVu Serif, banner + kontakt-footer minden oldalon (bal: kattintható `www`/`info` link, közép: NT-ikon + `aktuális/összes` oldalszám, jobb: név/tel/cím). Az aláírás-blokk **lapított raszter** (`alairas-blokk-b64.ts`, ImageMagick-kel offline sütve a repó DejaVu fontjából + `src/assets/alairas.png` 75%-os rárétegzés) → szövegréteg nélkül nem másolható; az `alairas.png` csak ebben a kompozitban él (nincs önálló kép-objektum). pdf-lib nem tud permission-flaget, ez tudatos korlát.
 - **E-mail**: SMTP2GO `fetch`-en át (`email.ts`). Admin + ügyfél levél függetlenül megy; `DEBUG_EMAIL_TO` bcc teszthez.
 - **Kvóták**: e-mailenként napi 1 ajánlat; IP-limit másodlagos fék (`QUOTE_IP_LIMIT`).
 - Kupon: `POST /api/kupon`; sablon-seed: `POST /api/ajanlat-sablon-seed` (gate: `SABLON_SEED_TOKEN`).

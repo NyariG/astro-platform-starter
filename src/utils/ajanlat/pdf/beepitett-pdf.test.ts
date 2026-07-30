@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFName, PDFString } from 'pdf-lib';
 import { keszitsBeepitettPdf } from './beepitett-pdf';
 import type { QuoteRecord } from '../store';
 import { calculateQuote } from '../pricing';
@@ -82,5 +82,22 @@ describe('beépített pdf-lib generátor', () => {
         const bytes = await keszitsBeepitettPdf(rekord({ nev: 'Tóth Örzsébet Űr' }));
         const fejlec = new TextDecoder().decode(bytes.slice(0, 5));
         expect(fejlec).toBe('%PDF-');
+    });
+
+    it('a footer minden oldalra kattintható linket ágyaz be (mailto + https)', async () => {
+        const bytes = await keszitsBeepitettPdf(TELJES());
+        const doc = await PDFDocument.load(bytes);
+        for (const oldal of doc.getPages()) {
+            const annots = oldal.node.Annots();
+            expect(annots).toBeTruthy();
+            const uris: string[] = [];
+            for (let k = 0; k < annots!.size(); k++) {
+                const action = annots!.lookup(k, PDFDict).lookupMaybe(PDFName.of('A'), PDFDict);
+                const uri = action?.get(PDFName.of('URI'));
+                if (uri instanceof PDFString) uris.push(uri.asString());
+            }
+            expect(uris).toContain('mailto:info@nyariterv.hu');
+            expect(uris).toContain('https://nyariterv.hu');
+        }
     });
 });
