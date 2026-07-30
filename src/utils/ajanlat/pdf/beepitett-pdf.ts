@@ -6,10 +6,13 @@ import { buildTemplateData } from './adatszerzodes';
 import { ezresPont } from './format';
 import { DEJAVU_BOLD_B64, DEJAVU_REGULAR_B64 } from './dejavu-b64';
 import { BANNER_B64 } from './banner-b64';
+import { FOOTER_B64 } from './footer-b64';
 
 const A4: [number, number] = [595.28, 841.89];
 const M = 50;
 const CW = A4[0] - 2 * M;
+const FOOTER_MAG = 42;
+const ALSO = M + FOOTER_MAG + 10;
 
 const SZOVEG = rgb(0.09, 0.13, 0.24);
 const HALVANY = rgb(0.42, 0.47, 0.53);
@@ -42,7 +45,7 @@ function ujOldal(a: Allapot): void {
 }
 
 function hely(a: Allapot, kell: number): void {
-    if (a.y - kell < M) ujOldal(a);
+    if (a.y - kell < ALSO) ujOldal(a);
 }
 
 function tordel(text: string, font: PDFFont, size: number, maxW: number): string[] {
@@ -204,6 +207,12 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     sor(a, '_______________________', { color: HALVANY });
     sor(a, 'Nyári Gergő Mátyás', { font: bold });
     sor(a, 'Gépészmérnök', { color: HALVANY });
+
+    const footerKep = await doc.embedPng(b64(FOOTER_B64));
+    const footerW = (FOOTER_MAG * footerKep.width) / footerKep.height;
+    for (const oldal of doc.getPages()) {
+        oldal.drawImage(footerKep, { x: (A4[0] - footerW) / 2, y: 16, width: footerW, height: FOOTER_MAG });
+    }
 
     return doc.save();
 }

@@ -19,6 +19,7 @@ const HALVANY = '#64748b';
 const KERET = '#e2e8f0';
 const HATTER = '#f8fafc';
 const BANNER_URL = 'https://nyariterv.hu/images/nyariterv-banner.png';
+const FOOTER_URL = 'https://nyariterv.hu/images/nyariterv-ikonok.png';
 
 export type EmailTorzs = {
     subject: string;
@@ -167,6 +168,11 @@ function keret(cim: string, torzsHtml: string, elonezet = ''): string {
               <strong style="color:${SZOVEG};">Nyári Terv</strong> — épületgépészeti tervezés, Győr és környéke<br>
               <a href="mailto:info@nyariterv.hu" style="color:${MARKA};text-decoration:none;">info@nyariterv.hu</a> &nbsp;·&nbsp;
               <a href="tel:+36703187843" style="color:${MARKA};text-decoration:none;">+36 70 318 7843</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;font-size:0;line-height:0;">
+              <img src="${FOOTER_URL}" width="600" alt="Nyári-Terv" style="display:block;width:100%;max-width:600px;height:auto;border:0;">
             </td>
           </tr>
         </table>
