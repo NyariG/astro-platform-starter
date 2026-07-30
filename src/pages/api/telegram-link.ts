@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { readEnv } from '../../utils/ajanlat/store';
-import { createLinkToken } from '../../utils/ajanlat/telegram-store';
+import { createLinkToken, listAdmins } from '../../utils/ajanlat/telegram-store';
 
 export const prerender = false;
 
@@ -16,8 +16,9 @@ function ujToken(): string {
     return Array.from(bajtok, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-export const POST: APIRoute = async ({ request }) => {
-    if (!engedelyezett(request)) {
+export const POST: APIRoute = async ({ request, url }) => {
+    const elsoAdminBootstrap = url.searchParams.has('bootstrap') && (await listAdmins()).length === 0;
+    if (!engedelyezett(request) && !elsoAdminBootstrap) {
         return new Response('Not found', { status: 404 });
     }
 
