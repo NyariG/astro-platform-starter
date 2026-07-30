@@ -21,6 +21,13 @@ export const GET: APIRoute = async ({ url }) => {
         DEBUG_EMAIL_TO: readEnv('DEBUG_EMAIL_TO') ?? '(nincs)'
     };
 
+    const kulcsok = typeof process !== 'undefined' && process.env ? Object.keys(process.env) : [];
+    const env_attekintes = {
+        osszes_kulcs: kulcsok.length,
+        netlify_beepitett: ['NETLIFY', 'SITE_NAME', 'URL', 'DEPLOY_URL', 'CONTEXT'].filter((k) => Boolean(process.env?.[k])),
+        sajat_kulcsok: kulcsok.filter((k) => /^(QUOTE_|SMTP2GO|SABLON_|TELEGRAM_|DEBUG_|PDF_|CLOUDCONVERT|GMAIL_)/.test(k)).sort()
+    };
+
     let testSend: unknown = 'kihagyva (add hozzá: &send=1)';
     if (url.searchParams.get('send') === '1') {
         const apiKey = readEnv('SMTP2GO_API_KEY');
@@ -46,7 +53,7 @@ export const GET: APIRoute = async ({ url }) => {
         }
     }
 
-    return new Response(JSON.stringify({ cfg, testSend }, null, 2), {
+    return new Response(JSON.stringify({ cfg, env_attekintes, testSend }, null, 2), {
         status: 200,
         headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
