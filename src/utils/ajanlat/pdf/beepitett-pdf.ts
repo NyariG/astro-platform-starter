@@ -212,7 +212,7 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     const footerW = (FOOTER_MAG * footerKep.width) / footerKep.height;
     const oldalak = doc.getPages();
     oldalak.forEach((oldal, i) => {
-        const szam = `- ${i + 1} -`;
+        const szam = `${i + 1} / ${oldalak.length}`;
         const szamW = reg.widthOfTextAtSize(szam, 8);
         oldal.drawText(szam, { x: (A4[0] - szamW) / 2, y: 16 + FOOTER_MAG + 5, size: 8, font: reg, color: HALVANY });
         oldal.drawImage(footerKep, { x: (A4[0] - footerW) / 2, y: 16, width: footerW, height: FOOTER_MAG });
