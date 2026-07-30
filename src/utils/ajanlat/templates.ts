@@ -171,8 +171,8 @@ function keret(cim: string, torzsHtml: string, elonezet = ''): string {
             </td>
           </tr>
           <tr>
-            <td style="padding:0;font-size:0;line-height:0;">
-              <img src="${FOOTER_URL}" width="600" alt="Nyári-Terv" style="display:block;width:100%;max-width:600px;height:auto;border:0;">
+            <td align="center" style="padding:14px 30px 20px;background:${HATTER};">
+              <img src="${FOOTER_URL}" width="190" alt="Nyári-Terv" style="display:inline-block;width:190px;max-width:60%;height:auto;border:0;">
             </td>
           </tr>
         </table>
@@ -311,8 +311,8 @@ function kapcsolatBlokkHtml(record: QuoteRecord): string {
         <a href="mailto:${esc(record.email)}" style="color:${MARKA};text-decoration:none;">${esc(record.email)}</a>${record.telefon ? ` &nbsp;·&nbsp; <a href="tel:${esc(record.telefon)}" style="color:${MARKA};text-decoration:none;">${esc(record.telefon)}</a>` : ''} &nbsp;·&nbsp; ${esc(record.varos)}
       </td></tr>
     </table>
-    <p style="margin:0 0 22px;">
-      <a href="mailto:${esc(record.email)}" style="display:inline-block;background:${MARKA};color:#ffffff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:700;font-size:14px;min-height:44px;line-height:22px;">Válasz az ügyfélnek</a>
+    <p style="margin:0 0 16px;">
+      <a href="mailto:${esc(record.email)}" style="display:inline-block;background:${MARKA};color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:8px;font-weight:700;font-size:14px;line-height:1;">Válasz az ügyfélnek</a>
     </p>`;
 }
 
