@@ -18,6 +18,7 @@ const SZOVEG = '#0f172a';
 const HALVANY = '#64748b';
 const KERET = '#e2e8f0';
 const HATTER = '#f8fafc';
+const BANNER_URL = 'https://nyariterv.hu/images/nyariterv-banner.png';
 
 export type EmailTorzs = {
     subject: string;
@@ -155,9 +156,8 @@ function keret(cim: string, torzsHtml: string, elonezet = ''): string {
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;width:100%;background:#ffffff;border:1px solid ${KERET};border-radius:14px;overflow:hidden;font-family:'Segoe UI',Arial,Helvetica,sans-serif;box-shadow:0 1px 3px rgba(15,23,42,0.06);">
           <tr>
-            <td style="padding:26px 30px 18px;">
-              <div style="font-size:23px;font-weight:800;letter-spacing:-0.02em;color:${SZOVEG};line-height:1;"><span style="color:${MARKA};">Nyári</span>Terv</div>
-              <div style="margin-top:6px;font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:${HALVANY};">Épületgépészeti tervezés · Győr és környéke</div>
+            <td style="padding:0;font-size:0;line-height:0;">
+              <img src="${BANNER_URL}" width="600" alt="Nyári-Terv — épületgépészeti tervezés, Győr és környéke" style="display:block;width:100%;max-width:600px;height:auto;border:0;">
             </td>
           </tr>
           <tr><td style="height:4px;line-height:4px;font-size:0;background:${MARKA};">&nbsp;</td></tr>

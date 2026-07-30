@@ -357,6 +357,21 @@ export async function getSablon(tipus: SablonTipus): Promise<ArrayBuffer | null>
     return (await store().get(sablonKey(tipus), { type: 'arrayBuffer' })) as ArrayBuffer | null;
 }
 
+export type MarkaKep = 'banner' | 'ikonok';
+
+function markaKepKey(nev: MarkaKep): string {
+    return `markakep/${nev}`;
+}
+
+export async function saveMarkaKep(nev: MarkaKep, bytes: Uint8Array): Promise<void> {
+    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    await store().set(markaKepKey(nev), buffer, { metadata: { createdAt: new Date().toISOString() } });
+}
+
+export async function getMarkaKep(nev: MarkaKep): Promise<ArrayBuffer | null> {
+    return (await store().get(markaKepKey(nev), { type: 'arrayBuffer' })) as ArrayBuffer | null;
+}
+
 /** Egy meglévő rekord részleges frissítése (státusz, küldési időbélyeg, hiba). */
 export async function patchRequest(id: string, patch: Partial<QuoteRecord>): Promise<void> {
     const key = requestKey(id);

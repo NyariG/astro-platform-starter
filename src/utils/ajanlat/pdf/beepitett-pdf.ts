@@ -5,6 +5,7 @@ import { ENERGETIKAI_TANUSITVANY_DIJ } from '../pricing-config';
 import { buildTemplateData } from './adatszerzodes';
 import { ezresPont } from './format';
 import { DEJAVU_BOLD_B64, DEJAVU_REGULAR_B64 } from './dejavu-b64';
+import { BANNER_B64 } from './banner-b64';
 
 const A4: [number, number] = [595.28, 841.89];
 const M = 50;
@@ -138,8 +139,10 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     const bold = await doc.embedFont(b64(DEJAVU_BOLD_B64), { subset: true });
     const a: Allapot = { doc, reg, bold, page: doc.addPage(A4), y: A4[1] - M };
 
-    a.page.drawText('NyáriTerv', { x: M, y: a.y - 20, size: 22, font: bold, color: MARKA });
-    a.y -= 34;
+    const bannerKep = await doc.embedPng(b64(BANNER_B64));
+    const bannerH = (CW * bannerKep.height) / bannerKep.width;
+    a.page.drawImage(bannerKep, { x: M, y: A4[1] - M - bannerH, width: CW, height: bannerH });
+    a.y = A4[1] - M - bannerH - 10;
     a.page.drawLine({ start: { x: M, y: a.y }, end: { x: M + CW, y: a.y }, thickness: 1.5, color: MARKA });
     a.y -= 20;
 
