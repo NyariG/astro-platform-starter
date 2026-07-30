@@ -4,7 +4,7 @@ import type { QuoteRecord } from '../store';
 import { ENERGETIKAI_TANUSITVANY_DIJ } from '../pricing-config';
 import { buildTemplateData } from './adatszerzodes';
 import { ezresPont } from './format';
-import { DEJAVU_BOLD_B64, DEJAVU_REGULAR_B64 } from './dejavu-b64';
+import { DEJAVU_SERIF_B64, DEJAVU_SERIF_BOLD_B64 } from './dejavu-serif-b64';
 import { BANNER_B64 } from './banner-b64';
 import { FOOTER_B64 } from './footer-b64';
 
@@ -138,8 +138,8 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     const adat = buildTemplateData(record);
     const doc = await PDFDocument.create();
     doc.registerFontkit(fontkit);
-    const reg = await doc.embedFont(b64(DEJAVU_REGULAR_B64), { subset: true });
-    const bold = await doc.embedFont(b64(DEJAVU_BOLD_B64), { subset: true });
+    const reg = await doc.embedFont(b64(DEJAVU_SERIF_B64), { subset: true });
+    const bold = await doc.embedFont(b64(DEJAVU_SERIF_BOLD_B64), { subset: true });
     const a: Allapot = { doc, reg, bold, page: doc.addPage(A4), y: A4[1] - M };
 
     const bannerKep = await doc.embedPng(b64(BANNER_B64));
