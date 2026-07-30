@@ -3,14 +3,12 @@ import { forint, negyzetmeter } from './format';
 import { JOGI_ROVID } from './legal-notice';
 import type { QuoteRecord } from './store';
 
-function jogiLevelHtml(record: QuoteRecord): string {
-    return `<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid ${KERET};color:${HALVANY};font-size:12px;line-height:1.5;">${esc(JOGI_ROVID)}${
-        record.jogiNyilatkozatVerzio ? ` (Tájékoztató v${esc(record.jogiNyilatkozatVerzio)})` : ''
-    }</p>`;
+function jogiLevelHtml(): string {
+    return `<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid ${KERET};color:${HALVANY};font-size:12px;line-height:1.5;">${esc(JOGI_ROVID)}</p>`;
 }
 
-function jogiLevelText(record: QuoteRecord): string {
-    return `\n${JOGI_ROVID}${record.jogiNyilatkozatVerzio ? ` (Tájékoztató v${record.jogiNyilatkozatVerzio})` : ''}`;
+function jogiLevelText(): string {
+    return `\n${JOGI_ROVID}`;
 }
 
 const MARKA = '#2563eb';
@@ -158,14 +156,14 @@ function keret(cim: string, torzsHtml: string, elonezet = ''): string {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;width:100%;background:#ffffff;border:1px solid ${KERET};border-radius:14px;overflow:hidden;font-family:'Segoe UI',Arial,Helvetica,sans-serif;box-shadow:0 1px 3px rgba(15,23,42,0.06);">
           <tr>
             <td style="padding:0;font-size:0;line-height:0;">
-              <img src="${BANNER_URL}" width="600" alt="Nyári-Terv — épületgépészeti tervezés, Győr és környéke" style="display:block;width:100%;max-width:600px;height:auto;border:0;">
+              <img src="${BANNER_URL}" width="600" alt="Nyári-Terv — épületgépészeti tervezés" style="display:block;width:100%;max-width:600px;height:auto;border:0;">
             </td>
           </tr>
           <tr><td style="height:4px;line-height:4px;font-size:0;background:${MARKA};">&nbsp;</td></tr>
           <tr><td style="padding:28px 30px;color:${SZOVEG};font-size:15px;line-height:1.65;">${torzsHtml}</td></tr>
           <tr>
             <td style="padding:18px 30px;border-top:1px solid ${KERET};background:${HATTER};color:${HALVANY};font-size:12px;line-height:1.6;">
-              <strong style="color:${SZOVEG};">Nyári Terv</strong> — épületgépészeti tervezés, Győr és környéke<br>
+              <strong style="color:${SZOVEG};">Nyári Terv</strong> — épületgépészeti tervezés<br>
               <a href="mailto:info@nyariterv.hu" style="color:${MARKA};text-decoration:none;">info@nyariterv.hu</a> &nbsp;·&nbsp;
               <a href="tel:+36703187843" style="color:${MARKA};text-decoration:none;">+36 70 318 7843</a>
             </td>
@@ -222,7 +220,7 @@ function lakoepuletUgyfelTorzs(record: QuoteRecord, vanPdf: boolean): { html: st
       <strong>Következő lépés:</strong> tervezőnk a megadott elérhetőségen hamarosan felveszi Önnel
       a kapcsolatot az árajánlat véglegesítése és a részletek egyeztetése céljából.
     </p>
-    ${jogiLevelHtml(record)}
+    ${jogiLevelHtml()}
     <p style="margin:20px 0 0;color:${HALVANY};font-size:13px;">
       Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a
       <a href="tel:+36703187843" style="color:${MARKA};text-decoration:none;">+36 70 318 7843</a> számon.
@@ -238,11 +236,11 @@ Az Ön kérése röviden:
 ${osszefoglaloText(record)}
 
 Következő lépés: tervezőnk a megadott elérhetőségen hamarosan felveszi Önnel a kapcsolatot az árajánlat véglegesítése és a részletek egyeztetése céljából.
-${jogiLevelText(record)}
+${jogiLevelText()}
 
 Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a +36 70 318 7843 számon.
 
-Nyári Terv — épületgépészeti tervezés, Győr és környéke
+Nyári Terv — épületgépészeti tervezés
 info@nyariterv.hu · +36 70 318 7843`;
 
     return { html, text };
@@ -273,7 +271,7 @@ export function altalanosUgyfelLevel(record: QuoteRecord): EmailTorzs {
       <strong>Következő lépés:</strong> kollégánk a megadott elérhetőségen hamarosan felveszi Önnel a kapcsolatot,
       hogy egyeztessük a részleteket, és összeállítsuk az Ön projektjére szabott ajánlatot.
     </p>
-    ${jogiLevelHtml(record)}
+    ${jogiLevelHtml()}
     <p style="margin:20px 0 0;color:${HALVANY};font-size:13px;">
       Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a
       <a href="tel:+36703187843" style="color:${MARKA};text-decoration:none;">+36 70 318 7843</a> számon.
@@ -289,11 +287,11 @@ Az Ön kérése röviden:
 ${osszefoglaloText(record)}
 
 Következő lépés: kollégánk a megadott elérhetőségen hamarosan felveszi Önnel a kapcsolatot, hogy egyeztessük a részleteket, és összeállítsuk az Ön projektjére szabott ajánlatot.
-${jogiLevelText(record)}
+${jogiLevelText()}
 
 Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a +36 70 318 7843 számon.
 
-Nyári Terv — épületgépészeti tervezés, Győr és környéke
+Nyári Terv — épületgépészeti tervezés
 info@nyariterv.hu · +36 70 318 7843`;
 
     return {
