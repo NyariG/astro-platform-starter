@@ -27,7 +27,9 @@ const HATARIDOK = [
     'Előleg: A tervezési munka megrendelése 30%-os előleg kifizetéssel véglegesíthető.',
     'Átadás: Az elkészült tervek a végszámla kiegyenlítését követően, elektronikusan átadásra kerülnek.'
 ];
-const ENERGETIKAI = `Energetikai tanúsítvány használatbavételi engedélyhez — ${ezresPont(ENERGETIKAI_TANUSITVANY_DIJ)},- Ft (Az ár a tervezés megrendelése esetén érvényes a tervek leadásától számított maximum 2 évig.)`;
+const ENERGETIKAI_NEV = 'Energetikai tanúsítvány használatbavételi engedélyhez';
+const ENERGETIKAI_ARA = `${ezresPont(ENERGETIKAI_TANUSITVANY_DIJ)},- Ft`;
+const ENERGETIKAI_SZOVEG = '(Az ár a tervezés megrendelése esetén érvényes a tervek leadásától számított maximum 2 évig.)';
 
 function b64(s: string): Uint8Array {
     return new Uint8Array(Buffer.from(s, 'base64'));
@@ -219,7 +221,8 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     }
     a.y -= 4;
     sor(a, 'Egyéb kiegészítő tervezési opciók', { font: bold, size: 10, gap: 2 });
-    sor(a, ENERGETIKAI, { size: 9, color: HALVANY, gap: 8 });
+    tetelSor(a, ENERGETIKAI_NEV, ENERGETIKAI_ARA, { size: 9, color: HALVANY });
+    sor(a, ENERGETIKAI_SZOVEG, { size: 8.5, color: HALVANY, indent: 6, gap: 8 });
 
     a.page.drawLine({ start: { x: M, y: a.y + 2 }, end: { x: M + CW, y: a.y + 2 }, thickness: 1, color: KERET });
     a.y -= 10;
