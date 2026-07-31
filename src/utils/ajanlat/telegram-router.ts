@@ -1,8 +1,7 @@
 import { answerCallbackQuery, sendMessage, telegramKonfiguralva, type InlineButton } from './telegram';
 import { checkRateLimit, consumeLinkToken, isAdmin, linkAdmin, listAdmins, markUpdateProcessed, unlinkAdmin } from './telegram-store';
-import { INGATLAN_JELLEG, SZOLGALTATAS_OPCIOK, labelOf, labelsOf } from './options';
-import { forint } from './format';
-import type { QuoteRecord } from './store';
+import { ujAjanlatUzenet } from './telegram-uzenet';
+import { readEnv, type QuoteRecord } from './store';
 
 type Chat = { id: number };
 type From = { id: number; username?: string };
@@ -138,30 +137,17 @@ async function kezelCallback(cq: CallbackQuery): Promise<void> {
     }
 }
 
-function esc(value: string): string {
-    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
 export async function ertesitsUjAjanlat(record: QuoteRecord): Promise<void> {
     if (!telegramKonfiguralva()) return;
     const adminok = await listAdmins();
     if (adminok.length === 0) return;
 
-    const jelleg = labelOf(INGATLAN_JELLEG, record.ingatlanJelleg);
-    const szolg = labelsOf(SZOLGALTATAS_OPCIOK, record.szolgaltatasok).join(', ');
-    const vegosszeg = record.vanEgyediArazas || record.vegosszeg === null ? 'egyedi árajánlat' : forint(record.vegosszeg);
-    const szoveg = [
-        '📩 <b>Új árajánlatkérés</b>',
-        `👤 ${esc(record.nev)}`,
-        `✉️ ${esc(record.email)}${record.telefon ? ` · 📞 ${esc(record.telefon)}` : ''}`,
-        `🏠 ${esc(jelleg)}${record.varos ? ` · ${esc(record.varos)}` : ''}`,
-        `🧰 ${esc(szolg)}`,
-        `💰 ${esc(vegosszeg)}`
-    ].join('\n');
+    const baseUrl = readEnv('URL') ?? 'https://nyariterv.hu';
+    const { szoveg, keyboard } = ujAjanlatUzenet(record, { baseUrl });
 
     for (const admin of adminok) {
         try {
-            await sendMessage(admin.chatId, szoveg);
+            await sendMessage(admin.chatId, szoveg, keyboard ? { keyboard } : {});
         } catch (hiba) {
             console.error('[telegram] admin-értesítés sikertelen', { chatId: admin.chatId, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
         }

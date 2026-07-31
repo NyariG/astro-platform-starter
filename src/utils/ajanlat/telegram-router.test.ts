@@ -119,14 +119,19 @@ describe('callback query', () => {
 
 describe('ertesitsUjAjanlat — best-effort', () => {
     const rekord = {
+        id: 'e1f9b0a2-0000-4000-8000-000000000001',
         nev: 'Kab Bea',
         email: 'bea@example.com',
         telefon: '+36 30 111 2222',
         varos: 'Győr',
         ingatlanJelleg: 'lakoepulet',
-        szolgaltatasok: ['futes'],
-        vegosszeg: 1234000,
-        vanEgyediArazas: false
+        szolgaltatasok: ['futesi_terv'],
+        tetelek: [{ kod: 'futesi_terv', megnevezes: 'Fűtési terv', osszeg: 290000, status: 'PRICED' }],
+        kedvezmeny: null,
+        reszosszeg: 290000,
+        vegosszeg: 290000,
+        vanEgyediArazas: false,
+        createdAt: '2026-07-31T06:30:00.000Z'
     } as unknown as Parameters<typeof ertesitsUjAjanlat>[0];
 
     it('nincs konfiguráció → nem küld', async () => {
