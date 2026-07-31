@@ -222,8 +222,12 @@ export async function kezelAllapotBemenet(chatId: number, szoveg: string): Promi
     return false;
 }
 
-function idopontRovid(iso: string): string {
-    return new Intl.DateTimeFormat('hu-HU', { timeZone: 'Europe/Budapest', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+export function idopontRovid(iso: string): string {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    const reszek = new Intl.DateTimeFormat('hu-HU', { timeZone: 'Europe/Budapest', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
+    const ertek = (tipus: string): string => reszek.find((r) => r.type === tipus)?.value ?? '';
+    return `${ertek('year')}.${ertek('month')}.${ertek('day')}. ${ertek('hour')}:${ertek('minute')}`;
 }
 
 async function ajanlatokMenu(chatId: number, oldal: number): Promise<void> {
@@ -323,7 +327,7 @@ async function ugyfelekMenu(chatId: number, oldal: number): Promise<void> {
     const lapok = Math.ceil(ugyfelek.length / OLDAL_MERET);
     const p = Math.max(0, Math.min(oldal, lapok - 1));
     const szelet = ugyfelek.slice(p * OLDAL_MERET, p * OLDAL_MERET + OLDAL_MERET);
-    const gombok: InlineButton[][] = szelet.map((u) => [{ text: `${u.nev} · ${u.db} kérés · ${idopontRovid(u.utolso).slice(0, 10)}`, callback_data: `ugyfel:reszlet:${u.kulcs}` }]);
+    const gombok: InlineButton[][] = szelet.map((u) => [{ text: `${u.nev} · ${u.db} kérés · ${idopontRovid(u.utolso)}`, callback_data: `ugyfel:reszlet:${u.kulcs}` }]);
     const lapozo: InlineButton[] = [];
     if (p > 0) lapozo.push({ text: '⬅️ Előző', callback_data: `ugyfel:lista:${p - 1}` });
     if (p < lapok - 1) lapozo.push({ text: 'Következő ➡️', callback_data: `ugyfel:lista:${p + 1}` });
@@ -343,7 +347,7 @@ async function ugyfelReszletek(chatId: number, kulcs: string): Promise<void> {
     const email = sajat[0].email;
     const telefon = sajat.find((r) => r.telefon)?.telefon ?? '—';
     const fej = [`👤 <b>${nev}</b>`, `✉️ ${email} · 📞 ${telefon}`, `Kérések száma: <b>${sajat.length}</b>`, '', 'Ajánlatok:'];
-    const gombok: InlineButton[][] = sajat.map((r) => [{ text: `${statuszNev(r.status)} · ${idopontRovid(r.createdAt).slice(0, 10)} · ${osszegLeiras(r)}`, callback_data: `ajanlat:reszlet:${r.id}` }]);
+    const gombok: InlineButton[][] = sajat.map((r) => [{ text: `${statuszNev(r.status)} · ${idopontRovid(r.createdAt)} · ${osszegLeiras(r)}`, callback_data: `ajanlat:reszlet:${r.id}` }]);
     gombok.push([{ text: '⬅️ Ügyféllista', callback_data: 'ugyfel:lista:0' }, { text: '🏠 Főmenü', callback_data: 'menu:fo' }]);
     await sendMessage(chatId, fej.join('\n'), { keyboard: gombok });
 }
