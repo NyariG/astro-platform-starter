@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { kuponKeres, kuponNormalizal } from '../../utils/ajanlat/coupons';
+import { betoltKuponokBiztonsagos } from '../../utils/ajanlat/kupon-store';
 import { consumeIpQuota, dateKey, hashIp } from '../../utils/ajanlat/store';
 
 export const prerender = false;
@@ -32,7 +33,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         }
     }
 
-    const { kupon, allapot } = kuponKeres(nyersKod, dateKey());
+    const { kupon, allapot } = kuponKeres(nyersKod, dateKey(), await betoltKuponokBiztonsagos());
     if (allapot !== 'ervenyes' || !kupon) {
         return json({ ervenyes: false }, 200);
     }

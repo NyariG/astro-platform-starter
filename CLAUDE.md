@@ -53,6 +53,31 @@ Serverless → **webhook** (nem long-polling).
 ### Tesztek
 `telegram.test.ts` (TelegramService, mockolt fetch), `telegram-router.test.ts` (dispatch/auth/idempotencia/értesítő, mockolt telegram+store). A Blobs-függő `telegram-store.ts` — mint a többi Blobs-kód — nincs unit-tesztelve (Netlify-kontextus kell).
 
+## Telegram admin-vezérlő réteg — Iteráció 2 (kész, aktiválásra vár)
+
+Dinamikus, store-vezérelt admin-CMS a bot fölött. **Egyetlen igazságforrás**: a `beallitasok` Blobs-store (verziózott JSON, atomi írás).
+
+### Config-store és dinamikus generátor
+- `src/utils/ajanlat/config-store.ts` — verziózott Blobs (`beallitasok` store): `olvasKonfig` (seed, ha üres), `irKonfig` (atomi `onlyIfMatch` + history), `verzioLista`, `visszaallit`.
+- `src/utils/ajanlat/admin-config.ts` — `ArazasKonfig`/`SzovegKonfig`/`KapcsoloKonfig` + SEED-ek (a jelenlegi hardcode-olt értékek) + loader/saver (`betoltArak/Szovegek/Kapcsolok`, `mentsd*`).
+- **A generátor kizárólag a store-ból olvas**: `pricing.ts` `calculateQuote(input, szorzok, kupon, arak)`, `beepitett-pdf.ts` a `SzovegKonfig`-ból, `adatszerzodes.ts` `buildTemplateData(record, energetikaiDij)`. A `pricing-config.ts`/beépített szövegek már **csak SEED-forrás** — a viselkedés a seed miatt változatlan (bizonyítva: 406 teszt zöld).
+
+### Telegram menürendszer
+- `src/utils/ajanlat/telegram-menu.ts` — `/admin` főmenü inline gombokkal, `kezelMenuCallback` dispatch (`menu:/pdf:/debug:/arak:/kupon:/ajanlat:/ugyfel:`), conversation-state (`telegram-store.ts` `allapotMent/Olvas/Torol`) a szerkesztéshez, lapozás, megerősítés destruktív műveletnél.
+- **Árak**: fix díjak + hőtermelő felár + energetikai díj + kedvezmény % szerkeszthető (validációval); a sávos díjak nézete kész, szerkesztésük a következő finomítás.
+- **PDF-kapcsolók** (`config/kapcsolok`): admin/ügyfél külön + „mindkettő"; az [email.ts](src/utils/ajanlat/email.ts) `sikeresBekuldesLevelei(record, pdf, {pdfAdmin, pdfUgyfel})` szerint csatol; kikapcsolva a levél PDF nélkül, teljes tartalommal.
+- **Debug-kapcsoló**: perzisztens, láthatóan jelzett.
+
+### Kuponok, életciklus, ügyfelek, karbantartás
+- `kupon-store.ts` — dinamikus kupon-store (`config/kuponok`), a hardcode üres `KUPONOK` helyett; `kuponKeres` az [ajanlat.ts](src/pages/api/ajanlat.ts)/[kupon.ts](src/pages/api/kupon.ts)-ben a store-ból. Menü: lista (státusszal), létrehozás (`ELŐTAG SZÁZALÉK`), aktiválás/deaktiválás.
+- **Életciklus** ([store.ts](src/utils/ajanlat/store.ts)): `QuoteStatus` bővítve (`megtekintve/elfogadva/elutasitva/lejart/lezarva`); `listaKerelmek`, `getRequest`, `auditNaplo/auditHozzaad`. Menü: lista (lapozva) → részletek (`ujAjanlatUzenet`) → státuszváltás (lezáráshoz megerősítés) → napló. **Megtekintve**: az [ajanlat-pdf.ts](src/pages/api/ajanlat-pdf.ts) a PDF megnyitásakor `megtekintve` + admin-értesítés (`ertesitsMegtekintes`).
+- **Ügyfelek**: `emailNormalized` szerinti aggregáció (kérések száma, utolsó dátum), belépés az ügyfél ajánlataiba.
+- **Karbantartás** (`karbantartas.ts` + `netlify/functions/napi-karbantartas.mts` `@daily` + gated `GET /api/karbantartas?debug`): 90 napnál régebbi `sent/megtekintve` → `lejart` + audit; 3 napon belül lejáró aktív kuponok → Telegram-értesítés.
+
+### Aktiválás/teszt
+- A `/admin` a bot 4 `TELEGRAM_*` env-jével él (már beállítva). Első `/admin` betölti a store-t a seed-értékekkel.
+- Az ütemezett karbantartás a Netlify Scheduled Functions révén fut (a `napi-karbantartas.mts`); manuális teszt: `GET /api/karbantartas?debug`.
+
 ## Munkamódszer
 
 Fázis-kapus: FÁZIS 0 (read-only feltárás) → D1 (terv jóváhagyás) → D2 (implementáció jóváhagyás) → kód.

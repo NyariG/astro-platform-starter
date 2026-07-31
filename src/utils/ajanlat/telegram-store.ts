@@ -86,3 +86,30 @@ export async function checkRateLimit(chatId: number): Promise<boolean> {
     await store().setJSON(key, { count: count + 1 }, { onlyIfMatch: rekord.etag });
     return true;
 }
+
+const ALLAPOT_TTL_MS = 5 * 60 * 1000;
+
+export type BeszelgetesAllapot = { fajta: string; adat: Record<string, string>; lejar: string };
+
+function allapotKey(chatId: number): string {
+    return `state/${chatId}`;
+}
+
+export async function allapotMent(chatId: number, fajta: string, adat: Record<string, string> = {}): Promise<void> {
+    const rekord: BeszelgetesAllapot = { fajta, adat, lejar: new Date(Date.now() + ALLAPOT_TTL_MS).toISOString() };
+    await store().setJSON(allapotKey(chatId), rekord);
+}
+
+export async function allapotOlvas(chatId: number): Promise<BeszelgetesAllapot | null> {
+    const be = (await store().get(allapotKey(chatId), { type: 'json', consistency: 'strong' })) as BeszelgetesAllapot | null;
+    if (!be) return null;
+    if (be.lejar < new Date().toISOString()) {
+        await store().delete(allapotKey(chatId));
+        return null;
+    }
+    return be;
+}
+
+export async function allapotTorol(chatId: number): Promise<void> {
+    await store().delete(allapotKey(chatId));
+}

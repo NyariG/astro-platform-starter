@@ -1,6 +1,7 @@
 import { answerCallbackQuery, sendMessage, telegramKonfiguralva, type InlineButton } from './telegram';
 import { checkRateLimit, consumeLinkToken, isAdmin, linkAdmin, listAdmins, markUpdateProcessed, unlinkAdmin } from './telegram-store';
 import { ujAjanlatUzenet } from './telegram-uzenet';
+import { fomenu as adminFomenu, kezelAllapotBemenet, kezelMenuCallback } from './telegram-menu';
 import { readEnv, type QuoteRecord } from './store';
 
 type Chat = { id: number };
@@ -65,9 +66,14 @@ async function kezelParancs(message: Message): Promise<void> {
     const chatId = message.chat.id;
     if (!(await checkRateLimit(chatId))) return;
 
-    const [nyers, ...args] = message.text!.trim().split(/\s+/);
+    const teljesSzoveg = message.text!.trim();
+    const [nyers, ...args] = teljesSzoveg.split(/\s+/);
     const parancs = nyers.split('@')[0].toLowerCase();
     const linkelt = await isAdmin(chatId);
+
+    if (linkelt && !teljesSzoveg.startsWith('/')) {
+        if (await kezelAllapotBemenet(chatId, teljesSzoveg)) return;
+    }
 
     switch (parancs) {
         case '/start': {
@@ -106,6 +112,11 @@ async function kezelParancs(message: Message): Promise<void> {
             await sendMessage(chatId, `🟢 <b>Összekötve.</b>\nChat azonosító: <code>${chatId}</code>\nÖsszekötött adminok: <b>${darab}</b>`, { keyboard: fomenu() });
             return;
         }
+        case '/admin':
+        case '/menu':
+            if (!linkelt) return elutasit(chatId);
+            await adminFomenu(chatId);
+            return;
         default:
             if (TODO_PARANCSOK.has(parancs)) {
                 if (!linkelt) return elutasit(chatId);
@@ -123,6 +134,7 @@ async function kezelCallback(cq: CallbackQuery): Promise<void> {
         await elutasit(chatId);
         return;
     }
+    if (cq.data && (await kezelMenuCallback(chatId, cq.data))) return;
     switch (cq.data) {
         case 'help':
             await sendMessage(chatId, helpSzoveg(true), { keyboard: fomenu() });
@@ -150,6 +162,20 @@ export async function ertesitsUjAjanlat(record: QuoteRecord): Promise<void> {
             await sendMessage(admin.chatId, szoveg, keyboard ? { keyboard } : {});
         } catch (hiba) {
             console.error('[telegram] admin-értesítés sikertelen', { chatId: admin.chatId, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+        }
+    }
+}
+
+export async function ertesitsMegtekintes(record: QuoteRecord): Promise<void> {
+    if (!telegramKonfiguralva()) return;
+    const adminok = await listAdmins();
+    if (adminok.length === 0) return;
+    const szoveg = `👁️ <b>Az ügyfél megnyitotta az ajánlatot</b>\n${record.nev} · #${record.id.slice(0, 8)}`;
+    for (const admin of adminok) {
+        try {
+            await sendMessage(admin.chatId, szoveg);
+        } catch (hiba) {
+            console.error('[telegram] megtekintés-értesítés sikertelen', { chatId: admin.chatId, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
         }
     }
 }

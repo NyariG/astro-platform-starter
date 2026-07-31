@@ -1,8 +1,8 @@
 import { PDFDocument, PDFName, PDFString, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import type { QuoteRecord } from '../store';
-import { ENERGETIKAI_TANUSITVANY_DIJ } from '../pricing-config';
 import { buildTemplateData } from './adatszerzodes';
+import { betoltArak, betoltSzovegek, SEED_ARAK, SEED_SZOVEGEK, type ArazasKonfig, type SzovegKonfig } from '../admin-config';
 import { ezresPont } from './format';
 import { DEJAVU_SERIF_B64, DEJAVU_SERIF_BOLD_B64 } from './dejavu-serif-b64';
 import { BANNER_B64 } from './banner-b64';
@@ -20,16 +20,6 @@ const HALVANY = rgb(0.42, 0.47, 0.53);
 const MARKA = rgb(0.145, 0.388, 0.922);
 const KERET = rgb(0.85, 0.86, 0.88);
 
-const TARTALMAZZA = ['műszaki konzultációt', 'hőtechnikai számításokat (fűtéshez-hűtéshez)', 'alaprajzi tervet', 'függőleges csőtervet', 'kapcsolási rajzot', 'árazatlan költségvetést', 'műszaki leírást'];
-const NEM_TARTALMAZZA = ['vezérlés/automatika (gyengeáram) terveit', 'közmű csatlakozások terveit', 'víz-csatorna közművek engedélyeztetési eljárását', 'esővíz elvezetés terveit'];
-const HATARIDOK = [
-    'Tervezés várható időtartama: A megrendeléstől, illetve a végleges adatszolgáltatástól számított kb. 3 munkahét.',
-    'Előleg: A tervezési munka megrendelése 30%-os előleg kifizetéssel véglegesíthető.',
-    'Átadás: Az elkészült tervek a végszámla kiegyenlítését követően, elektronikusan átadásra kerülnek.'
-];
-const ENERGETIKAI_NEV = 'Energetikai tanúsítvány használatbavételi engedélyhez';
-const ENERGETIKAI_ARA = `${ezresPont(ENERGETIKAI_TANUSITVANY_DIJ)},- Ft`;
-const ENERGETIKAI_SZOVEG = '(Az ár a tervezés megrendelése esetén érvényes a tervek leadásától számított maximum 2 évig.)';
 
 function b64(s: string): Uint8Array {
     return new Uint8Array(Buffer.from(s, 'base64'));
@@ -174,7 +164,20 @@ function footerBlokk(oldal: PDFPage, sorok: FSor[], xAnchor: number, jobbra: boo
 }
 
 export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Array> {
-    const adat = buildTemplateData(record);
+    let szovegek: SzovegKonfig;
+    let arak: ArazasKonfig;
+    try {
+        szovegek = await betoltSzovegek();
+    } catch {
+        szovegek = SEED_SZOVEGEK;
+    }
+    try {
+        arak = await betoltArak();
+    } catch {
+        arak = SEED_ARAK;
+    }
+    const energetikaiAra = `${ezresPont(arak.energetikaiDij)},- Ft`;
+    const adat = buildTemplateData(record, arak.energetikaiDij);
     const doc = await PDFDocument.create();
     doc.registerFontkit(fontkit);
     const reg = await doc.embedFont(b64(DEJAVU_SERIF_B64), { subset: true });
@@ -221,8 +224,8 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     }
     a.y -= 4;
     sor(a, 'Egyéb kiegészítő tervezési opciók', { font: bold, size: 10, gap: 2 });
-    tetelSor(a, ENERGETIKAI_NEV, ENERGETIKAI_ARA, { size: 9, color: HALVANY });
-    sor(a, ENERGETIKAI_SZOVEG, { size: 8.5, color: HALVANY, indent: 6, gap: 8 });
+    tetelSor(a, szovegek.pdf.energetikaiNev, energetikaiAra, { size: 9, color: HALVANY });
+    sor(a, szovegek.pdf.energetikaiSzoveg, { size: 8.5, color: HALVANY, indent: 6, gap: 8 });
 
     a.page.drawLine({ start: { x: M, y: a.y + 2 }, end: { x: M + CW, y: a.y + 2 }, thickness: 1, color: KERET });
     a.y -= 10;
@@ -231,17 +234,17 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     a.y -= 8;
 
     sor(a, 'Az ajánlat tartalmazza (bővített opció esetén):', { font: bold, size: 10, gap: 2 });
-    for (const s of TARTALMAZZA) sor(a, `•  ${s}`, { size: 9, indent: 6 });
+    for (const s of szovegek.pdf.tartalmazza) sor(a, `•  ${s}`, { size: 9, indent: 6 });
     a.y -= 4;
     sor(a, 'Az ajánlat NEM tartalmazza:', { font: bold, size: 10, gap: 2 });
-    for (const s of NEM_TARTALMAZZA) sor(a, `•  ${s}`, { size: 9, indent: 6 });
+    for (const s of szovegek.pdf.nemTartalmazza) sor(a, `•  ${s}`, { size: 9, indent: 6 });
     a.y -= 6;
 
     cimsor(a, '3. Határidők és fizetési feltételek');
-    for (const s of HATARIDOK) sor(a, `•  ${s}`, { size: 9, indent: 6 });
+    for (const s of szovegek.pdf.hataridok) sor(a, `•  ${s}`, { size: 9, indent: 6 });
     a.y -= 6;
-    sor(a, 'Az árajánlat a kiállítástól számított 3 hónapig érvényes.', { size: 9, color: HALVANY });
-    sor(a, 'Az ajánlat alanyi adómentes.', { size: 9, color: HALVANY, gap: 14 });
+    sor(a, szovegek.pdf.ervenyesseg, { size: 9, color: HALVANY });
+    sor(a, szovegek.pdf.adomentes, { size: 9, color: HALVANY, gap: 14 });
 
     sor(a, `Abda, ${adat.AKTUALIS_DATUM}`, { gap: 10 });
     const alairasKep = await doc.embedPng(b64(ALAIRAS_BLOKK_B64));

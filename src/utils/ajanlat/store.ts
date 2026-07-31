@@ -5,7 +5,7 @@ const STORE_NAME = 'ajanlatok';
 const TIME_ZONE = 'Europe/Budapest';
 const CAS_RETRIES = 3;
 
-export type QuoteStatus = 'new' | 'sent' | 'failed' | 'blocked';
+export type QuoteStatus = 'new' | 'sent' | 'failed' | 'blocked' | 'megtekintve' | 'elfogadva' | 'elutasitva' | 'lejart' | 'lezarva';
 
 export type QuoteRecord = {
     id: string;
@@ -378,4 +378,32 @@ export async function patchRequest(id: string, patch: Partial<QuoteRecord>): Pro
     const current = (await store().get(key, { type: 'json', consistency: 'strong' })) as QuoteRecord | null;
     if (!current) return;
     await store().setJSON(key, { ...current, ...patch });
+}
+
+export async function getRequest(id: string): Promise<QuoteRecord | null> {
+    return (await store().get(requestKey(id), { type: 'json', consistency: 'strong' })) as QuoteRecord | null;
+}
+
+export async function listaKerelmek(limit = 50): Promise<QuoteRecord[]> {
+    const { blobs } = await store().list({ prefix: 'request/' });
+    const rekordok: QuoteRecord[] = [];
+    for (const b of blobs) {
+        const r = (await store().get(b.key, { type: 'json', consistency: 'strong' })) as QuoteRecord | null;
+        if (r) rekordok.push(r);
+    }
+    rekordok.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    return rekordok.slice(0, limit);
+}
+
+export type AuditBejegyzes = { mikor: string; ki: string; mit: string };
+
+export async function auditNaplo(id: string): Promise<AuditBejegyzes[]> {
+    const be = (await store().get(`audit/${id}`, { type: 'json', consistency: 'strong' })) as AuditBejegyzes[] | null;
+    return be ?? [];
+}
+
+export async function auditHozzaad(id: string, ki: string, mit: string): Promise<void> {
+    const lista = await auditNaplo(id);
+    lista.push({ mikor: new Date().toISOString(), ki, mit });
+    await store().setJSON(`audit/${id}`, lista);
 }

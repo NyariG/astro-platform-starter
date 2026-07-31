@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { getPdf } from '../../utils/ajanlat/store';
+import { auditHozzaad, getPdf, getRequest, patchRequest } from '../../utils/ajanlat/store';
+import { ertesitsMegtekintes } from '../../utils/ajanlat/telegram-router';
 import { PDF_FAJLNEV } from '../../utils/ajanlat/pdf/generate';
 
 export const prerender = false;
@@ -15,6 +16,17 @@ export const GET: APIRoute = async ({ url }) => {
     const pdf = await getPdf(id);
     if (!pdf) {
         return new Response('A dokumentum nem található.', { status: 404 });
+    }
+
+    try {
+        const rekord = await getRequest(id);
+        if (rekord && rekord.status === 'sent') {
+            await patchRequest(id, { status: 'megtekintve' });
+            await auditHozzaad(id, 'ügyfél', 'megtekintve (PDF megnyitva)');
+            await ertesitsMegtekintes(rekord);
+        }
+    } catch (hiba) {
+        console.error('[ajanlat-pdf] megtekintés-jelölés sikertelen', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
     }
 
     return new Response(pdf, {

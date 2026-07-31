@@ -54,11 +54,11 @@ type Osszesito = {
     VEGOSSZEG_ARA_ENERGETIKAVAL: string;
 };
 
-function osszesito(record: QuoteRecord): Osszesito {
+function osszesito(record: QuoteRecord, energetikaiDij: number): Osszesito {
     const kupon = record.kedvezmeny && record.kedvezmeny.tipus === 'kupon' ? record.kedvezmeny : null;
     const vegosszeg = record.vegosszeg === null ? null : Math.max(0, record.vegosszeg);
     const vegSzoveg = vegosszeg === null ? EGYEDI_SZOVEG : fixArSzoveg(vegosszeg);
-    const vegEnergetika = vegosszeg === null ? EGYEDI_SZOVEG : fixArSzoveg(vegosszeg + ENERGETIKAI_TANUSITVANY_DIJ);
+    const vegEnergetika = vegosszeg === null ? EGYEDI_SZOVEG : fixArSzoveg(vegosszeg + energetikaiDij);
     return {
         kuponVan: kupon !== null,
         KUPON_KEDVEZMENY: kupon ? `Kupon (${kuponNormalizal(kupon.kuponKod ?? '')} – ${kupon.szazalek}%)` : '',
@@ -94,7 +94,7 @@ function reszletekSorok(record: QuoteRecord): Sor[] {
     return sorok;
 }
 
-export function buildTemplateData(record: QuoteRecord): SablonAdat {
+export function buildTemplateData(record: QuoteRecord, energetikaiDij: number = ENERGETIKAI_TANUSITVANY_DIJ): SablonAdat {
     const muszaki = record.tetelek.find((t) => t.kod === MUSZAKI);
     const felar = record.tetelek.find((t) => t.kod === HOTERMELO_FELAR);
     const mennyezetKedvezmeny = record.kedvezmeny && record.kedvezmeny.tipus === 'mennyezet_hutes' ? record.kedvezmeny.osszeg : 0;
@@ -134,6 +134,6 @@ export function buildTemplateData(record: QuoteRecord): SablonAdat {
         kertKoncepcio,
         kertKiviteles,
         ontozo,
-        ...osszesito(record)
+        ...osszesito(record, energetikaiDij)
     };
 }

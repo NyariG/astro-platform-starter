@@ -1,13 +1,23 @@
 import {
     ARLISTA_VERZIO,
+    ENERGETIKAI_TANUSITVANY_DIJ,
     FUTESI_TERV,
     HOTERMELO_FELAR,
     KEDVEZMENY_SZAZALEK,
     SZOLGALTATASOK,
-    szolgaltatasKodSzerint,
+    type Szolgaltatas,
     type TeruletFajta
 } from './pricing-config';
 import { TERULETI_SZORZOK, alkalmazModosito, modositoLeiras, type AreaModifier } from './pricing-modifiers';
+import type { ArazasKonfig } from './admin-config';
+
+const ALAP_ARAK: ArazasKonfig = {
+    szolgaltatasok: SZOLGALTATASOK as unknown as Szolgaltatas[],
+    hotermeloFelar: HOTERMELO_FELAR,
+    kedvezmenySzazalek: KEDVEZMENY_SZAZALEK,
+    energetikaiDij: ENERGETIKAI_TANUSITVANY_DIJ,
+    arlistaVerzio: ARLISTA_VERZIO
+};
 
 export type TetelStatus = 'PRICED' | 'CUSTOM_QUOTE' | 'INCOMPLETE';
 
@@ -99,8 +109,8 @@ function savLabel(max: number): string {
  * árazás, csak még nincs mit számolni. A validáció gondoskodik arról, hogy
  * ilyen állapotban ne lehessen beküldeni.
  */
-function tetelt(kod: string, input: QuoteInput, szorzok: Record<TeruletFajta, AreaModifier>): Tetel | null {
-    const szolgaltatas = szolgaltatasKodSzerint(kod);
+function tetelt(kod: string, input: QuoteInput, szorzok: Record<TeruletFajta, AreaModifier>, arak: ArazasKonfig): Tetel | null {
+    const szolgaltatas = arak.szolgaltatasok.find((sz) => sz.kod === kod);
     if (!szolgaltatas) return null;
 
     const alap = {
@@ -183,18 +193,17 @@ function tetelt(kod: string, input: QuoteInput, szorzok: Record<TeruletFajta, Ar
  * A felár a fűtési terv felára, ezért osztozik annak sorsán: ha a fűtési terv
  * egyedi árazású, a felár is oda kerül (D1 döntés).
  */
-function hotermeloTetel(input: QuoteInput, futesiTerv: Tetel | undefined): Tetel | null {
+function hotermeloTetel(input: QuoteInput, futesiTerv: Tetel | undefined, arak: ArazasKonfig): Tetel | null {
     if (!futesiTerv) return null;
     const darab = input.hotermelok.length;
     if (darab === 0) return null;
 
-    // A hőtermelő felárra a területi szorzó NEM hat (nem területalapú tétel).
     const alap = {
         kod: 'hotermelo_felar',
         megnevezes: darab === 1 ? 'Hőtermelő felár' : `Hőtermelő felár (${darab} db)`,
         terulet: null,
         savLabel: null,
-        egysegar: HOTERMELO_FELAR,
+        egysegar: arak.hotermeloFelar,
         mennyiseg: darab,
         alapAr: null as number | null,
         teruletiSzorzo: null as string | null,
@@ -205,7 +214,7 @@ function hotermeloTetel(input: QuoteInput, futesiTerv: Tetel | undefined): Tetel
         return { ...alap, osszeg: null, status: futesiTerv.status };
     }
 
-    const ar = forintra(darab * HOTERMELO_FELAR);
+    const ar = forintra(darab * arak.hotermeloFelar);
     return { ...alap, alapAr: ar, osszeg: ar, status: 'PRICED' };
 }
 
@@ -218,19 +227,19 @@ function hotermeloTetel(input: QuoteInput, futesiTerv: Tetel | undefined): Tetel
 export function calculateQuote(
     input: QuoteInput,
     szorzok: Record<TeruletFajta, AreaModifier> = TERULETI_SZORZOK,
-    kupon: AlkalmazottKupon | null = null
+    kupon: AlkalmazottKupon | null = null,
+    arak: ArazasKonfig = ALAP_ARAK
 ): QuoteResult {
     const valasztott = new Set(input.szolgaltatasok);
     const tetelek: Tetel[] = [];
 
-    for (const szolgaltatas of SZOLGALTATASOK) {
+    for (const szolgaltatas of arak.szolgaltatasok) {
         if (!valasztott.has(szolgaltatas.kod)) continue;
-        const tetel = tetelt(szolgaltatas.kod, input, szorzok);
+        const tetel = tetelt(szolgaltatas.kod, input, szorzok, arak);
         if (tetel) tetelek.push(tetel);
 
-        // A hőtermelő felár közvetlenül a fűtési terv után jelenik meg.
         if (szolgaltatas.kod === FUTESI_TERV) {
-            const felar = hotermeloTetel(input, tetel ?? undefined);
+            const felar = hotermeloTetel(input, tetel ?? undefined, arak);
             if (felar) tetelek.push(felar);
         }
     }
@@ -255,10 +264,10 @@ export function calculateQuote(
         if (alap > 0) {
             jeloltek.push({
                 tipus: 'mennyezet_hutes',
-                cimke: `Kedvezmény (nem kér mennyezet hűtést): −${KEDVEZMENY_SZAZALEK}%`,
+                cimke: `Kedvezmény (nem kér mennyezet hűtést): −${arak.kedvezmenySzazalek}%`,
                 alap,
-                szazalek: KEDVEZMENY_SZAZALEK,
-                osszeg: forintra((alap * KEDVEZMENY_SZAZALEK) / 100),
+                szazalek: arak.kedvezmenySzazalek,
+                osszeg: forintra((alap * arak.kedvezmenySzazalek) / 100),
                 kuponKod: null
             });
         }
@@ -298,6 +307,6 @@ export function calculateQuote(
         vegosszeg: vanEgyediArazas ? null : reszosszeg - (kedvezmeny?.osszeg ?? 0),
         vanEgyediArazas,
         figyelmeztetesek,
-        arlistaVerzio: ARLISTA_VERZIO
+        arlistaVerzio: arak.arlistaVerzio
     };
 }

@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { fieldErrors, quoteInputSchema, teruletSzam } from '../../utils/ajanlat/schema';
 import { calculateQuote } from '../../utils/ajanlat/pricing';
+import { betoltArak, betoltKapcsolok, SEED_KAPCSOLOK, type ArazasKonfig } from '../../utils/ajanlat/admin-config';
 import { kuponKeres, kuponNormalizal, kuponTeljesKod } from '../../utils/ajanlat/coupons';
+import { betoltKuponokBiztonsagos } from '../../utils/ajanlat/kupon-store';
 import { JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
 import { ismeteltKiserletLevele, maszkoltEmail, sikeresBekuldesLevelei } from '../../utils/ajanlat/email';
 import { ertesitsUjAjanlat } from '../../utils/ajanlat/telegram-router';
@@ -92,7 +94,14 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         nincsHutes: input.mennyezetHutes === 'nem'
     };
 
-    const arazas = calculateQuote(arInput);
+    let arak: ArazasKonfig | undefined;
+    try {
+        arak = await betoltArak();
+    } catch (hiba) {
+        console.error('[ajanlat] ár-konfiguráció betöltése sikertelen, alapértékkel folytatom', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+    }
+
+    const arazas = calculateQuote(arInput, undefined, undefined, arak);
 
     const id = crypto.randomUUID();
     const alap = {
@@ -164,7 +173,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         let arazasVegleges = arazas;
         let bevaltottKupon: string | null = null;
         if (input.kuponKod.trim() !== '') {
-            const { kupon, allapot } = kuponKeres(input.kuponKod, datum);
+            const { kupon, allapot } = kuponKeres(input.kuponKod, datum, await betoltKuponokBiztonsagos());
             if (allapot === 'ervenyes' && kupon) {
                 const kod = kuponNormalizal(kuponTeljesKod(kupon));
                 const engedelyezett = await consumeCoupon(kod, emailNormalized, kupon.osszesBevaltasMax ?? null, kupon.emailenkentiMax ?? null);
@@ -174,7 +183,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
                         kod,
                         szazalek: kupon.szazalek,
                         hatokorSzolgaltatasok: kupon.hatokorSzolgaltatasok
-                    });
+                    }, arak);
                 }
             }
         }
@@ -192,7 +201,14 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         };
         await saveRequest(rekord);
 
-        const pdf = await keszitsArajanlatPdf(rekord);
+        let kapcsolok = SEED_KAPCSOLOK;
+        try {
+            kapcsolok = await betoltKapcsolok();
+        } catch (hiba) {
+            console.error('[ajanlat] kapcsoló-konfiguráció betöltése sikertelen, alapértékkel folytatom', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+        }
+
+        const pdf = kapcsolok.pdfAdmin || kapcsolok.pdfUgyfel ? await keszitsArajanlatPdf(rekord) : null;
         let pdfElerheto = false;
         if (pdf) {
             try {
@@ -205,7 +221,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
 
         let emailKiment = true;
         try {
-            await sikeresBekuldesLevelei(rekord, pdf);
+            await sikeresBekuldesLevelei(rekord, pdf, { pdfAdmin: kapcsolok.pdfAdmin, pdfUgyfel: kapcsolok.pdfUgyfel });
             await patchRequest(id, { status: 'sent', emailSentAt: new Date().toISOString() });
             console.info('[ajanlat] rögzítve és kiküldve', {
                 id,

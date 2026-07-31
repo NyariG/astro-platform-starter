@@ -95,20 +95,24 @@ function hibaSzoveg(hiba: unknown): string {
     return hiba instanceof Error ? hiba.message : String(hiba);
 }
 
-export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null): Promise<void> {
+export type PdfKapcsolo = { pdfAdmin: boolean; pdfUgyfel: boolean };
+
+export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null, kapcsolo: PdfKapcsolo = { pdfAdmin: true, pdfUgyfel: true }): Promise<void> {
     const env = kornyezet();
     const bcc = debugBcc();
-    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record, pdf !== null) : altalanosUgyfelLevel(record);
-    const csatolmanyok: Csatolmany[] = pdf ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : [];
+    const csatolmany = (aktiv: boolean): Csatolmany[] => (pdf && aktiv ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : []);
+    const adminCsat = csatolmany(kapcsolo.pdfAdmin);
+    const ugyfelCsat = csatolmany(kapcsolo.pdfUgyfel);
+    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record, ugyfelCsat.length > 0) : altalanosUgyfelLevel(record);
 
     try {
-        await kuldes(env, env.notify, uzemeltetoiAdatlap(record), csatolmanyok, bcc);
+        await kuldes(env, env.notify, uzemeltetoiAdatlap(record), adminCsat, bcc);
     } catch (hiba) {
         console.error('[ajanlat] admin értesítő sikertelen', { id: record.id, uzenet: hibaSzoveg(hiba) });
     }
 
     try {
-        await kuldes(env, [record.email], ugyfelLevel, csatolmanyok, bcc);
+        await kuldes(env, [record.email], ugyfelLevel, ugyfelCsat, bcc);
     } catch (hiba) {
         const uzenet = hibaSzoveg(hiba);
         console.error('[ajanlat] ügyfél levél sikertelen', { id: record.id, uzenet });
