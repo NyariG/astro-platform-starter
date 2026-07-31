@@ -299,57 +299,44 @@ async function ajanlatAudit(chatId: number, id: string): Promise<void> {
 
 const STATUSZ_VALTHATO: QuoteStatus[] = ['elfogadva', 'elutasitva', 'lejart', 'lezarva'];
 
-type UgyfelOsszesito = { nev: string; email: string; kulcs: string; db: number; utolso: string; statuszok: Set<string> };
-
-function ugyfeleketOsszesit(rekordok: QuoteRecord[]): UgyfelOsszesito[] {
-    const terkep = new Map<string, UgyfelOsszesito>();
-    for (const r of rekordok) {
-        const kulcs = r.emailNormalized || r.email;
-        const e = terkep.get(kulcs) ?? { nev: r.nev, email: r.email, kulcs, db: 0, utolso: r.createdAt, statuszok: new Set<string>() };
-        e.db += 1;
-        if (r.createdAt >= e.utolso) {
-            e.utolso = r.createdAt;
-            e.nev = r.nev;
-        }
-        e.statuszok.add(r.status);
-        terkep.set(kulcs, e);
-    }
-    return [...terkep.values()].sort((a, b) => (a.utolso < b.utolso ? 1 : -1));
+export function napFormat(nap: string): string {
+    return `${nap.replace(/-/g, '.')}.`;
 }
 
-async function ugyfelekMenu(chatId: number, oldal: number): Promise<void> {
+async function datumokMenu(chatId: number, oldal: number): Promise<void> {
     const mind = await listaKerelmek(200);
-    const ugyfelek = ugyfeleketOsszesit(mind);
-    if (ugyfelek.length === 0) {
-        await sendMessage(chatId, '👥 <b>Ügyfelek</b>\n\n(még nincs ügyfél)', { keyboard: [vissza()] });
+    if (mind.length === 0) {
+        await sendMessage(chatId, '👥 <b>Ügyfelek</b>\n\n(még nincs beküldés)', { keyboard: [vissza()] });
         return;
     }
-    const lapok = Math.ceil(ugyfelek.length / OLDAL_MERET);
+    const szamlalo = new Map<string, number>();
+    for (const r of mind) {
+        const nap = dateKey(new Date(r.createdAt));
+        szamlalo.set(nap, (szamlalo.get(nap) ?? 0) + 1);
+    }
+    const napok = [...szamlalo.entries()].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+    const lapok = Math.ceil(napok.length / OLDAL_MERET);
     const p = Math.max(0, Math.min(oldal, lapok - 1));
-    const szelet = ugyfelek.slice(p * OLDAL_MERET, p * OLDAL_MERET + OLDAL_MERET);
-    const gombok: InlineButton[][] = szelet.map((u) => [{ text: `${u.nev} · ${u.db} kérés · ${idopontRovid(u.utolso)}`, callback_data: `ugyfel:reszlet:${u.kulcs}` }]);
+    const szelet = napok.slice(p * OLDAL_MERET, p * OLDAL_MERET + OLDAL_MERET);
+    const gombok: InlineButton[][] = szelet.map(([nap, db]) => [{ text: `📅 ${napFormat(nap)} — ${db} db`, callback_data: `datum:${nap}` }]);
     const lapozo: InlineButton[] = [];
-    if (p > 0) lapozo.push({ text: '⬅️ Előző', callback_data: `ugyfel:lista:${p - 1}` });
-    if (p < lapok - 1) lapozo.push({ text: 'Következő ➡️', callback_data: `ugyfel:lista:${p + 1}` });
+    if (p > 0) lapozo.push({ text: '⬅️ Előző', callback_data: `datumlista:${p - 1}` });
+    if (p < lapok - 1) lapozo.push({ text: 'Következő ➡️', callback_data: `datumlista:${p + 1}` });
     if (lapozo.length > 0) gombok.push(lapozo);
     gombok.push(vissza());
-    await sendMessage(chatId, `👥 <b>Ügyfelek</b> — ${ugyfelek.length} db · ${p + 1}/${lapok}. oldal`, { keyboard: gombok });
+    await sendMessage(chatId, `👥 <b>Ügyfelek — dátumok</b>\n${napok.length} nap · ${mind.length} ajánlat · ${p + 1}/${lapok}. oldal`, { keyboard: gombok });
 }
 
-async function ugyfelReszletek(chatId: number, kulcs: string): Promise<void> {
+async function datumReszletek(chatId: number, nap: string): Promise<void> {
     const mind = await listaKerelmek(200);
-    const sajat = mind.filter((r) => (r.emailNormalized || r.email) === kulcs);
-    if (sajat.length === 0) {
-        await sendMessage(chatId, '⚠️ Az ügyfél nem található.', { keyboard: [[{ text: '⬅️ Lista', callback_data: 'ugyfel:lista:0' }]] });
+    const aznapi = mind.filter((r) => dateKey(new Date(r.createdAt)) === nap);
+    if (aznapi.length === 0) {
+        await sendMessage(chatId, '⚠️ Ehhez a naphoz nincs beküldés.', { keyboard: [[{ text: '⬅️ Dátumok', callback_data: 'datumlista:0' }]] });
         return;
     }
-    const nev = sajat[0].nev;
-    const email = sajat[0].email;
-    const telefon = sajat.find((r) => r.telefon)?.telefon ?? '—';
-    const fej = [`👤 <b>${nev}</b>`, `✉️ ${email} · 📞 ${telefon}`, `Kérések száma: <b>${sajat.length}</b>`, '', 'Ajánlatok:'];
-    const gombok: InlineButton[][] = sajat.map((r) => [{ text: `${statuszNev(r.status)} · ${idopontRovid(r.createdAt)} · ${osszegLeiras(r)}`, callback_data: `ajanlat:reszlet:${r.id}` }]);
-    gombok.push([{ text: '⬅️ Ügyféllista', callback_data: 'ugyfel:lista:0' }, { text: '🏠 Főmenü', callback_data: 'menu:fo' }]);
-    await sendMessage(chatId, fej.join('\n'), { keyboard: gombok });
+    const gombok: InlineButton[][] = aznapi.map((r) => [{ text: `${r.nev} · ${idopontRovid(r.createdAt)} · ${statuszNev(r.status)} · ${osszegLeiras(r)}`, callback_data: `ajanlat:reszlet:${r.id}` }]);
+    gombok.push([{ text: '⬅️ Dátumok', callback_data: 'datumlista:0' }, { text: '🏠 Főmenü', callback_data: 'menu:fo' }]);
+    await sendMessage(chatId, `📅 <b>${napFormat(nap)}</b> — ${aznapi.length} ajánlat`, { keyboard: gombok });
 }
 
 export async function kezelMenuCallback(chatId: number, data: string): Promise<boolean> {
@@ -401,15 +388,15 @@ export async function kezelMenuCallback(chatId: number, data: string): Promise<b
         return true;
     }
     if (data === 'menu:ugyfelek') {
-        await ugyfelekMenu(chatId, 0);
+        await datumokMenu(chatId, 0);
         return true;
     }
-    if (data.startsWith('ugyfel:lista:')) {
-        await ugyfelekMenu(chatId, Number.parseInt(data.slice('ugyfel:lista:'.length), 10) || 0);
+    if (data.startsWith('datumlista:')) {
+        await datumokMenu(chatId, Number.parseInt(data.slice('datumlista:'.length), 10) || 0);
         return true;
     }
-    if (data.startsWith('ugyfel:reszlet:')) {
-        await ugyfelReszletek(chatId, data.slice('ugyfel:reszlet:'.length));
+    if (data.startsWith('datum:')) {
+        await datumReszletek(chatId, data.slice('datum:'.length));
         return true;
     }
     if (data === 'menu:kuponok') {

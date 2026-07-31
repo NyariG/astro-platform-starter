@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { idopontRovid } from './telegram-menu';
+import { idopontRovid, napFormat } from './telegram-menu';
 
 describe('idopontRovid — dátum + óra:perc, Europe/Budapest', () => {
     it('tömör ÉÉÉÉ.HH.NN. ÓÓ:PP formátum, nyári idő (UTC+2)', () => {
@@ -16,5 +16,11 @@ describe('idopontRovid — dátum + óra:perc, Europe/Budapest', () => {
 
     it('érvénytelen időpont → —', () => {
         expect(idopontRovid('nem-datum')).toBe('—');
+    });
+});
+
+describe('napFormat — dátum-csoport fejléc', () => {
+    it('ÉÉÉÉ-HH-NN → ÉÉÉÉ.HH.NN.', () => {
+        expect(napFormat('2026-07-31')).toBe('2026.07.31.');
     });
 });
