@@ -109,7 +109,7 @@ export const LEPESEK = ['Ingatlan', 'Szolgáltatások', 'Áttekintés', 'Kapcsol
 // FormValues-mező, hanem a Kertépítés-csoport kliensoldali hibájának a helye.
 export const LEPES_MEZOK: readonly (readonly string[])[] = [
     ['ingatlanJelleg', 'tervCelja', 'szintek'],
-    ['szolgaltatasok', 'alapterulet', 'telekMeret', 'ontozendoTerulet', 'hotermelok', 'mennyezetHutes', 'kertepites'],
+    ['szolgaltatasok', 'alapterulet', 'telekMeret', 'ontozendoTerulet', 'hotermelok', 'mennyezetHutes', 'hutesOpciok', 'kertepites'],
     [],
     ['nev', 'email', 'telefon', 'varos', 'gdprConsent']
 ];
