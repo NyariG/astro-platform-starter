@@ -5,7 +5,7 @@ import { HOTERMELOK, HUTES_OPCIOK, INGATLAN_JELLEG, MENNYEZET_HUTES, PINCE, SZOL
 import { effektivUrlap, mezoLathato } from '../../../utils/ajanlat/lathatosag';
 import { SZOLGALTATAS_FA } from '../../../utils/ajanlat/szolgaltatas-fa';
 import { negyzetmeter } from '../../../utils/ajanlat/format';
-import { JOGI_CIM, JOGI_ROVID, JOGI_TELJES } from '../../../utils/ajanlat/legal-notice';
+import { GDPR_KONSZENT_SZOVEG, JOGI_CIM, JOGI_ROVID, JOGI_TELJES } from '../../../utils/ajanlat/legal-notice';
 
 function jogiPontLinkkel(pont: string): ReactNode {
     const kulcs = 'Adatkezelési tájékoztató';
@@ -198,7 +198,7 @@ export function StepKapcsolat({ values, errors, set, onBlur }: StepProps) {
                         className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 text-primary focus:ring-primary"
                     />
                     <span className="text-sm text-slate-700">
-                        Hozzájárulok, hogy a Nyári Terv a megadott adataimat az árajánlat elkészítése és a kapcsolatfelvétel céljából kezelje. A részletekért lásd az{' '}
+                        {GDPR_KONSZENT_SZOVEG.replace('Adatkezelési tájékoztatót.', '')}
                         <a href="/adatkezelesi" target="_blank" rel="noopener" className="font-medium text-primary underline hover:text-primary/80" onClick={(e) => e.stopPropagation()}>
                             Adatkezelési tájékoztatót
                         </a>

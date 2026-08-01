@@ -46,6 +46,9 @@ export type QuoteRecord = {
     arlistaVerzio: string;
 
     gdprConsent: boolean;
+    gdprConsentSzoveg?: string;
+    gdprConsentVerzio?: string;
+    gdprConsentAt?: string;
 
     status: QuoteStatus;
     attemptNumber: number;

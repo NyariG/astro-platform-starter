@@ -3,6 +3,7 @@ import type { FormValues } from './FormSteps';
 import type { AlkalmazottKupon } from './CouponField';
 import type { QuoteResult } from '../../../utils/ajanlat/pricing';
 import { forint } from '../../../utils/ajanlat/format';
+import { ENERGETIKAI_TANUSITVANY_DIJ } from '../../../utils/ajanlat/pricing-config';
 
 export function debugEngedelyezve(): boolean {
     if (import.meta.env.DEV) return true;
@@ -131,6 +132,8 @@ export function DebugPanel({ values, arazas, kupon }: { values: FormValues; araz
                     <Sor cimke="részösszeg" ertek={forint(arazas.reszosszeg)} />
                     <Sor cimke="egyedi árazás?" ertek={String(arazas.vanEgyediArazas)} />
                     <Sor cimke="VÉGÖSSZEG" ertek={arazas.vegosszeg !== null ? forint(arazas.vegosszeg) : 'egyedi'} kiemelt />
+                    <Sor cimke="energetikai tanúsítvány díja" ertek={forint(ENERGETIKAI_TANUSITVANY_DIJ)} />
+                    <Sor cimke="VÉGÖSSZEG energetikával" ertek={arazas.vegosszeg !== null ? forint(arazas.vegosszeg + ENERGETIKAI_TANUSITVANY_DIJ) : 'egyedi'} kiemelt />
                     <Sor cimke="árlista verzió" ertek={arazas.arlistaVerzio} />
                 </div>
             )}

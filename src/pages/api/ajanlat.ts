@@ -4,7 +4,7 @@ import { calculateQuote } from '../../utils/ajanlat/pricing';
 import { betoltArak, betoltKapcsolok, SEED_KAPCSOLOK, type ArazasKonfig } from '../../utils/ajanlat/admin-config';
 import { kuponKeres, kuponNormalizal, kuponTeljesKod } from '../../utils/ajanlat/coupons';
 import { betoltKuponokBiztonsagos } from '../../utils/ajanlat/kupon-store';
-import { JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
+import { GDPR_KONSZENT_SZOVEG, GDPR_KONSZENT_VERZIO, JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
 import { ismeteltKiserletLevele, maszkoltEmail, sikeresBekuldesLevelei } from '../../utils/ajanlat/email';
 import { ertesitsUjAjanlat } from '../../utils/ajanlat/telegram-router';
 import { keszitsArajanlatPdf } from '../../utils/ajanlat/pdf/generate';
@@ -104,6 +104,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
     const arazas = calculateQuote(arInput, undefined, undefined, arak);
 
     const id = crypto.randomUUID();
+    const rogzitesIdo = new Date().toISOString();
     const alap = {
         id,
         nev: input.nev,
@@ -132,10 +133,13 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         vanEgyediArazas: arazas.vanEgyediArazas,
         arlistaVerzio: arazas.arlistaVerzio,
         gdprConsent: input.gdprConsent,
+        gdprConsentSzoveg: GDPR_KONSZENT_SZOVEG,
+        gdprConsentVerzio: GDPR_KONSZENT_VERZIO,
+        gdprConsentAt: rogzitesIdo,
         ip,
         userAgent: request.headers.get('user-agent') ?? '',
         sourceUrl: request.headers.get('referer') ?? url.href,
-        createdAt: new Date().toISOString(),
+        createdAt: rogzitesIdo,
         emailSentAt: null,
         emailError: null
     } satisfies Omit<QuoteRecord, 'status' | 'attemptNumber'>;

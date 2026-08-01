@@ -19,3 +19,8 @@ export const JOGI_TELJES: readonly string[] = [
 ];
 
 export const JOGI_CIM = 'Tájékoztatás az ajánlatkérés jellegéről';
+
+export const GDPR_KONSZENT_VERZIO = '1.0';
+
+export const GDPR_KONSZENT_SZOVEG =
+    'Hozzájárulok, hogy a Nyári Terv a megadott adataimat az árajánlat elkészítése és a kapcsolatfelvétel céljából kezelje. A részletekért lásd az Adatkezelési tájékoztatót.';

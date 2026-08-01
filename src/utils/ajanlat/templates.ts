@@ -310,7 +310,7 @@ function kapcsolatBlokkHtml(record: QuoteRecord): string {
       </td></tr>
     </table>
     <p style="margin:0 0 16px;">
-      <a href="mailto:${esc(record.email)}" style="display:inline-block;background:${MARKA};color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:8px;font-weight:700;font-size:14px;line-height:1;">Válasz az ügyfélnek</a>
+      <a href="mailto:${esc(record.email)}" style="display:inline-block;background:${MARKA};color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:8px;font-weight:700;font-size:14px;line-height:1;">Válasz</a>
     </p>`;
 }
 
