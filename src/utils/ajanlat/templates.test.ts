@@ -101,9 +101,9 @@ describe('ipari / egyéb ügyfél-e-mail — nincs árajánlat', () => {
         expect(level.html).not.toContain('Végösszeg');
     });
 
-    it('tartalmazza a kapcsolatfelvételi ígéretet', () => {
+    it('tartalmazza az egyedi árazás ígéretét és a megerősítést', () => {
         const level = altalanosUgyfelLevel(rekord({ ingatlanJelleg: 'egyeb' }));
-        expect(level.text).toContain('felveszi Önnel a kapcsolatot');
+        expect(level.text).toContain('egyedi árajánlattal');
         expect(level.text).toContain('megkaptuk');
     });
 

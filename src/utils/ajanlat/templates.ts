@@ -144,7 +144,7 @@ function adatTablaText(record: QuoteRecord): string {
         .join('\n');
 }
 
-function keret(cim: string, torzsHtml: string, elonezet = ''): string {
+function keret(cim: string, torzsHtml: string, elonezet = '', alairoNev = ''): string {
     return `<!doctype html>
 <html lang="hu">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${esc(cim)}</title></head>
@@ -163,7 +163,7 @@ function keret(cim: string, torzsHtml: string, elonezet = ''): string {
           <tr><td style="padding:28px 30px;color:${SZOVEG};font-size:15px;line-height:1.65;">${torzsHtml}</td></tr>
           <tr>
             <td style="padding:18px 30px;border-top:1px solid ${KERET};background:${HATTER};color:${HALVANY};font-size:12px;line-height:1.6;">
-              <strong style="color:${SZOVEG};">Nyári Terv</strong> — épületgépészeti tervezés<br>
+              ${alairoNev ? `<strong style="color:${SZOVEG};">${esc(alairoNev)}</strong><br>` : ''}<strong style="color:${SZOVEG};">Nyári Terv</strong> — épületgépészeti tervezés<br>
               <a href="mailto:info@nyariterv.hu" style="color:${MARKA};text-decoration:none;">info@nyariterv.hu</a> &nbsp;·&nbsp;
               <a href="tel:+36703187843" style="color:${MARKA};text-decoration:none;">+36 70 318 7843</a>
             </td>
@@ -206,7 +206,7 @@ function lakoepuletUgyfelTorzs(record: QuoteRecord, vanPdf: boolean): { html: st
     const html = `
     <p style="margin:0 0 16px;font-size:16px;">Kedves ${esc(record.nev)}!</p>
     <p style="margin:0 0 18px;">
-      Köszönjük, hogy a Nyári Tervet választotta. Árajánlatkérését megkaptuk, és a megadott
+      Köszönjük, hogy ajánlatkérésével megtisztelte a Nyári Tervet. Árajánlatkérését megkaptuk, és a megadott
       paraméterek alapján összeállítottuk az Ön személyre szabott árajánlatát.
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background:#eff6ff;border:1px solid #dbeafe;border-radius:10px;margin:0 0 22px;">
@@ -216,10 +216,6 @@ function lakoepuletUgyfelTorzs(record: QuoteRecord, vanPdf: boolean): { html: st
     </table>
     <p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Az Ön kérése röviden</p>
     ${osszefoglaloHtml(record)}
-    <p style="margin:22px 0 18px;">
-      <strong>Következő lépés:</strong> tervezőnk a megadott elérhetőségen hamarosan felveszi Önnel
-      a kapcsolatot az árajánlat véglegesítése és a részletek egyeztetése céljából.
-    </p>
     ${jogiLevelHtml()}
     <p style="margin:20px 0 0;color:${HALVANY};font-size:13px;">
       Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a
@@ -228,18 +224,17 @@ function lakoepuletUgyfelTorzs(record: QuoteRecord, vanPdf: boolean): { html: st
 
     const text = `Kedves ${record.nev}!
 
-Köszönjük, hogy a Nyári Tervet választotta. Árajánlatkérését megkaptuk, és a megadott paraméterek alapján összeállítottuk az Ön személyre szabott árajánlatát.
+Köszönjük, hogy ajánlatkérésével megtisztelte a Nyári Tervet. Árajánlatkérését megkaptuk, és a megadott paraméterek alapján összeállítottuk az Ön személyre szabott árajánlatát.
 
 ${pdfBlokkText}
 
 Az Ön kérése röviden:
 ${osszefoglaloText(record)}
-
-Következő lépés: tervezőnk a megadott elérhetőségen hamarosan felveszi Önnel a kapcsolatot az árajánlat véglegesítése és a részletek egyeztetése céljából.
 ${jogiLevelText()}
 
 Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a +36 70 318 7843 számon.
 
+Nyári Gergő Mátyás
 Nyári Terv — épületgépészeti tervezés
 info@nyariterv.hu · +36 70 318 7843`;
 
@@ -250,7 +245,7 @@ export function lakoepuletUgyfelLevel(record: QuoteRecord, vanPdf = true): Email
     const { html, text } = lakoepuletUgyfelTorzs(record, vanPdf);
     return {
         subject: 'Az Ön árajánlata — Nyári Terv',
-        html: keret('Az Ön árajánlata', html, `${record.nev}, elkészült az árajánlata${vanPdf ? ' — a részletek a mellékelt PDF-ben' : ''}.`),
+        html: keret('Az Ön árajánlata', html, `${record.nev}, elkészült az árajánlata${vanPdf ? ' — a részletek a mellékelt PDF-ben' : ''}.`, 'Nyári Gergő Mátyás'),
         text
     };
 }
@@ -259,7 +254,7 @@ export function altalanosUgyfelLevel(record: QuoteRecord): EmailTorzs {
     const html = `
     <p style="margin:0 0 16px;font-size:16px;">Kedves ${esc(record.nev)}!</p>
     <p style="margin:0 0 16px;">
-      Köszönjük, hogy a Nyári Tervet választotta, és bizalmával megtisztelt bennünket. Megkeresését megkaptuk.
+      Köszönjük, hogy ajánlatkérésével megtisztelte a Nyári Tervet. Megkeresését megkaptuk.
     </p>
     <p style="margin:0 0 18px;">
       Az ipari és egyedi jellegű projektek minden esetben személyre szabott tervezői megközelítést igényelnek,
@@ -267,10 +262,6 @@ export function altalanosUgyfelLevel(record: QuoteRecord): EmailTorzs {
     </p>
     <p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Az Ön kérése röviden</p>
     ${osszefoglaloHtml(record)}
-    <p style="margin:22px 0 18px;">
-      <strong>Következő lépés:</strong> kollégánk a megadott elérhetőségen hamarosan felveszi Önnel a kapcsolatot,
-      hogy egyeztessük a részleteket, és összeállítsuk az Ön projektjére szabott ajánlatot.
-    </p>
     ${jogiLevelHtml()}
     <p style="margin:20px 0 0;color:${HALVANY};font-size:13px;">
       Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a
@@ -279,14 +270,12 @@ export function altalanosUgyfelLevel(record: QuoteRecord): EmailTorzs {
 
     const text = `Kedves ${record.nev}!
 
-Köszönjük, hogy a Nyári Tervet választotta, és bizalmával megtisztelt bennünket. Megkeresését megkaptuk.
+Köszönjük, hogy ajánlatkérésével megtisztelte a Nyári Tervet. Megkeresését megkaptuk.
 
 Az ipari és egyedi jellegű projektek minden esetben személyre szabott tervezői megközelítést igényelnek, ezért ezekre az igények alapos felmérését követően, egyedi árajánlattal válaszolunk.
 
 Az Ön kérése röviden:
 ${osszefoglaloText(record)}
-
-Következő lépés: kollégánk a megadott elérhetőségen hamarosan felveszi Önnel a kapcsolatot, hogy egyeztessük a részleteket, és összeállítsuk az Ön projektjére szabott ajánlatot.
 ${jogiLevelText()}
 
 Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a +36 70 318 7843 számon.

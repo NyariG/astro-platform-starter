@@ -178,6 +178,7 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
     }
     const energetikaiAra = `${ezresPont(arak.energetikaiDij)},- Ft`;
     const adat = buildTemplateData(record, arak.energetikaiDij);
+    const energetikaMutat = record.szolgaltatasok.includes('futesi_terv') || record.szolgaltatasok.includes('klimaterv');
     const doc = await PDFDocument.create();
     doc.registerFontkit(fontkit);
     const reg = await doc.embedFont(b64(DEJAVU_SERIF_B64), { subset: true });
@@ -222,15 +223,17 @@ export async function keszitsBeepitettPdf(record: QuoteRecord): Promise<Uint8Arr
         a.y -= 4;
         tetelSor(a, adat.KUPON_KEDVEZMENY, adat.KUPON_KEDVEZMENY_ARA, { color: HALVANY });
     }
-    a.y -= 4;
-    sor(a, 'Egyéb kiegészítő tervezési opciók', { font: bold, size: 10, gap: 2 });
-    tetelSor(a, szovegek.pdf.energetikaiNev, energetikaiAra, { size: 9, color: HALVANY });
-    sor(a, szovegek.pdf.energetikaiSzoveg, { size: 8.5, color: HALVANY, indent: 6, gap: 8 });
+    if (energetikaMutat) {
+        a.y -= 4;
+        sor(a, 'Egyéb kiegészítő tervezési opciók', { font: bold, size: 10, gap: 2 });
+        tetelSor(a, szovegek.pdf.energetikaiNev, energetikaiAra, { size: 9, color: HALVANY });
+        sor(a, szovegek.pdf.energetikaiSzoveg, { size: 8.5, color: HALVANY, indent: 6, gap: 8 });
+    }
 
     a.page.drawLine({ start: { x: M, y: a.y + 2 }, end: { x: M + CW, y: a.y + 2 }, thickness: 1, color: KERET });
     a.y -= 10;
     tetelSor(a, 'Végösszeg', adat.VEGOSSZEG_ARA_ENERGETIKA_NELKUL, { font: bold, size: 12 });
-    tetelSor(a, 'Végösszeg (Energetikai tanúsítvánnyal kalkulált összeg)', adat.VEGOSSZEG_ARA_ENERGETIKAVAL, { font: bold, size: 12 });
+    if (energetikaMutat) tetelSor(a, 'Végösszeg (Energetikai tanúsítvánnyal kalkulált összeg)', adat.VEGOSSZEG_ARA_ENERGETIKAVAL, { font: bold, size: 12 });
     a.y -= 8;
 
     sor(a, 'Az ajánlat tartalmazza (bővített opció esetén):', { font: bold, size: 10, gap: 2 });

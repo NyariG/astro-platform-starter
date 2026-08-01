@@ -256,7 +256,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
                 branch: rekord.ingatlanJelleg === 'lakoepulet' ? 'lakoepulet' : 'ipari_egyeb',
                 emailSent: emailKiment,
 
-                pdfElerheto: pdfElerheto && emailKiment,
+                pdfElerheto: pdfElerheto && emailKiment && !rekord.vanEgyediArazas,
 
                 vegosszeg: arazasVegleges.vegosszeg,
                 vanEgyediArazas: arazasVegleges.vanEgyediArazas,

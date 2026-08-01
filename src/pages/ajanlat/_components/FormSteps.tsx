@@ -370,7 +370,7 @@ export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
                     {' *'}
                 </span>
             </legend>
-            <p className="mb-2 text-sm text-slate-500">Több lehetőség is választható. Az árajánlatot az Áttekintés lépésben mutatjuk meg.</p>
+            <p className="mb-2 text-sm text-slate-500">Több lehetőség is választható. Kerttel kapcsolatos tervek lentebb, a lenyíló menüben, a Kertépítés témában.</p>
 
             <div className="flex flex-col gap-3">
                 {SZOLGALTATAS_FA.map((cs) => {

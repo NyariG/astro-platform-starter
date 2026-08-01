@@ -99,10 +99,11 @@ export type PdfKapcsolo = { pdfAdmin: boolean; pdfUgyfel: boolean };
 export async function sikeresBekuldesLevelei(record: QuoteRecord, pdf: Uint8Array | null = null, kapcsolo: PdfKapcsolo = { pdfAdmin: true, pdfUgyfel: true }): Promise<void> {
     const env = kornyezet();
     const bcc = debugBcc();
+    const egyedi = record.vanEgyediArazas || record.ingatlanJelleg !== 'lakoepulet';
     const csatolmany = (aktiv: boolean): Csatolmany[] => (pdf && aktiv ? [{ filename: PDF_FAJLNEV, bytes: pdf, mimetype: 'application/pdf' }] : []);
     const adminCsat = csatolmany(kapcsolo.pdfAdmin);
-    const ugyfelCsat = csatolmany(kapcsolo.pdfUgyfel);
-    const ugyfelLevel = record.ingatlanJelleg === 'lakoepulet' ? lakoepuletUgyfelLevel(record, ugyfelCsat.length > 0) : altalanosUgyfelLevel(record);
+    const ugyfelCsat = csatolmany(kapcsolo.pdfUgyfel && !egyedi);
+    const ugyfelLevel = egyedi ? altalanosUgyfelLevel(record) : lakoepuletUgyfelLevel(record, ugyfelCsat.length > 0);
 
     try {
         await kuldes(env, env.notify, uzemeltetoiAdatlap(record), adminCsat, bcc);
