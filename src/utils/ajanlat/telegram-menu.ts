@@ -1,6 +1,6 @@
 import { sendMessage, type InlineButton } from './telegram';
-import { betoltArak, betoltKapcsolok, mentsdArak, mentsdKapcsolok, type ArazasKonfig, type KapcsoloKonfig } from './admin-config';
-import type { Szolgaltatas } from './pricing-config';
+import { betoltArak, betoltKapcsolok, betoltSzovegek, mentsdArak, mentsdKapcsolok, mentsdSzovegek, type ArazasKonfig, type KapcsoloKonfig, type SzovegKonfig } from './admin-config';
+import { savKonfigHibak, type Szolgaltatas } from './pricing-config';
 import { allapotMent, allapotOlvas, allapotTorol } from './telegram-store';
 import { betoltKuponok, mentsdKuponok } from './kupon-store';
 import { kuponHiba, kuponNormalizal, kuponTeljesKod, type Coupon } from './coupons';
@@ -31,13 +31,90 @@ function osszegLeiras(r: QuoteRecord): string {
     return r.vanEgyediArazas || r.vegosszeg === null ? 'egyedi' : forint(r.vegosszeg);
 }
 
-const SZERK_MEZOK: Record<string, string> = {
-    muszaki_leiras: 'Műszaki leírás díja',
-    klimaterv: 'Klímaterv díja',
+type ArCel = 'fix' | 'sav' | 'egyseg' | 'min' | 'felar' | 'energetika' | 'kedvezmeny';
+
+const ARCEL_CIMKE: Record<string, string> = {
+    fix: 'Díj',
+    sav: 'Sáv díja',
+    egyseg: 'Egységár (Ft/m²)',
+    min: 'Minimumdíj',
     felar: 'Hőtermelő felár',
     energetika: 'Energetikai tanúsítvány díja',
     kedvezmeny: 'Mennyezet-kedvezmény (%)'
 };
+
+type SzovegMezo = {
+    kulcs: string;
+    cimke: string;
+    lista: boolean;
+    get: (sz: SzovegKonfig) => string | string[];
+    set: (sz: SzovegKonfig, ertek: string | string[]) => void;
+};
+
+const SZOVEG_MEZOK: SzovegMezo[] = [
+    { kulcs: 'muszakiNev', cimke: 'Műszaki leírás neve', lista: false, get: (s) => s.muszakiNev, set: (s, v) => { s.muszakiNev = v as string; } },
+    { kulcs: 'reszletezo', cimke: 'Műszaki leírás részletező', lista: false, get: (s) => s.reszletezo, set: (s, v) => { s.reszletezo = v as string; } },
+    { kulcs: 'kertFejlec', cimke: 'Kertépítés fejléc', lista: false, get: (s) => s.kertFejlec, set: (s, v) => { s.kertFejlec = v as string; } },
+    { kulcs: 'energetikaiNev', cimke: 'Energetikai tétel neve', lista: false, get: (s) => s.pdf.energetikaiNev, set: (s, v) => { s.pdf.energetikaiNev = v as string; } },
+    { kulcs: 'energetikaiSzoveg', cimke: 'Energetikai megjegyzés', lista: false, get: (s) => s.pdf.energetikaiSzoveg, set: (s, v) => { s.pdf.energetikaiSzoveg = v as string; } },
+    { kulcs: 'tartalmazza', cimke: 'Tartalmazza (lista)', lista: true, get: (s) => s.pdf.tartalmazza, set: (s, v) => { s.pdf.tartalmazza = v as string[]; } },
+    { kulcs: 'nemTartalmazza', cimke: 'Nem tartalmazza (lista)', lista: true, get: (s) => s.pdf.nemTartalmazza, set: (s, v) => { s.pdf.nemTartalmazza = v as string[]; } },
+    { kulcs: 'hataridok', cimke: 'Határidők (lista)', lista: true, get: (s) => s.pdf.hataridok, set: (s, v) => { s.pdf.hataridok = v as string[]; } },
+    { kulcs: 'ervenyesseg', cimke: 'Érvényesség', lista: false, get: (s) => s.pdf.ervenyesseg, set: (s, v) => { s.pdf.ervenyesseg = v as string; } },
+    { kulcs: 'adomentes', cimke: 'Adómentesség', lista: false, get: (s) => s.pdf.adomentes, set: (s, v) => { s.pdf.adomentes = v as string; } }
+];
+
+function szovegMezo(kulcs: string): SzovegMezo | undefined {
+    return SZOVEG_MEZOK.find((m) => m.kulcs === kulcs);
+}
+
+function escHtml(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function rovidit(s: string, max = 24): string {
+    return s.length <= max ? s : `${s.slice(0, max - 1)}…`;
+}
+
+export function listaBont(szoveg: string): string[] {
+    return szoveg
+        .split('\n')
+        .map((s) => s.trim().replace(/^[•\-*]\s+/, '').trim())
+        .filter((s) => s !== '');
+}
+
+export function alkalmazArCel(a: ArazasKonfig, cel: ArCel, kod: string, index: number, ertek: number): ArazasKonfig {
+    const uj: ArazasKonfig = JSON.parse(JSON.stringify(a));
+    if (cel === 'felar') uj.hotermeloFelar = ertek;
+    else if (cel === 'energetika') uj.energetikaiDij = ertek;
+    else if (cel === 'kedvezmeny') uj.kedvezmenySzazalek = ertek;
+    else {
+        const sz = uj.szolgaltatasok.find((s) => s.kod === kod);
+        if (!sz) return uj;
+        const ar = sz.arazas;
+        if (cel === 'fix' && ar.tipus === 'fix') ar.ar = ertek;
+        else if (cel === 'sav' && ar.tipus === 'sav') {
+            const sav = ar.savok[index];
+            if (sav) sav.ar = ertek;
+        } else if (cel === 'egyseg' && ar.tipus === 'egysegar') ar.egysegar = ertek;
+        else if (cel === 'min' && ar.tipus === 'egysegar') ar.minimumDij = ertek;
+    }
+    return uj;
+}
+
+export function alkalmazTetelNev(a: ArazasKonfig, kod: string, nev: string): ArazasKonfig {
+    const uj: ArazasKonfig = JSON.parse(JSON.stringify(a));
+    const sz = uj.szolgaltatasok.find((s) => s.kod === kod);
+    if (sz) sz.megnevezes = nev;
+    return uj;
+}
+
+export function alkalmazSzovegMezo(sz: SzovegKonfig, kulcs: string, ertek: string | string[]): SzovegKonfig {
+    const uj: SzovegKonfig = JSON.parse(JSON.stringify(sz));
+    const mezo = szovegMezo(kulcs);
+    if (mezo) mezo.set(uj, ertek);
+    return uj;
+}
 
 const FOMENU: InlineButton[][] = [
     [
@@ -95,63 +172,179 @@ async function debugMenu(chatId: number): Promise<void> {
     await sendMessage(chatId, szoveg, { keyboard });
 }
 
+async function arakSzovegekMenu(chatId: number): Promise<void> {
+    await sendMessage(chatId, '💰 <b>Árak és szövegek</b>\nMit szeretnél szerkeszteni?', {
+        keyboard: [[{ text: '💰 Árak', callback_data: 'arak:lista' }], [{ text: '📝 Szövegek', callback_data: 'szoveg:menu' }], vissza()]
+    });
+}
+
 async function arakMenu(chatId: number): Promise<void> {
     const a = await betoltArak();
-    const sorok = a.szolgaltatasok.map((sz) => `• <b>${sz.megnevezes}</b>\n   ${arLeiras(sz)}`);
-    const szoveg = ['💰 <b>Aktuális árak</b> (v' + a.arlistaVerzio + ')', '', ...sorok, '', `Hőtermelő felár: ${ezresPont(a.hotermeloFelar)},- Ft`, `Energetikai díj: ${ezresPont(a.energetikaiDij)},- Ft`, `Mennyezet-kedvezmény: ${a.kedvezmenySzazalek}%`, '', 'Szerkeszthető mezők (a sávos díjak szerkesztése a következő lépésben):'].join('\n');
+    const sorok = a.szolgaltatasok.map((sz) => `• <b>${escHtml(sz.megnevezes)}</b>\n   ${arLeiras(sz)}`);
+    const szoveg = ['💰 <b>Aktuális árak</b> (v' + a.arlistaVerzio + ')', '', ...sorok, '', `Hőtermelő felár: ${ezresPont(a.hotermeloFelar)},- Ft`, `Energetikai díj: ${ezresPont(a.energetikaiDij)},- Ft`, `Mennyezet-kedvezmény: ${a.kedvezmenySzazalek}%`, '', 'Válaszd ki, melyik tétel árát szerkeszted:'].join('\n');
+    const svcGombok: InlineButton[][] = [];
+    for (let i = 0; i < a.szolgaltatasok.length; i += 2) {
+        svcGombok.push(a.szolgaltatasok.slice(i, i + 2).map((sz) => ({ text: `✏️ ${rovidit(sz.megnevezes, 20)}`, callback_data: `arak:svc:${sz.kod}` })));
+    }
     const keyboard: InlineButton[][] = [
-        [
-            { text: '✏️ Műszaki leírás', callback_data: 'arak:edit:muszaki_leiras' },
-            { text: '✏️ Klímaterv', callback_data: 'arak:edit:klimaterv' }
-        ],
+        ...svcGombok,
         [
             { text: '✏️ Hőtermelő felár', callback_data: 'arak:edit:felar' },
             { text: '✏️ Energetikai díj', callback_data: 'arak:edit:energetika' }
         ],
         [{ text: '✏️ Kedvezmény %', callback_data: 'arak:edit:kedvezmeny' }],
-        vissza()
+        [{ text: '⬅️ Vissza', callback_data: 'menu:arak' }]
     ];
     await sendMessage(chatId, szoveg, { keyboard });
 }
 
-async function arSzerkesztesInditasa(chatId: number, mezo: string): Promise<void> {
-    if (!SZERK_MEZOK[mezo]) return;
-    await allapotMent(chatId, 'ar', { mezo });
-    const kerdes = mezo === 'kedvezmeny' ? 'Írd be az új kedvezmény százalékot (0–100):' : 'Írd be az új díjat forintban (csak szám):';
-    await sendMessage(chatId, `✏️ <b>${SZERK_MEZOK[mezo]}</b>\n${kerdes}\n\n(Megszakítás: /admin)`);
-}
-
-function alkalmazArMezo(a: ArazasKonfig, mezo: string, ertek: number): ArazasKonfig {
-    const uj: ArazasKonfig = JSON.parse(JSON.stringify(a));
-    if (mezo === 'felar') uj.hotermeloFelar = ertek;
-    else if (mezo === 'energetika') uj.energetikaiDij = ertek;
-    else if (mezo === 'kedvezmeny') uj.kedvezmenySzazalek = ertek;
-    else {
-        const sz = uj.szolgaltatasok.find((s) => s.kod === mezo);
-        if (sz && sz.arazas.tipus === 'fix') sz.arazas.ar = ertek;
+async function arSzolgaltatasMenu(chatId: number, kod: string): Promise<void> {
+    const a = await betoltArak();
+    const sz = a.szolgaltatasok.find((s) => s.kod === kod);
+    if (!sz) {
+        await arakMenu(chatId);
+        return;
     }
-    return uj;
+    const ar = sz.arazas;
+    const gombok: InlineButton[][] = [];
+    if (ar.tipus === 'fix') {
+        gombok.push([{ text: `✏️ Díj: ${ezresPont(ar.ar)},- Ft`, callback_data: `arak:edit:fix:${kod}` }]);
+    } else if (ar.tipus === 'egysegar') {
+        gombok.push([{ text: `✏️ Egységár: ${ezresPont(ar.egysegar)},- Ft/m²`, callback_data: `arak:edit:egyseg:${kod}` }]);
+        gombok.push([{ text: `✏️ Minimumdíj: ${ezresPont(ar.minimumDij)},- Ft`, callback_data: `arak:edit:min:${kod}` }]);
+    } else {
+        ar.savok.forEach((s, i) => {
+            gombok.push([{ text: `✏️ ≤${s.max} m²: ${ezresPont(s.ar)},- Ft`, callback_data: `arak:edit:sav:${kod}:${i}` }]);
+        });
+    }
+    gombok.push([{ text: '⬅️ Árak', callback_data: 'arak:lista' }]);
+    await sendMessage(chatId, `💰 <b>${escHtml(sz.megnevezes)}</b>\n${arLeiras(sz)}\n\nMelyik értéket módosítod?`, { keyboard: gombok });
 }
 
-async function arBemenet(chatId: number, mezo: string, szoveg: string): Promise<boolean> {
+async function arSzerkesztesInditasa(chatId: number, cel: string, kod: string, index: string): Promise<void> {
+    if (!(cel in ARCEL_CIMKE)) return;
+    await allapotMent(chatId, 'ar', { cel, kod, index });
+    const kerdes = cel === 'kedvezmeny' ? 'Írd be az új százalékot (0–100):' : 'Írd be az új értéket forintban (csak szám):';
+    await sendMessage(chatId, `✏️ <b>${ARCEL_CIMKE[cel]}</b>\n${kerdes}\n\n(Megszakítás: /admin)`);
+}
+
+async function arBemenet(chatId: number, adat: Record<string, string>, szoveg: string): Promise<boolean> {
+    const cel = adat.cel as ArCel;
     const nyers = csakSzamjegy(szoveg);
     if (nyers === '') {
         await sendMessage(chatId, '⚠️ Érvénytelen érték — csak számot adj meg. Próbáld újra, vagy /admin a megszakításhoz.');
         return true;
     }
     const ertek = Number.parseInt(nyers, 10);
-    if (mezo === 'kedvezmeny' && ertek > 100) {
+    if (cel === 'kedvezmeny' && ertek > 100) {
         await sendMessage(chatId, '⚠️ A kedvezmény 0 és 100 között lehet. Próbáld újra.');
         return true;
     }
+    const index = Number.parseInt(adat.index ?? '0', 10) || 0;
     const a = await betoltArak();
-    const uj = alkalmazArMezo(a, mezo, ertek);
-    await mentsdArak(uj, String(chatId), `${SZERK_MEZOK[mezo] ?? mezo} módosítás → ${ertek}`);
+    const uj = alkalmazArCel(a, cel, adat.kod ?? '', index, ertek);
+    const hibak = savKonfigHibak(uj.szolgaltatasok);
+    if (hibak.length > 0) {
+        await sendMessage(chatId, `⚠️ A módosítás érvénytelen árlistát adna:\n${hibak.join('\n')}\nPróbáld újra, vagy /admin.`);
+        return true;
+    }
+    await mentsdArak(uj, String(chatId), `${ARCEL_CIMKE[cel] ?? cel}${adat.kod ? ` — ${adat.kod}` : ''} → ${ertek}`);
     await allapotTorol(chatId);
-    const megjelenit = mezo === 'kedvezmeny' ? `${ertek}%` : `${ezresPont(ertek)},- Ft`;
-    await sendMessage(chatId, `✅ Mentve: <b>${SZERK_MEZOK[mezo] ?? mezo}</b> = ${megjelenit}`);
-    await arakMenu(chatId);
+    const megjelenit = cel === 'kedvezmeny' ? `${ertek}%` : `${ezresPont(ertek)},- Ft`;
+    await sendMessage(chatId, `✅ Mentve: <b>${ARCEL_CIMKE[cel] ?? cel}</b> = ${megjelenit}`);
+    if (adat.kod && (cel === 'fix' || cel === 'sav' || cel === 'egyseg' || cel === 'min')) await arSzolgaltatasMenu(chatId, adat.kod);
+    else await arakMenu(chatId);
     return true;
+}
+
+async function szovegekMenu(chatId: number): Promise<void> {
+    await sendMessage(chatId, '📝 <b>Szövegek</b>\nMit szerkesztesz?', {
+        keyboard: [[{ text: '📛 Tételnevek', callback_data: 'szoveg:nevek' }], [{ text: '📄 PDF-szövegek', callback_data: 'szoveg:pdf' }], [{ text: '⬅️ Vissza', callback_data: 'menu:arak' }]]
+    });
+}
+
+async function tetelNevekMenu(chatId: number): Promise<void> {
+    const a = await betoltArak();
+    const sorok = a.szolgaltatasok.map((sz) => `• <b>${escHtml(sz.megnevezes)}</b>`);
+    const gombok: InlineButton[][] = a.szolgaltatasok.map((sz) => [{ text: `✏️ ${rovidit(sz.megnevezes, 28)}`, callback_data: `szoveg:nev:${sz.kod}` }]);
+    gombok.push([{ text: '⬅️ Szövegek', callback_data: 'szoveg:menu' }]);
+    await sendMessage(chatId, ['📛 <b>Tételnevek</b>', '', ...sorok, '', 'Válaszd ki, melyik nevet írod át:'].join('\n'), { keyboard: gombok });
+}
+
+async function pdfSzovegekMenu(chatId: number): Promise<void> {
+    const gombok: InlineButton[][] = SZOVEG_MEZOK.map((m) => [{ text: `✏️ ${m.cimke}`, callback_data: `szoveg:mezo:${m.kulcs}` }]);
+    gombok.push([{ text: '⬅️ Szövegek', callback_data: 'szoveg:menu' }]);
+    await sendMessage(chatId, '📄 <b>PDF-szövegek</b>\nVálaszd ki a mezőt:', { keyboard: gombok });
+}
+
+async function tetelNevInditasa(chatId: number, kod: string): Promise<void> {
+    const a = await betoltArak();
+    const sz = a.szolgaltatasok.find((s) => s.kod === kod);
+    if (!sz) {
+        await tetelNevekMenu(chatId);
+        return;
+    }
+    await allapotMent(chatId, 'szoveg', { cel: 'nev', kod });
+    await sendMessage(chatId, `✏️ <b>Tételnév</b>\nJelenlegi: ${escHtml(sz.megnevezes)}\n\nÍrd be az új nevet.\n\n(Megszakítás: /admin)`);
+}
+
+async function szovegMezoInditasa(chatId: number, kulcs: string): Promise<void> {
+    const mezo = szovegMezo(kulcs);
+    if (!mezo) return;
+    const sz = await betoltSzovegek();
+    const jelenlegi = mezo.get(sz);
+    const jelenlegiSzoveg = Array.isArray(jelenlegi) ? jelenlegi.map((x) => `• ${x}`).join('\n') : jelenlegi;
+    await allapotMent(chatId, 'szoveg', { cel: 'mezo', kulcs });
+    const utmutato = mezo.lista ? 'Írd be az új listát — soronként egy elem.' : 'Írd be az új szöveget.';
+    await sendMessage(chatId, `✏️ <b>${mezo.cimke}</b>\nJelenlegi:\n${escHtml(jelenlegiSzoveg)}\n\n${utmutato}\n\n(Megszakítás: /admin)`);
+}
+
+async function szovegBemenet(chatId: number, adat: Record<string, string>, szoveg: string): Promise<boolean> {
+    if (adat.cel === 'nev') {
+        const nev = szoveg.trim();
+        if (nev === '') {
+            await sendMessage(chatId, '⚠️ A név nem lehet üres. Próbáld újra, vagy /admin.');
+            return true;
+        }
+        const a = await betoltArak();
+        const uj = alkalmazTetelNev(a, adat.kod ?? '', nev);
+        await mentsdArak(uj, String(chatId), `Tételnév (${adat.kod}) → ${nev}`);
+        await allapotTorol(chatId);
+        await sendMessage(chatId, `✅ Mentve: <b>${escHtml(nev)}</b>`);
+        await tetelNevekMenu(chatId);
+        return true;
+    }
+    if (adat.cel === 'mezo') {
+        const mezo = szovegMezo(adat.kulcs ?? '');
+        if (!mezo) {
+            await allapotTorol(chatId);
+            return true;
+        }
+        let ertek: string | string[];
+        if (mezo.lista) {
+            const lista = listaBont(szoveg);
+            if (lista.length === 0) {
+                await sendMessage(chatId, '⚠️ Legalább egy elem kell. Próbáld újra, vagy /admin.');
+                return true;
+            }
+            ertek = lista;
+        } else {
+            const s = szoveg.trim();
+            if (s === '') {
+                await sendMessage(chatId, '⚠️ A szöveg nem lehet üres. Próbáld újra, vagy /admin.');
+                return true;
+            }
+            ertek = s;
+        }
+        const sz = await betoltSzovegek();
+        const uj = alkalmazSzovegMezo(sz, mezo.kulcs, ertek);
+        await mentsdSzovegek(uj, String(chatId), `Szöveg (${mezo.kulcs}) módosítás`);
+        await allapotTorol(chatId);
+        await sendMessage(chatId, `✅ Mentve: <b>${escHtml(mezo.cimke)}</b>`);
+        await pdfSzovegekMenu(chatId);
+        return true;
+    }
+    return false;
 }
 
 function kuponAllapotCimke(k: Coupon, ma: string): string {
@@ -217,7 +410,8 @@ async function kuponUjBemenet(chatId: number, szoveg: string): Promise<boolean> 
 export async function kezelAllapotBemenet(chatId: number, szoveg: string): Promise<boolean> {
     const allapot = await allapotOlvas(chatId);
     if (!allapot) return false;
-    if (allapot.fajta === 'ar') return arBemenet(chatId, allapot.adat.mezo, szoveg);
+    if (allapot.fajta === 'ar') return arBemenet(chatId, allapot.adat, szoveg);
+    if (allapot.fajta === 'szoveg') return szovegBemenet(chatId, allapot.adat, szoveg);
     if (allapot.fajta === 'kupon-uj') return kuponUjBemenet(chatId, szoveg);
     return false;
 }
@@ -353,11 +547,42 @@ export async function kezelMenuCallback(chatId: number, data: string): Promise<b
         return true;
     }
     if (data === 'menu:arak') {
+        await arakSzovegekMenu(chatId);
+        return true;
+    }
+    if (data === 'arak:lista') {
         await arakMenu(chatId);
         return true;
     }
+    if (data.startsWith('arak:svc:')) {
+        await arSzolgaltatasMenu(chatId, data.slice('arak:svc:'.length));
+        return true;
+    }
     if (data.startsWith('arak:edit:')) {
-        await arSzerkesztesInditasa(chatId, data.slice('arak:edit:'.length));
+        const reszek = data.slice('arak:edit:'.length).split(':');
+        const cel = reszek[0] ?? '';
+        if (cel === 'felar' || cel === 'energetika' || cel === 'kedvezmeny') await arSzerkesztesInditasa(chatId, cel, '', '');
+        else await arSzerkesztesInditasa(chatId, cel, reszek[1] ?? '', reszek[2] ?? '0');
+        return true;
+    }
+    if (data === 'szoveg:menu') {
+        await szovegekMenu(chatId);
+        return true;
+    }
+    if (data === 'szoveg:nevek') {
+        await tetelNevekMenu(chatId);
+        return true;
+    }
+    if (data === 'szoveg:pdf') {
+        await pdfSzovegekMenu(chatId);
+        return true;
+    }
+    if (data.startsWith('szoveg:nev:')) {
+        await tetelNevInditasa(chatId, data.slice('szoveg:nev:'.length));
+        return true;
+    }
+    if (data.startsWith('szoveg:mezo:')) {
+        await szovegMezoInditasa(chatId, data.slice('szoveg:mezo:'.length));
         return true;
     }
     if (data === 'menu:ajanlatok') {
