@@ -5,13 +5,20 @@ import { JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
 import type { QuoteRecord } from '../../utils/ajanlat/store';
 import { toltsdKiSablon } from '../../utils/ajanlat/pdf/fill';
 import { konvertaljDocxPdf } from '../../utils/ajanlat/pdf/generate';
+import { betoltKapcsolok } from '../../utils/ajanlat/admin-config';
 
 export const prerender = false;
 
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-function engedelyezett(url: URL): boolean {
-    return Boolean(import.meta.env.DEV) || url.searchParams.has('debug');
+async function engedelyezett(url: URL): Promise<boolean> {
+    if (import.meta.env.DEV) return true;
+    if (!url.searchParams.has('debug')) return false;
+    try {
+        return (await betoltKapcsolok()).debug === true;
+    } catch {
+        return false;
+    }
 }
 
 function bajttorzs(bytes: Uint8Array): ArrayBuffer {
@@ -83,7 +90,7 @@ function elonezetiRekord(ertekek: Record<string, unknown>): QuoteRecord {
 }
 
 export const POST: APIRoute = async ({ request, url }) => {
-    if (!engedelyezett(url)) {
+    if (!(await engedelyezett(url))) {
         return new Response('Not found', { status: 404 });
     }
 

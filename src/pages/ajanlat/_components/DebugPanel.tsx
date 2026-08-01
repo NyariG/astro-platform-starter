@@ -5,12 +5,6 @@ import type { QuoteResult } from '../../../utils/ajanlat/pricing';
 import { forint } from '../../../utils/ajanlat/format';
 import { ENERGETIKAI_TANUSITVANY_DIJ } from '../../../utils/ajanlat/pricing-config';
 
-export function debugEngedelyezve(): boolean {
-    if (import.meta.env.DEV) return true;
-    if (typeof window === 'undefined') return false;
-    return new URLSearchParams(window.location.search).has('debug');
-}
-
 function Sor({ cimke, ertek, kiemelt }: { cimke: string; ertek: string; kiemelt?: boolean }) {
     return (
         <div className="flex justify-between gap-3 border-b border-slate-700 py-1">

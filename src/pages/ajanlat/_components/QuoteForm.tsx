@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LEPESEK, LEPES_MEZOK, StepAttekintes, StepIngatlan, StepKapcsolat, StepSzolgaltatasok, URES_URLAP, type FormValues } from './FormSteps';
 import type { AlkalmazottKupon } from './CouponField';
-import { DebugPanel, debugEngedelyezve } from './DebugPanel';
+import { DebugPanel } from './DebugPanel';
 import { Stepper } from './FormControls';
 import { ResultPanel, type Eredmeny } from './ResultPanel';
 import { fieldErrors, quoteInputSchema, teruletSzam } from '../../../utils/ajanlat/schema';
@@ -49,8 +49,24 @@ export default function QuoteForm() {
     const [eredmeny, setEredmeny] = useState<Eredmeny | null>(null);
 
     const [kupon, setKupon] = useState<AlkalmazottKupon | null>(null);
+    const [mutatDebug, setMutatDebug] = useState<boolean>(import.meta.env.DEV);
     const tetejeRef = useRef<HTMLDivElement>(null);
     const startElkuldve = useRef(false);
+
+    useEffect(() => {
+        if (import.meta.env.DEV) return;
+        if (!new URLSearchParams(window.location.search).has('debug')) return;
+        let ervenyes = true;
+        fetch('/api/debug-allapot')
+            .then((valasz) => (valasz.ok ? valasz.json() : null))
+            .then((adat) => {
+                if (ervenyes && adat && adat.debug === true) setMutatDebug(true);
+            })
+            .catch(() => {});
+        return () => {
+            ervenyes = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (ujratoltesVolt()) {
@@ -242,8 +258,6 @@ export default function QuoteForm() {
     const lepesProps = { values, errors, set, onBlur: blurEllenorzes };
     const utolsoLepes = step === LEPESEK.length - 1;
     const hibaSzam = Object.keys(errors).length;
-    const mutatDebug = debugEngedelyezve();
-
     if (eredmeny) {
         return (
             <div ref={tetejeRef} className="scroll-mt-24">
