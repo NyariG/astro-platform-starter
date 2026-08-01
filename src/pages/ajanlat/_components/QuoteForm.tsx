@@ -50,6 +50,7 @@ export default function QuoteForm() {
 
     const [kupon, setKupon] = useState<AlkalmazottKupon | null>(null);
     const tetejeRef = useRef<HTMLDivElement>(null);
+    const startElkuldve = useRef(false);
 
     useEffect(() => {
         if (ujratoltesVolt()) {
@@ -121,6 +122,19 @@ export default function QuoteForm() {
         const hibak = ellenorzes(LEPES_MEZOK[step]);
         setErrors(hibak);
         if (Object.keys(hibak).length > 0) return;
+        if (step === 0 && !startElkuldve.current) {
+            startElkuldve.current = true;
+            window.ntTrack?.('StartQuote', { content_category: 'arajanlat' });
+        }
+        if (step === 1) {
+            const eff = effektivUrlap(values);
+            window.ntTrack?.('SelectServices', {
+                content_category: 'arajanlat',
+                szolgaltatasok: eff.szolgaltatasok,
+                hotermelok: eff.hotermelok,
+                mennyezet_hutes: eff.mennyezetHutes
+            });
+        }
         setStep((s) => Math.min(s + 1, LEPESEK.length - 1));
         gorgetesFel();
     };
@@ -156,6 +170,22 @@ export default function QuoteForm() {
                     sessionStorage.removeItem(PISZKOZAT_KULCS);
                 } catch {
 
+                }
+                if (typeof test.id === 'string') {
+                    const nevDarabok = values.nev.trim().split(/\s+/).filter(Boolean);
+                    const illesztes: Record<string, string> = { country: 'hu' };
+                    if (values.email.trim()) illesztes.em = values.email;
+                    if (values.telefon.trim()) illesztes.ph = values.telefon;
+                    if (values.varos.trim()) illesztes.ct = values.varos;
+                    if (nevDarabok[0]) illesztes.ln = nevDarabok[0];
+                    if (nevDarabok.length > 1) illesztes.fn = nevDarabok.slice(1).join(' ');
+                    window.ntAdvancedMatch?.(illesztes);
+                    const leadParam: Record<string, unknown> = { content_category: 'arajanlat' };
+                    if (typeof test.vegosszeg === 'number') {
+                        leadParam.value = test.vegosszeg;
+                        leadParam.currency = 'HUF';
+                    }
+                    window.ntTrack?.('Lead', leadParam, { eventID: test.id });
                 }
                 setEredmeny({
                     tipus: 'siker',

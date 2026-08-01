@@ -1,0 +1,115 @@
+---
+interface Props {
+    pixelId: string;
+}
+
+const { pixelId } = Astro.props;
+---
+
+<div
+    id="nt-consent"
+    hidden
+    role="dialog"
+    aria-live="polite"
+    aria-label="Süti-hozzájárulás"
+    class="fixed inset-x-0 bottom-0 z-50 border-t border-slate-700 bg-slate-900/95 px-4 py-4 text-slate-200 shadow-2xl backdrop-blur"
+>
+    <div class="container-custom flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p class="max-w-2xl text-sm leading-relaxed">
+            Sütiket használunk a forgalom méréséhez és hirdetéseink hatékonyságának javításához (Meta Pixel). Ezek csak a hozzájárulásoddal aktiválódnak. Részletek az
+            <a href="/adatkezelesi" class="underline transition hover:text-white">Adatkezelési tájékoztatóban</a>.
+        </p>
+        <div class="flex flex-shrink-0 gap-3">
+            <button type="button" id="nt-consent-deny" class="btn btn-secondary min-h-11">Elutasítom</button>
+            <button type="button" id="nt-consent-accept" class="btn min-h-11">Elfogadom</button>
+        </div>
+    </div>
+</div>
+
+<script is:inline define:vars={{ pixelId }}>
+    (function () {
+        var SUTIK = 'nyariterv-consent';
+        function olvasSuti(nev) {
+            var parok = document.cookie ? document.cookie.split('; ') : [];
+            for (var i = 0; i < parok.length; i++) {
+                var reszek = parok[i].split('=');
+                if (reszek[0] === nev) return decodeURIComponent(reszek.slice(1).join('='));
+            }
+            return '';
+        }
+        function irSuti(nev, ertek, napok) {
+            var lejar = new Date(Date.now() + napok * 864e5).toUTCString();
+            document.cookie = nev + '=' + encodeURIComponent(ertek) + '; expires=' + lejar + '; path=/; SameSite=Lax';
+        }
+        var betoltve = false;
+        function betoltPixel() {
+            if (betoltve) return;
+            betoltve = true;
+            !(function (f, b, e, v, n, t, s) {
+                if (f.fbq) return;
+                n = f.fbq = function () {
+                    n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+                };
+                if (!f._fbq) f._fbq = n;
+                n.push = n;
+                n.loaded = !0;
+                n.version = '2.0';
+                n.queue = [];
+                t = b.createElement(e);
+                t.async = !0;
+                t.src = v;
+                s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s);
+            })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+            window.fbq('init', pixelId);
+            window.fbq('track', 'PageView');
+        }
+        function vanHozzajarulas() {
+            return olvasSuti(SUTIK) === 'granted';
+        }
+        window.ntTrack = function (esemeny, parameterek, opciok) {
+            if (!vanHozzajarulas() || typeof window.fbq !== 'function') return;
+            var standard = ['PageView', 'ViewContent', 'Lead', 'Contact', 'InitiateCheckout', 'Search', 'AddToCart', 'CompleteRegistration', 'Purchase'];
+            if (standard.indexOf(esemeny) >= 0) window.fbq('track', esemeny, parameterek || {}, opciok || {});
+            else window.fbq('trackCustom', esemeny, parameterek || {}, opciok || {});
+        };
+        window.ntAdvancedMatch = function (adatok) {
+            if (!vanHozzajarulas() || typeof window.fbq !== 'function') return;
+            window.fbq('init', pixelId, adatok);
+        };
+        var banner = document.getElementById('nt-consent');
+        function mutat() {
+            if (banner) banner.hidden = false;
+        }
+        function rejt() {
+            if (banner) banner.hidden = true;
+        }
+        function elfogad() {
+            irSuti(SUTIK, 'granted', 180);
+            rejt();
+            betoltPixel();
+        }
+        function elutasit() {
+            irSuti(SUTIK, 'denied', 180);
+            rejt();
+        }
+        window.ntConsentReopen = function () {
+            mutat();
+        };
+        if (banner) {
+            var ok = document.getElementById('nt-consent-accept');
+            var nem = document.getElementById('nt-consent-deny');
+            if (ok) ok.addEventListener('click', elfogad);
+            if (nem) nem.addEventListener('click', elutasit);
+        }
+        var allapot = olvasSuti(SUTIK);
+        if (allapot === 'granted') betoltPixel();
+        else if (allapot !== 'denied') mutat();
+        document.addEventListener('click', function (e) {
+            var cel = e.target;
+            if (!cel || !cel.closest) return;
+            var link = cel.closest('a[href^="tel:"], a[href^="mailto:"]');
+            if (link) window.ntTrack('Contact', { content_category: 'kapcsolat' });
+        });
+    })();
+</script>

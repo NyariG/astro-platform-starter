@@ -6,6 +6,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MinimalHeader from '../components/MinimalHeader.astro';
 import MinimalFooter from '../components/MinimalFooter.astro';
+import CookieConsent from '../components/CookieConsent.astro';
 
 interface Props {
     title: string;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 const { title, description = "Nyári Terv - Precíz épületgépészeti tervezés", minimal = false } = Astro.props;
+
+const metaPixelId = (import.meta.env.META_PIXEL_ID as string | undefined) ?? (process.env.META_PIXEL_ID as string | undefined) ?? '';
 ---
 
 <!doctype html>
@@ -29,6 +32,7 @@ const { title, description = "Nyári Terv - Precíz épületgépészeti tervezé
         <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
     </head>
     <body class="flex flex-col min-h-screen">
+        {metaPixelId && <CookieConsent pixelId={metaPixelId} />}
         {minimal ? <MinimalHeader /> : <Header />}
         <main class="grow">
             <slot />

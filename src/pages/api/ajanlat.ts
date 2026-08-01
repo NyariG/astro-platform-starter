@@ -7,6 +7,7 @@ import { betoltKuponokBiztonsagos } from '../../utils/ajanlat/kupon-store';
 import { GDPR_KONSZENT_SZOVEG, GDPR_KONSZENT_VERZIO, JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
 import { ismeteltKiserletLevele, maszkoltEmail, sikeresBekuldesLevelei } from '../../utils/ajanlat/email';
 import { ertesitsUjAjanlat } from '../../utils/ajanlat/telegram-router';
+import { kuldCapiLead } from '../../utils/ajanlat/meta-capi';
 import { keszitsArajanlatPdf } from '../../utils/ajanlat/pdf/generate';
 import {
     claimQuota,
@@ -247,6 +248,20 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
             await ertesitsUjAjanlat(rekord);
         } catch (hiba) {
             console.error('[ajanlat] Telegram admin-értesítés sikertelen', { id, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+        }
+
+        try {
+            const cookie = request.headers.get('cookie') ?? '';
+            if (/(?:^|;\s*)nyariterv-consent=granted(?:;|$)/.test(cookie)) {
+                await kuldCapiLead(rekord, {
+                    cookie,
+                    ip: ip === 'ismeretlen' ? '' : ip,
+                    userAgent: request.headers.get('user-agent') ?? '',
+                    sourceUrl: rekord.sourceUrl
+                });
+            }
+        } catch (hiba) {
+            console.error('[ajanlat] Meta CAPI Lead sikertelen', { id, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
         }
 
         return json(
