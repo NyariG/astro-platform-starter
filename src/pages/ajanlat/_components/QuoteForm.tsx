@@ -33,7 +33,6 @@ function piszkozatBetoltes(): FormValues | null {
         const urlap = { ...URES_URLAP, ...Object.fromEntries(Object.entries(mentett).filter(([kulcs]) => kulcs in URES_URLAP)) } as FormValues;
 
         const szolg = new Set(urlap.szolgaltatasok);
-        if (szolg.has('klimaterv') || urlap.hutesOpciok.length > 0 || urlap.mennyezetHutes !== '') urlap.hutesTervAktiv = true;
         if (['kert_koncepcio', 'kert_kiviteli', 'ontozorendszer'].some((k) => szolg.has(k))) urlap.kertepitesAktiv = true;
 
         return normalizalAllapot(urlap);

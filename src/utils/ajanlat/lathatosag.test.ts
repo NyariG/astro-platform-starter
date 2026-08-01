@@ -7,37 +7,40 @@ function v(over: Partial<LathatosagBemenet> = {}): LathatosagBemenet {
         hotermelok: [],
         mennyezetHutes: '',
         hutesOpciok: [],
-        hutesTervAktiv: false,
         kertepitesAktiv: false,
         ...over
     };
 }
 
+const HUTHETO = { szolgaltatasok: ['futesi_terv'], hotermelok: ['hoszivattyu'] };
+
 describe('normalizalAllapot — a hűtési kiválasztások nem ragadnak be', () => {
-    it('csoport zárva: klíma, hűtési opciók és a válasz is nullázódik (a hőszivattyú marad)', () => {
-        const e = normalizalAllapot(v({ szolgaltatasok: ['klimaterv', 'futesi_terv'], hotermelok: ['hoszivattyu'], hutesOpciok: ['fan_coil'], mennyezetHutes: 'igen', hutesTervAktiv: false }));
-        expect(e.szolgaltatasok).toEqual(['futesi_terv']);
-        expect(e.hutesOpciok).toEqual([]);
+    it('nincs hőszivattyú: a válasz és a hűtési opciók nullázódnak', () => {
+        const e = normalizalAllapot(v({ szolgaltatasok: ['futesi_terv'], hotermelok: ['gazkazan'], hutesOpciok: ['fan_coil'], mennyezetHutes: 'igen' }));
         expect(e.mennyezetHutes).toBe('');
-        expect(e.hotermelok).toEqual(['hoszivattyu']);
+        expect(e.hutesOpciok).toEqual([]);
     });
 
-    it('„Nem": klíma és hűtési opciók törlődnek, a válasz (kedvezmény) marad', () => {
-        const e = normalizalAllapot(v({ szolgaltatasok: ['klimaterv'], hotermelok: ['hoszivattyu'], hutesOpciok: ['fan_coil', 'mennyezet'], mennyezetHutes: 'nem', hutesTervAktiv: true }));
-        expect(e.szolgaltatasok).toEqual([]);
+    it('nincs fűtési terv: a válasz és a hűtési opciók nullázódnak', () => {
+        const e = normalizalAllapot(v({ szolgaltatasok: ['szellozteto_terv'], hotermelok: ['hoszivattyu'], hutesOpciok: ['fan_coil'], mennyezetHutes: 'igen' }));
+        expect(e.mennyezetHutes).toBe('');
+        expect(e.hutesOpciok).toEqual([]);
+    });
+
+    it('hőszivattyú + „Nem": a hűtési opciók törlődnek, a válasz (kedvezmény) marad', () => {
+        const e = normalizalAllapot(v({ ...HUTHETO, hutesOpciok: ['fan_coil', 'mennyezet'], mennyezetHutes: 'nem' }));
         expect(e.hutesOpciok).toEqual([]);
         expect(e.mennyezetHutes).toBe('nem');
-        expect(e.hotermelok).toEqual(['hoszivattyu']);
     });
 
-    it('„Igen" + hőszivattyú: Fan-coil és Mennyezethűtés megmarad', () => {
-        const e = normalizalAllapot(v({ hotermelok: ['hoszivattyu'], hutesOpciok: ['fan_coil', 'mennyezet'], mennyezetHutes: 'igen', hutesTervAktiv: true }));
+    it('hőszivattyú + „Igen": Fan-coil és Mennyezethűtés megmarad', () => {
+        const e = normalizalAllapot(v({ ...HUTHETO, hutesOpciok: ['fan_coil', 'mennyezet'], mennyezetHutes: 'igen' }));
         expect(e.hutesOpciok).toEqual(['fan_coil', 'mennyezet']);
     });
 
-    it('„Igen", de nincs hőszivattyú: Fan-coil és Mennyezethűtés törlődik', () => {
-        const e = normalizalAllapot(v({ hotermelok: ['gazkazan'], hutesOpciok: ['fan_coil', 'mennyezet'], mennyezetHutes: 'igen', hutesTervAktiv: true }));
-        expect(e.hutesOpciok).toEqual([]);
+    it('a Klímaterv sima szolgáltatásként megmarad', () => {
+        const e = normalizalAllapot(v({ szolgaltatasok: ['klimaterv', 'futesi_terv'], hotermelok: ['gazkazan'] }));
+        expect(e.szolgaltatasok).toContain('klimaterv');
     });
 });
 
@@ -52,15 +55,9 @@ describe('effektivUrlap — a beküldött/árazott értékek', () => {
         expect(e.szolgaltatasok).toEqual(['kert_koncepcio']);
     });
 
-    it('Fűtési terv nélkül a hőtermelő és a hőszivattyú-függő alopciók kiesnek', () => {
-        const e = effektivUrlap(v({ szolgaltatasok: ['szellozteto_terv'], hotermelok: ['hoszivattyu'], hutesOpciok: ['fan_coil'], mennyezetHutes: 'igen', hutesTervAktiv: true }));
+    it('Fűtési terv nélkül a hőtermelő és a hűtési opciók kiesnek', () => {
+        const e = effektivUrlap(v({ szolgaltatasok: ['szellozteto_terv'], hotermelok: ['hoszivattyu'], hutesOpciok: ['fan_coil'], mennyezetHutes: 'igen' }));
         expect(e.hotermelok).toEqual([]);
-        expect(e.hutesOpciok).toEqual([]);
-    });
-
-    it('a hűtési blokk normalizálását is alkalmazza (zárt csoport → tiszta)', () => {
-        const e = effektivUrlap(v({ szolgaltatasok: ['klimaterv'], hutesOpciok: ['fan_coil'], mennyezetHutes: 'igen', hutesTervAktiv: false }));
-        expect(e.szolgaltatasok).toEqual([]);
         expect(e.hutesOpciok).toEqual([]);
     });
 
@@ -81,36 +78,40 @@ describe('mezoLathato', () => {
         expect(mezoLathato(v({ szolgaltatasok: ['ontozorendszer'], kertepitesAktiv: true })).ontozendoTerulet).toBe(true);
     });
 
-    it('a hűtési kérdés a csoport nyitottságát követi', () => {
-        expect(mezoLathato(v({ hutesTervAktiv: false })).hutesKerdes).toBe(false);
-        expect(mezoLathato(v({ hutesTervAktiv: true })).hutesKerdes).toBe(true);
+    it('a hűtési kérdés csak fűtési terv + hőszivattyú esetén látszik', () => {
+        expect(mezoLathato(v(HUTHETO)).hutesKerdes).toBe(true);
+        expect(mezoLathato(v({ szolgaltatasok: ['futesi_terv'], hotermelok: ['gazkazan'] })).hutesKerdes).toBe(false);
+        expect(mezoLathato(v({ hotermelok: ['hoszivattyu'] })).hutesKerdes).toBe(false);
     });
 
-    it('Fan-coil/Mennyezethűtés csak „igen" + fűtési hőszivattyú esetén', () => {
-        expect(mezoLathato(v({ hutesTervAktiv: true, mennyezetHutes: 'igen', hotermelok: ['hoszivattyu'] })).fanCoilMennyezet).toBe(true);
-        expect(mezoLathato(v({ hutesTervAktiv: true, mennyezetHutes: 'igen', hotermelok: ['gazkazan'] })).fanCoilMennyezet).toBe(false);
-        expect(mezoLathato(v({ hutesTervAktiv: true, mennyezetHutes: 'nem', hotermelok: ['hoszivattyu'] })).fanCoilMennyezet).toBe(false);
+    it('Fan-coil/Mennyezethűtés csak „igen" esetén', () => {
+        expect(mezoLathato(v({ ...HUTHETO, mennyezetHutes: 'igen' })).hutesAlopciok).toBe(true);
+        expect(mezoLathato(v({ ...HUTHETO, mennyezetHutes: 'nem' })).hutesAlopciok).toBe(false);
     });
 });
 
 describe('kliensExtraHibak — UI-kapuzott kötelezőségek', () => {
-    it('Hűtési terv nyitva, de nincs válasz → hiba', () => {
-        expect(kliensExtraHibak(v({ hutesTervAktiv: true, mennyezetHutes: '' })).mennyezetHutes).toBeTruthy();
+    it('hőszivattyú, de nincs hűtési válasz → hiba', () => {
+        expect(kliensExtraHibak(v({ ...HUTHETO, mennyezetHutes: '' })).mennyezetHutes).toBeTruthy();
     });
 
-    it('Hűtési terv nyitva, van válasz → nincs hiba', () => {
-        expect(kliensExtraHibak(v({ hutesTervAktiv: true, mennyezetHutes: 'nem' })).mennyezetHutes).toBeUndefined();
+    it('hőszivattyú, van válasz → nincs kérdés-hiba', () => {
+        expect(kliensExtraHibak(v({ ...HUTHETO, mennyezetHutes: 'nem' })).mennyezetHutes).toBeUndefined();
+    });
+
+    it('„Igen", de nincs hűtési opció → hiba', () => {
+        expect(kliensExtraHibak(v({ ...HUTHETO, mennyezetHutes: 'igen', hutesOpciok: [] })).hutesOpciok).toBeTruthy();
+    });
+
+    it('„Igen", van legalább egy opció → nincs hiba', () => {
+        expect(kliensExtraHibak(v({ ...HUTHETO, mennyezetHutes: 'igen', hutesOpciok: ['fan_coil'] })).hutesOpciok).toBeUndefined();
     });
 
     it('Kertépítés nyitva, de nincs kiválasztott gyerek → hiba', () => {
         expect(kliensExtraHibak(v({ kertepitesAktiv: true, szolgaltatasok: [] })).kertepites).toBeTruthy();
     });
 
-    it('Kertépítés nyitva, van gyerek → nincs hiba', () => {
-        expect(kliensExtraHibak(v({ kertepitesAktiv: true, szolgaltatasok: ['kert_koncepcio'] })).kertepites).toBeUndefined();
-    });
-
-    it('zárt csoportoknál nincs extra hiba', () => {
+    it('nincs hőszivattyú és zárt csoportok → nincs extra hiba', () => {
         expect(kliensExtraHibak(v())).toEqual({});
     });
 });

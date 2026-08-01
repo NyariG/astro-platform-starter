@@ -62,7 +62,7 @@ function adatSorok(record: QuoteRecord): [string, string][] {
         sorok.push(['Hőtermelők', labelsOf(HOTERMELOK, record.hotermelok).join(', ')]);
     }
     if (record.mennyezetHutes) {
-        sorok.push(['Mennyezet hűtés', labelOf(MENNYEZET_HUTES, record.mennyezetHutes)]);
+        sorok.push(['Hűtés', labelOf(MENNYEZET_HUTES, record.mennyezetHutes)]);
     }
 
     if ((record.hutesOpciok ?? []).length > 0) {

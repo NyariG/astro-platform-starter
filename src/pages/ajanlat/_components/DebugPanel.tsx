@@ -100,7 +100,6 @@ export function DebugPanel({ values, arazas, kupon }: { values: FormValues; araz
                     <Sor cimke="hotermelok" ertek={values.hotermelok.join(', ')} />
                     <Sor cimke="mennyezetHutes" ertek={values.mennyezetHutes} />
                     <Sor cimke="hutesOpciok" ertek={values.hutesOpciok.join(', ')} />
-                    <Sor cimke="hutesTervAktiv" ertek={String(values.hutesTervAktiv)} />
                     <Sor cimke="kertepitesAktiv" ertek={String(values.kertepitesAktiv)} />
                     <Sor cimke="kuponKod (beírt)" ertek={values.kuponKod} />
                     <Sor cimke="nev" ertek={values.nev} />

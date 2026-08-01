@@ -110,14 +110,14 @@ export const quoteObjectSchema = z.object({
     hotermelok: z.array(z.enum(hotermelokValues, { errorMap: () => ({ message: 'Ismeretlen hőtermelő.' }) })).default([]),
 
     /**
-     * „Szeretne mennyezet hűtést?” — a „nem" válasz jár 5% kedvezménnyel.
+     * „Szeretne hűtést?” — a „nem" válasz jár 5% kedvezménnyel.
      * Szándékosan nem logikai érték: üresen hagyva nem adunk kedvezményt,
      * és nem is feltételezünk semmit az ügyfél helyett.
      */
-    mennyezetHutes: z.enum(mennyezetHutesValues, { errorMap: () => ({ message: 'Válaszoljon a mennyezet hűtésre vonatkozó kérdésre.' }) }).or(z.literal('')).default(''),
+    mennyezetHutes: z.enum(mennyezetHutesValues, { errorMap: () => ({ message: 'Válaszoljon a hűtésre vonatkozó kérdésre.' }) }).or(z.literal('')).default(''),
 
     /**
-     * A Hűtési terv informatív alopciói (Hőszivattyú / Fan-coil / Mennyezethűtés).
+     * A hűtés informatív alopciói (Fan-coil / Mennyezethűtés).
      * NEM árazott — az igény jelzésére, a rekordba és az e-mailekbe kerül.
      * Kliensoldalon a láthatóság kapuzza; a szerver csak az értékkészletet nézi.
      */
@@ -153,8 +153,8 @@ export const quoteInputSchema = quoteObjectSchema.superRefine((data, ctx) => {
         }
     }
 
-    // A „Szeretne mennyezet hűtést?" kérdés kötelezőségét a kliens kapuzza
-    // (csak a Hűtési terv csoport nyitott állapotában — lásd lathatosag.ts).
+    // A „Szeretne hűtést?" kérdés kötelezőségét a kliens kapuzza
+    // (csak hőszivattyú esetén — lásd lathatosag.ts).
     // Szerveroldalon ezért opcionális: üres = nincs kedvezmény. Így a csak
     // fűtést kérő beküldés nem bukik el egy rejtett mező miatt.
 

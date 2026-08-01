@@ -1,27 +1,8 @@
-import { FUTESI_TERV, KLIMATERV, szuksegesTeruletek, type TeruletFajta } from './pricing-config';
+import { FUTESI_TERV, szuksegesTeruletek, type TeruletFajta } from './pricing-config';
 
 export const KERT_KODOK = ['kert_koncepcio', 'kert_kiviteli', 'ontozorendszer'] as const;
 
 const HOSZIVATTYU = 'hoszivattyu';
-
-const HUTES_ALOPCIO = ['fan_coil', 'mennyezet'] as const;
-
-export function normalizalAllapot<T extends LathatosagBemenet>(v: T): T {
-    const klimaNelkul = (s: string[]) => s.filter((k) => k !== KLIMATERV);
-
-    if (!v.hutesTervAktiv) {
-        return { ...v, szolgaltatasok: klimaNelkul(v.szolgaltatasok), hutesOpciok: [], mennyezetHutes: '' };
-    }
-
-    if (v.mennyezetHutes !== 'igen') {
-        return { ...v, szolgaltatasok: klimaNelkul(v.szolgaltatasok), hutesOpciok: [] };
-    }
-
-    if (!v.hotermelok.includes(HOSZIVATTYU)) {
-        return { ...v, hutesOpciok: v.hutesOpciok.filter((o) => !HUTES_ALOPCIO.includes(o as (typeof HUTES_ALOPCIO)[number])) };
-    }
-    return v;
-}
 
 export type LathatosagBemenet = {
     szolgaltatasok: string[];
@@ -29,13 +10,24 @@ export type LathatosagBemenet = {
     mennyezetHutes: string;
     hutesOpciok: string[];
 
-    hutesTervAktiv: boolean;
-
     kertepitesAktiv: boolean;
 };
 
-export function effektivUrlap<T extends LathatosagBemenet>(v: T): T {
+function huthet(v: LathatosagBemenet): boolean {
+    return v.szolgaltatasok.includes(FUTESI_TERV) && v.hotermelok.includes(HOSZIVATTYU);
+}
 
+export function normalizalAllapot<T extends LathatosagBemenet>(v: T): T {
+    if (!huthet(v)) {
+        return { ...v, mennyezetHutes: '', hutesOpciok: [] };
+    }
+    if (v.mennyezetHutes !== 'igen') {
+        return { ...v, hutesOpciok: [] };
+    }
+    return v;
+}
+
+export function effektivUrlap<T extends LathatosagBemenet>(v: T): T {
     const alap = normalizalAllapot(v);
     const bent = new Set(alap.szolgaltatasok);
 
@@ -43,19 +35,13 @@ export function effektivUrlap<T extends LathatosagBemenet>(v: T): T {
         for (const kod of KERT_KODOK) bent.delete(kod);
     }
 
-    let hotermelok = alap.hotermelok;
-    let hutesOpciok = alap.hutesOpciok;
-
-    if (!bent.has(FUTESI_TERV)) {
-        hotermelok = [];
-        hutesOpciok = hutesOpciok.filter((o) => !HUTES_ALOPCIO.includes(o as (typeof HUTES_ALOPCIO)[number]));
-    }
+    const hotermelok = bent.has(FUTESI_TERV) ? alap.hotermelok : [];
 
     return {
         ...alap,
         szolgaltatasok: alap.szolgaltatasok.filter((s) => bent.has(s)),
         hotermelok,
-        hutesOpciok
+        hutesOpciok: alap.hutesOpciok
     };
 }
 
@@ -69,34 +55,35 @@ export type MezoLathatosag = {
 
     hutesAlopciok: boolean;
 
-    fanCoilMennyezet: boolean;
-
     kertGyerekek: boolean;
 };
 
 export function mezoLathato(v: LathatosagBemenet): MezoLathatosag {
     const eff = effektivUrlap(v);
     const szuks = new Set<TeruletFajta>(szuksegesTeruletek(eff.szolgaltatasok));
-    const hutesIgen = v.hutesTervAktiv && v.mennyezetHutes === 'igen';
+    const hutesheto = huthet(v);
 
     return {
         alapterulet: szuks.has('epulet'),
         telekMeret: szuks.has('telek'),
         ontozendoTerulet: szuks.has('ontozes'),
         hotermelok: eff.szolgaltatasok.includes(FUTESI_TERV),
-        hutesKerdes: v.hutesTervAktiv,
-        hutesAlopciok: hutesIgen,
-
-        fanCoilMennyezet: hutesIgen && v.hotermelok.includes(HOSZIVATTYU),
+        hutesKerdes: hutesheto,
+        hutesAlopciok: hutesheto && v.mennyezetHutes === 'igen',
         kertGyerekek: v.kertepitesAktiv
     };
 }
 
 export function kliensExtraHibak(v: LathatosagBemenet): Record<string, string> {
     const hibak: Record<string, string> = {};
+    const hutesheto = huthet(v);
 
-    if (v.hutesTervAktiv && v.mennyezetHutes === '') {
-        hibak.mennyezetHutes = 'Válaszoljon a mennyezet hűtésre vonatkozó kérdésre.';
+    if (hutesheto && v.mennyezetHutes === '') {
+        hibak.mennyezetHutes = 'Válaszoljon a hűtésre vonatkozó kérdésre.';
+    }
+
+    if (hutesheto && v.mennyezetHutes === 'igen' && v.hutesOpciok.length === 0) {
+        hibak.hutesOpciok = 'Válasszon legalább egy hűtési opciót.';
     }
 
     if (v.kertepitesAktiv && !KERT_KODOK.some((k) => v.szolgaltatasok.includes(k))) {

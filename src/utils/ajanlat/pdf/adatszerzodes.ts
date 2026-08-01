@@ -89,7 +89,7 @@ function reszletekSorok(record: QuoteRecord): Sor[] {
     if (record.ontozendoTerulet !== null) sorok.push({ cimke: 'Öntözendő terület', ertek: negyzetmeter(record.ontozendoTerulet) });
     if (record.szolgaltatasok.length > 0) sorok.push({ cimke: 'Kért szolgáltatások', ertek: labelsOf(SZOLGALTATAS_OPCIOK, record.szolgaltatasok).join(', ') });
     if (record.hotermelok.length > 0) sorok.push({ cimke: 'Hőtermelők', ertek: labelsOf(HOTERMELOK, record.hotermelok).join(', ') });
-    if (record.mennyezetHutes) sorok.push({ cimke: 'Mennyezet hűtés', ertek: labelOf(MENNYEZET_HUTES, record.mennyezetHutes) });
+    if (record.mennyezetHutes) sorok.push({ cimke: 'Hűtés', ertek: labelOf(MENNYEZET_HUTES, record.mennyezetHutes) });
     if ((record.hutesOpciok ?? []).length > 0) sorok.push({ cimke: 'Hűtési igények', ertek: labelsOf(HUTES_OPCIOK, record.hutesOpciok).join(', ') });
     return sorok;
 }

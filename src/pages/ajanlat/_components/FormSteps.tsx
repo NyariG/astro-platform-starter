@@ -69,8 +69,6 @@ export type FormValues = {
     mennyezetHutes: string;
     /** Informatív hűtési alopciók (Hőszivattyú / Fan-coil / Mennyezethűtés). */
     hutesOpciok: string[];
-    /** A „Hűtési terv" vizuális csoport nyitott állapota (UI-only, a szerver ledobja). */
-    hutesTervAktiv: boolean;
     /** A „Kertépítés" vizuális csoport nyitott állapota (UI-only). */
     kertepitesAktiv: boolean;
     kuponKod: string;
@@ -94,7 +92,6 @@ export const URES_URLAP: FormValues = {
     hotermelok: [],
     mennyezetHutes: '',
     hutesOpciok: [],
-    hutesTervAktiv: false,
     kertepitesAktiv: false,
     kuponKod: '',
     gdprConsent: false,
@@ -271,19 +268,13 @@ export function StepIngatlan({ values, errors, set, onBlur }: StepProps) {
     );
 }
 
-/** A Hűtési terv csoport tartalma (kétszintű: Fan-coil/Mennyezethűtés csak hőszivattyúnál). */
-function HutesBlokk({ values, errors, set, toggleSzolg, toggleHutes }: StepProps & { toggleSzolg: (kod: string, be: boolean) => void; toggleHutes: (opcio: string, be: boolean) => void }) {
+function HutesBlokk({ values, errors, set, toggleHutes }: StepProps & { toggleHutes: (opcio: string, be: boolean) => void }) {
     const latszik = mezoLathato(values);
     return (
-        <>
-            {/*
-                A „nem" válasz 5% kedvezményt jelent a fűtési blokkra, ezért
-                Igen/Nem választás, nem jelölőnégyzet. A kérdés csak itt, a
-                Hűtési terv csoportban jelenik meg.
-            */}
+        <div className="flex flex-col gap-3">
             <RadioGroup
                 name="mennyezetHutes"
-                legend="Szeretne mennyezet hűtést?"
+                legend="Szeretne hűtést?"
                 options={MENNYEZET_HUTES}
                 value={values.mennyezetHutes}
                 onChange={(v) => set('mennyezetHutes', v)}
@@ -292,29 +283,17 @@ function HutesBlokk({ values, errors, set, toggleSzolg, toggleHutes }: StepProps
             />
 
             <Collapsible open={latszik.hutesAlopciok}>
-                <div className="flex flex-col gap-3">
-                    <SingleCheckbox
-                        id="hutes-klimaterv"
-                        checked={values.szolgaltatasok.includes('klimaterv')}
-                        onChange={(b) => toggleSzolg('klimaterv', b)}
-                        label={labelOf(SZOLGALTATAS_OPCIOK, 'klimaterv')}
-                    />
-                    <SingleCheckbox
-                        id="hutes-hoszivattyu"
-                        checked={values.hotermelok.includes('hoszivattyu')}
-                        onChange={(b) => set('hotermelok', b ? [...values.hotermelok, 'hoszivattyu'] : values.hotermelok.filter((h) => h !== 'hoszivattyu'))}
-                        label={labelOf(HOTERMELOK, 'hoszivattyu')}
-                    />
-
-                    <Collapsible open={latszik.fanCoilMennyezet}>
-                        <NestedBlock>
-                            <SingleCheckbox id="hutes-fan_coil" checked={values.hutesOpciok.includes('fan_coil')} onChange={(b) => toggleHutes('fan_coil', b)} label={labelOf(HUTES_OPCIOK, 'fan_coil')} />
-                            <SingleCheckbox id="hutes-mennyezet" checked={values.hutesOpciok.includes('mennyezet')} onChange={(b) => toggleHutes('mennyezet', b)} label={labelOf(HUTES_OPCIOK, 'mennyezet')} />
-                        </NestedBlock>
-                    </Collapsible>
-                </div>
+                <NestedBlock>
+                    <SingleCheckbox id="hutes-fan_coil" checked={values.hutesOpciok.includes('fan_coil')} onChange={(b) => toggleHutes('fan_coil', b)} label={labelOf(HUTES_OPCIOK, 'fan_coil')} />
+                    <SingleCheckbox id="hutes-mennyezet" checked={values.hutesOpciok.includes('mennyezet')} onChange={(b) => toggleHutes('mennyezet', b)} label={labelOf(HUTES_OPCIOK, 'mennyezet')} />
+                    {errors.hutesOpciok && (
+                        <p className="field-error" role="alert">
+                            {errors.hutesOpciok}
+                        </p>
+                    )}
+                </NestedBlock>
             </Collapsible>
-        </>
+        </div>
     );
 }
 
@@ -373,6 +352,8 @@ export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
         set('hutesOpciok', be ? [...values.hutesOpciok, opcio] : values.hutesOpciok.filter((o) => o !== opcio));
     };
 
+    const latszik = mezoLathato(values);
+
     return (
         <div className="flex flex-col gap-6">
             {/* Az épület alapterülete MINDIG látható, a szolgáltatáslista fölött. */}
@@ -421,6 +402,9 @@ export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
                                                     error={errors.hotermelok}
                                                     required
                                                 />
+                                                <Collapsible open={latszik.hutesKerdes}>
+                                                    <HutesBlokk values={values} errors={errors} set={set} onBlur={onBlur} toggleHutes={toggleHutes} />
+                                                </Collapsible>
                                             </NestedBlock>
                                         </Collapsible>
                                     </div>
@@ -443,11 +427,7 @@ export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
                             />
                             <Collapsible open={nyitva}>
                                 <NestedBlock>
-                                    {cs.kulcs === 'hutesTervAktiv' ? (
-                                        <HutesBlokk values={values} errors={errors} set={set} onBlur={onBlur} toggleSzolg={toggleSzolg} toggleHutes={toggleHutes} />
-                                    ) : (
-                                        <KertBlokk values={values} errors={errors} set={set} onBlur={onBlur} toggleSzolg={toggleSzolg} />
-                                    )}
+                                    <KertBlokk values={values} errors={errors} set={set} onBlur={onBlur} toggleSzolg={toggleSzolg} />
                                 </NestedBlock>
                             </Collapsible>
                         </div>
@@ -485,7 +465,7 @@ export function StepAttekintes({ values, set, onKuponBevaltva }: StepProps & { o
 
     sorok.push(['Kért szolgáltatások', labelsOf(SZOLGALTATAS_OPCIOK, eff.szolgaltatasok).join(', ') || '—']);
     if (eff.hotermelok.length > 0) sorok.push(['Hőtermelők', labelsOf(HOTERMELOK, eff.hotermelok).join(', ')]);
-    if (eff.mennyezetHutes) sorok.push(['Mennyezet hűtés', labelOf(MENNYEZET_HUTES, eff.mennyezetHutes)]);
+    if (eff.mennyezetHutes) sorok.push(['Hűtés', labelOf(MENNYEZET_HUTES, eff.mennyezetHutes)]);
     if (eff.hutesOpciok.length > 0) sorok.push(['Hűtési igények', labelsOf(HUTES_OPCIOK, eff.hutesOpciok).join(', ')]);
 
     return (
