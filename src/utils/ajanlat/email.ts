@@ -16,7 +16,7 @@ class EmailConfigError extends Error {}
 function kornyezet(): Kornyezet {
     const apiKey = readEnv('SMTP2GO_API_KEY');
     const sender = readEnv('QUOTE_SENDER_EMAIL');
-    const replyTo = readEnv('QUOTE_REPLY_TO') ?? sender;
+    const replyTo = sender;
     const notifyRaw = readEnv('QUOTE_NOTIFY_EMAIL');
 
     const hianyzo: string[] = [];
