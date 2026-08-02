@@ -4,6 +4,7 @@ import {
     FUTESI_TERV,
     HOTERMELO_FELAR,
     KEDVEZMENY_SZAZALEK,
+    LAKOEPULET_MAX_ALAPTERULET,
     SZOLGALTATASOK,
     type Szolgaltatas,
     type TeruletFajta
@@ -32,6 +33,8 @@ export type QuoteInput = {
     hotermelok: readonly string[];
 
     nincsHutes: boolean;
+
+    ingatlanJelleg?: string;
 };
 
 export type Tetel = {
@@ -296,7 +299,8 @@ export function calculateQuote(
     // A nagyobb forintösszegű kedvezmény nyer; azonos összegnél az első (mennyezethűtés).
     const kedvezmeny = jeloltek.reduce<Kedvezmeny | null>((legjobb, jelolt) => (legjobb === null || jelolt.osszeg > legjobb.osszeg ? jelolt : legjobb), null);
 
-    const vanEgyediArazas = tetelek.some((t) => t.status === 'CUSTOM_QUOTE');
+    const nagyLakoepulet = input.ingatlanJelleg === 'lakoepulet' && ervenyesTerulet(input.epuletTerulet) && input.epuletTerulet > LAKOEPULET_MAX_ALAPTERULET;
+    const vanEgyediArazas = nagyLakoepulet || tetelek.some((t) => t.status === 'CUSTOM_QUOTE');
     const figyelmeztetesek = tetelek.map((t) => t.uzenet).filter((uzenet): uzenet is string => Boolean(uzenet));
 
     return {

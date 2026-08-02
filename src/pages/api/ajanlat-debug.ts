@@ -48,7 +48,8 @@ function elonezetiRekord(ertekek: Record<string, unknown>): QuoteRecord {
         telekMeret,
         ontozendoTerulet,
         hotermelok,
-        nincsHutes: mennyezetHutes === 'nem'
+        nincsHutes: mennyezetHutes === 'nem',
+        ingatlanJelleg: str(ertekek.ingatlanJelleg) || 'lakoepulet'
     });
 
     return {

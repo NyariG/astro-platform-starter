@@ -100,7 +100,8 @@ export default function QuoteForm() {
                 telekMeret: teruletSzam(eff.telekMeret),
                 ontozendoTerulet: teruletSzam(eff.ontozendoTerulet),
                 hotermelok: eff.hotermelok,
-                nincsHutes: eff.mennyezetHutes === 'nem'
+                nincsHutes: eff.mennyezetHutes === 'nem',
+                ingatlanJelleg: values.ingatlanJelleg
             },
             undefined,
             kupon ? { kod: kupon.kod, szazalek: kupon.szazalek, hatokorSzolgaltatasok: kupon.hatokorSzolgaltatasok } : null

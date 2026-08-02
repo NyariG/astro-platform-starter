@@ -524,3 +524,28 @@ describe('robusztusság', () => {
         expect(calculateQuote(bemenet()).arlistaVerzio).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
 });
+
+describe('lakóépület 200 m² feletti alapterület — egyedi árazás', () => {
+    it('200 m² feletti lakóépület fix szolgáltatással is egyedi, nincs végösszeg', () => {
+        const e = calculateQuote(bemenet({ ingatlanJelleg: 'lakoepulet', szolgaltatasok: ['klimaterv'], epuletTerulet: 201 }));
+        expect(e.vanEgyediArazas).toBe(true);
+        expect(e.vegosszeg).toBeNull();
+    });
+
+    it('pontosan 200 m² lakóépület még árazott', () => {
+        const e = calculateQuote(bemenet({ ingatlanJelleg: 'lakoepulet', szolgaltatasok: ['klimaterv'], epuletTerulet: 200 }));
+        expect(e.vanEgyediArazas).toBe(false);
+        expect(e.vegosszeg).toBe(50_000);
+    });
+
+    it('200 m² feletti nem-lakóépület nem lesz emiatt egyedi', () => {
+        const e = calculateQuote(bemenet({ ingatlanJelleg: 'ipari', szolgaltatasok: ['klimaterv'], epuletTerulet: 300 }));
+        expect(e.vanEgyediArazas).toBe(false);
+        expect(e.vegosszeg).toBe(50_000);
+    });
+
+    it('ingatlanJelleg nélkül (régi hívók) a küszöb nem aktiválódik', () => {
+        const e = calculateQuote(bemenet({ szolgaltatasok: ['klimaterv'], epuletTerulet: 300 }));
+        expect(e.vanEgyediArazas).toBe(false);
+    });
+});

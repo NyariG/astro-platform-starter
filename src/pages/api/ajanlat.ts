@@ -97,7 +97,8 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         ontozendoTerulet,
         hotermelok: input.hotermelok,
 
-        nincsHutes: input.mennyezetHutes === 'nem'
+        nincsHutes: input.mennyezetHutes === 'nem',
+        ingatlanJelleg: input.ingatlanJelleg
     };
 
     let arak: ArazasKonfig | undefined;
@@ -290,7 +291,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
                 branch: rekord.ingatlanJelleg === 'lakoepulet' ? 'lakoepulet' : 'ipari_egyeb',
                 emailSent: emailKiment,
 
-                pdfElerheto: pdfElerheto && emailKiment && !rekord.vanEgyediArazas,
+                pdfElerheto: pdfElerheto && emailKiment && kapcsolok.pdfUgyfel && !rekord.vanEgyediArazas && rekord.ingatlanJelleg === 'lakoepulet',
 
                 vegosszeg: arazasVegleges.vegosszeg,
                 vanEgyediArazas: arazasVegleges.vanEgyediArazas,
