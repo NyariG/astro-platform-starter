@@ -30,6 +30,7 @@ export type KapcsoloKonfig = {
     pdfAdmin: boolean;
     pdfUgyfel: boolean;
     debug: boolean;
+    napiLimit: boolean;
 };
 
 const ARAK_KULCS = 'config/arak';
@@ -70,7 +71,8 @@ export const SEED_SZOVEGEK: SzovegKonfig = {
 export const SEED_KAPCSOLOK: KapcsoloKonfig = {
     pdfAdmin: true,
     pdfUgyfel: true,
-    debug: false
+    debug: false,
+    napiLimit: true
 };
 
 export async function betoltArak(): Promise<ArazasKonfig> {
@@ -90,7 +92,8 @@ export async function mentsdSzovegek(config: SzovegKonfig, modositotta: string, 
 }
 
 export async function betoltKapcsolok(): Promise<KapcsoloKonfig> {
-    return olvasKonfig(KAPCSOLOK_KULCS, SEED_KAPCSOLOK);
+    const tarolt = await olvasKonfig(KAPCSOLOK_KULCS, SEED_KAPCSOLOK);
+    return { ...SEED_KAPCSOLOK, ...tarolt };
 }
 
 export async function mentsdKapcsolok(config: KapcsoloKonfig, modositotta: string, mit: string): Promise<VerzioMeta> {

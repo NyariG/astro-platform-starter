@@ -128,7 +128,8 @@ const FOMENU: InlineButton[][] = [
     [
         { text: '📄 PDF-generálás', callback_data: 'menu:pdf' },
         { text: '🐞 Debug mód', callback_data: 'menu:debug' }
-    ]
+    ],
+    [{ text: '📧 Napi e-mail limit', callback_data: 'menu:limit' }]
 ];
 
 function vissza(): InlineButton[] {
@@ -169,6 +170,15 @@ async function debugMenu(chatId: number): Promise<void> {
     const k = await betoltKapcsolok();
     const szoveg = k.debug ? '🐞 <b>Debug mód</b>: 🟢 BE\n\n⚠️ Figyelem: a debug mód BE van kapcsolva — élesben ne maradjon így!' : '🐞 <b>Debug mód</b>: 🔴 KI';
     const keyboard: InlineButton[][] = [[{ text: k.debug ? 'Kikapcsolom' : 'Bekapcsolom', callback_data: 'debug:toggle' }], vissza()];
+    await sendMessage(chatId, szoveg, { keyboard });
+}
+
+async function limitMenu(chatId: number): Promise<void> {
+    const k = await betoltKapcsolok();
+    const szoveg = k.napiLimit
+        ? '📧 <b>Napi e-mail limit</b>: 🟢 BE\n\nCímenként naponta 1 árajánlat-levél mehet ki. A korlát fölötti ismételt kérésnél az ügyfél NEM kap levelet, de figyelmeztetést sem lát — csak simán nem küldjük ki. (Az IP-alapú fék is aktív.)'
+        : '📧 <b>Napi e-mail limit</b>: 🔴 KI (korlátlan)\n\nMinden ajánlatkérésre kimegy a levél, IP-korlát nélkül.';
+    const keyboard: InlineButton[][] = [[{ text: k.napiLimit ? '🔓 Korlátlanra (KI)' : '🔒 Napi 1-re (BE)', callback_data: 'limit:toggle' }], vissza()];
     await sendMessage(chatId, szoveg, { keyboard });
 }
 
@@ -546,6 +556,10 @@ export async function kezelMenuCallback(chatId: number, data: string): Promise<b
         await debugMenu(chatId);
         return true;
     }
+    if (data === 'menu:limit') {
+        await limitMenu(chatId);
+        return true;
+    }
     if (data === 'menu:arak') {
         await arakSzovegekMenu(chatId);
         return true;
@@ -655,6 +669,12 @@ export async function kezelMenuCallback(chatId: number, data: string): Promise<b
         const k = await betoltKapcsolok();
         await mentsdKapcsolok({ ...k, debug: !k.debug }, String(chatId), 'Debug-kapcsoló módosítás');
         await debugMenu(chatId);
+        return true;
+    }
+    if (data === 'limit:toggle') {
+        const k = await betoltKapcsolok();
+        await mentsdKapcsolok({ ...k, napiLimit: !k.napiLimit }, String(chatId), 'Napi e-mail limit módosítás');
+        await limitMenu(chatId);
         return true;
     }
 

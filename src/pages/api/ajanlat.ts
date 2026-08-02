@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { fieldErrors, quoteInputSchema, teruletSzam } from '../../utils/ajanlat/schema';
 import { calculateQuote } from '../../utils/ajanlat/pricing';
-import { betoltArak, betoltKapcsolok, SEED_KAPCSOLOK, type ArazasKonfig } from '../../utils/ajanlat/admin-config';
+import { betoltArak, betoltKapcsolok, SEED_KAPCSOLOK, type ArazasKonfig, type KapcsoloKonfig } from '../../utils/ajanlat/admin-config';
 import { kuponKeres, kuponNormalizal, kuponTeljesKod } from '../../utils/ajanlat/coupons';
 import { betoltKuponokBiztonsagos } from '../../utils/ajanlat/kupon-store';
 import { GDPR_KONSZENT_SZOVEG, GDPR_KONSZENT_VERZIO, JOGI_NYILATKOZAT_VERZIO } from '../../utils/ajanlat/legal-notice';
@@ -30,8 +30,6 @@ import {
 export const prerender = false;
 
 const ALAPERTELMEZETT_IP_LIMIT = 10;
-
-const LIMIT_UZENET = 'Naponta csak 1 árajánlat kérhető. Kérjük, próbálja meg holnap újra, vagy vegye fel velünk a kapcsolatot közvetlenül.';
 
 function json(body: unknown, status: number): Response {
     return new Response(JSON.stringify(body), {
@@ -69,7 +67,14 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
     const datum = dateKey();
     const emailNormalized = normalizeEmail(input.email);
 
-    if (clientAddress) {
+    let kapcsolok: KapcsoloKonfig = SEED_KAPCSOLOK;
+    try {
+        kapcsolok = await betoltKapcsolok();
+    } catch (hiba) {
+        console.error('[ajanlat] kapcsoló-konfiguráció betöltése sikertelen, alapértékkel folytatom', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+    }
+
+    if (kapcsolok.napiLimit && clientAddress) {
         try {
             const engedelyezett = await consumeIpQuota(await hashIp(clientAddress), datum, ipLimit());
             if (!engedelyezett) {
@@ -147,31 +152,52 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
 
     try {
 
-        const { claimed } = await claimQuota(emailNormalized, datum, id);
+        if (kapcsolok.napiLimit) {
+            const { claimed } = await claimQuota(emailNormalized, datum, id);
 
-        if (!claimed) {
-            const { attempts, exact, reclaimed } = await registerAttempt(emailNormalized, datum, id);
+            if (!claimed) {
+                const { attempts, exact, reclaimed } = await registerAttempt(emailNormalized, datum, id);
 
-            if (!reclaimed) {
-                const blokkolt: QuoteRecord = { ...alap, status: 'blocked', attemptNumber: attempts };
-                await saveRequest(blokkolt);
+                if (!reclaimed) {
+                    const blokkolt: QuoteRecord = { ...alap, status: 'blocked', attemptNumber: attempts };
+                    await saveRequest(blokkolt);
 
-                try {
-                    await ismeteltKiserletLevele(blokkolt, exact);
-                } catch (hiba) {
-                    const uzenet = hiba instanceof Error ? hiba.message : String(hiba);
-                    console.error('[ajanlat] üzemeltetői figyelmeztetés küldése sikertelen', { id, uzenet });
-                    await patchRequest(id, { emailError: uzenet });
+                    try {
+                        await ismeteltKiserletLevele(blokkolt, exact);
+                    } catch (hiba) {
+                        const uzenet = hiba instanceof Error ? hiba.message : String(hiba);
+                        console.error('[ajanlat] üzemeltetői figyelmeztetés küldése sikertelen', { id, uzenet });
+                        await patchRequest(id, { emailError: uzenet });
+                    }
+
+                    try {
+                        await ertesitsUjAjanlat(blokkolt);
+                    } catch (hiba) {
+                        console.error('[ajanlat] Telegram admin-értesítés sikertelen', { id, uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
+                    }
+
+                    console.info('[ajanlat] napi limit — ügyfél levél némán kihagyva', {
+                        id,
+                        email: maszkoltEmail(input.email),
+                        kiserlet: attempts,
+                        pontos: exact
+                    });
+
+                    return json(
+                        {
+                            ok: true,
+                            id,
+                            branch: blokkolt.ingatlanJelleg === 'lakoepulet' ? 'lakoepulet' : 'ipari_egyeb',
+                            emailSent: false,
+                            pdfElerheto: false,
+                            vegosszeg: blokkolt.vegosszeg,
+                            vanEgyediArazas: blokkolt.vanEgyediArazas,
+                            kuponBevaltva: false,
+                            kuponKert: input.kuponKod.trim() !== ''
+                        },
+                        200
+                    );
                 }
-
-                console.info('[ajanlat] napi limit blokkolta', {
-                    id,
-                    email: maszkoltEmail(input.email),
-                    kiserlet: attempts,
-                    pontos: exact
-                });
-
-                return json({ ok: false, error: 'daily_limit', message: LIMIT_UZENET }, 429);
             }
         }
 
@@ -205,13 +231,6 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
             vanEgyediArazas: arazasVegleges.vanEgyediArazas
         };
         await saveRequest(rekord);
-
-        let kapcsolok = SEED_KAPCSOLOK;
-        try {
-            kapcsolok = await betoltKapcsolok();
-        } catch (hiba) {
-            console.error('[ajanlat] kapcsoló-konfiguráció betöltése sikertelen, alapértékkel folytatom', { uzenet: hiba instanceof Error ? hiba.message : String(hiba) });
-        }
 
         const pdf = kapcsolok.pdfAdmin || kapcsolok.pdfUgyfel ? await keszitsArajanlatPdf(rekord) : null;
         let pdfElerheto = false;
