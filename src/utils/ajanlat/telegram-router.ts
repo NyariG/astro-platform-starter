@@ -1,7 +1,7 @@
 import { answerCallbackQuery, sendMessage, telegramKonfiguralva, type InlineButton } from './telegram';
 import { checkRateLimit, consumeLinkToken, isAdmin, linkAdmin, listAdmins, markUpdateProcessed, unlinkAdmin } from './telegram-store';
 import { ujAjanlatUzenet } from './telegram-uzenet';
-import { fomenu as adminFomenu, kezelAllapotBemenet, kezelMenuCallback } from './telegram-menu';
+import { adminokMenu, fomenu as adminFomenu, kezelAllapotBemenet, kezelMenuCallback } from './telegram-menu';
 import { readEnv, type QuoteRecord } from './store';
 
 type Chat = { id: number };
@@ -36,7 +36,9 @@ function helpSzoveg(linkelt: boolean): string {
         '/help — ez a súgó',
         '/link — fiók-összekötés tudnivalói',
         '/unlink — fiók leválasztása',
-        '/status — a kapcsolat állapota'
+        '/status — a kapcsolat állapota',
+        '/admin — vezérlőmenü',
+        '/adminok — adminok kezelése (hozzáadás, eltávolítás)'
     ];
     if (!linkelt) {
         sorok.push('', '⛔ A vezérlő parancsok csak összekötött fiókból érhetők el.');
@@ -116,6 +118,10 @@ async function kezelParancs(message: Message): Promise<void> {
         case '/menu':
             if (!linkelt) return elutasit(chatId);
             await adminFomenu(chatId);
+            return;
+        case '/adminok':
+            if (!linkelt) return elutasit(chatId);
+            await adminokMenu(chatId);
             return;
         default:
             if (TODO_PARANCSOK.has(parancs)) {

@@ -1,12 +1,12 @@
 import { sendMessage, type InlineButton } from './telegram';
 import { betoltArak, betoltKapcsolok, betoltSzovegek, mentsdArak, mentsdKapcsolok, mentsdSzovegek, type ArazasKonfig, type KapcsoloKonfig, type SzovegKonfig } from './admin-config';
 import { savKonfigHibak, type Szolgaltatas } from './pricing-config';
-import { allapotMent, allapotOlvas, allapotTorol } from './telegram-store';
+import { allapotMent, allapotOlvas, allapotTorol, createLinkToken, listAdmins, unlinkAdmin, type TelegramAdmin } from './telegram-store';
 import { betoltKuponok, mentsdKuponok } from './kupon-store';
 import { kuponHiba, kuponNormalizal, kuponTeljesKod, type Coupon } from './coupons';
 import { ujAjanlatUzenet } from './telegram-uzenet';
 import { csakSzamjegy, forint } from './format';
-import { auditHozzaad, auditNaplo, dateKey, getRequest, listaKerelmek, patchRequest, type QuoteRecord, type QuoteStatus } from './store';
+import { auditHozzaad, auditNaplo, dateKey, getRequest, listaKerelmek, patchRequest, readEnv, type QuoteRecord, type QuoteStatus } from './store';
 import { ezresPont } from './pdf/format';
 
 const OLDAL_MERET = 6;
@@ -129,7 +129,10 @@ const FOMENU: InlineButton[][] = [
         { text: '📄 PDF-generálás', callback_data: 'menu:pdf' },
         { text: '🐞 Debug mód', callback_data: 'menu:debug' }
     ],
-    [{ text: '📧 Napi e-mail limit', callback_data: 'menu:limit' }]
+    [
+        { text: '📧 Napi e-mail limit', callback_data: 'menu:limit' },
+        { text: '👤 Adminok', callback_data: 'menu:adminok' }
+    ]
 ];
 
 function vissza(): InlineButton[] {
@@ -180,6 +183,65 @@ async function limitMenu(chatId: number): Promise<void> {
         : '📧 <b>Napi e-mail limit</b>: 🔴 KI (korlátlan)\n\nMinden ajánlatkérésre kimegy a levél, IP-korlát nélkül.';
     const keyboard: InlineButton[][] = [[{ text: k.napiLimit ? '🔓 Korlátlanra (KI)' : '🔒 Napi 1-re (BE)', callback_data: 'limit:toggle' }], vissza()];
     await sendMessage(chatId, szoveg, { keyboard });
+}
+
+function ujLinkToken(): string {
+    const bajtok = new Uint8Array(24);
+    crypto.getRandomValues(bajtok);
+    return Array.from(bajtok, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function adminNev(a: TelegramAdmin): string {
+    return a.username ? `@${a.username}` : `azonosító: ${a.chatId}`;
+}
+
+export async function adminokMenu(chatId: number): Promise<void> {
+    const adminok = await listAdmins();
+    const sorok = adminok.map((a) => `• ${escHtml(adminNev(a))}${a.chatId === chatId ? ' <i>(te)</i>' : ''} — összekötve: ${idopontRovid(a.linkedAt)}`);
+    const gombok: InlineButton[][] = adminok.map((a) => [{ text: `🗑 Eltávolít: ${a.username ? '@' + a.username : a.chatId}`, callback_data: `admin:torol:${a.chatId}` }]);
+    gombok.push([{ text: '➕ Új admin', callback_data: 'admin:uj' }]);
+    gombok.push(vissza());
+    await sendMessage(chatId, ['👤 <b>Adminok</b> — ' + adminok.length + ' fő', '', ...sorok].join('\n'), { keyboard: gombok });
+}
+
+async function adminUjLink(chatId: number): Promise<void> {
+    const token = ujLinkToken();
+    await createLinkToken(token);
+    const botNev = readEnv('TELEGRAM_BOT_USERNAME');
+    const link = botNev ? `https://t.me/${botNev}?start=${token}` : null;
+    const szoveg = link
+        ? `➕ <b>Új admin meghívása</b>\n\nKüldd el ezt a linket az új adminnak — 10 percig él, egyszer használatos:\n\n${link}\n\nMiután megnyitja és a botban a Start gombra koppint, adminná válik.`
+        : `➕ <b>Új admin meghívása</b>\n\nA bot felhasználóneve nincs beállítva, ezért az új admin ezt írja be a botnak (10 percig él, egyszer használatos):\n\n<code>/start ${token}</code>`;
+    await sendMessage(chatId, szoveg, { keyboard: [[{ text: '⬅️ Adminok', callback_data: 'menu:adminok' }]] });
+}
+
+async function adminTorolMegerosites(chatId: number, celChatId: number): Promise<void> {
+    const adminok = await listAdmins();
+    if (adminok.length <= 1) {
+        await sendMessage(chatId, '⚠️ Az utolsó admin nem távolítható el — különben senki sem tudná vezérelni a botot. Előbb köss össze egy másik admint.', { keyboard: [[{ text: '⬅️ Adminok', callback_data: 'menu:adminok' }]] });
+        return;
+    }
+    const cel = adminok.find((a) => a.chatId === celChatId);
+    const nev = cel ? escHtml(adminNev(cel)) : String(celChatId);
+    await sendMessage(chatId, `🗑 Biztosan eltávolítod${celChatId === chatId ? ' saját magadat' : ''} ezt az admint: <b>${nev}</b>?`, {
+        keyboard: [
+            [
+                { text: '✅ Igen, eltávolítom', callback_data: `admin:torolMegerosit:${celChatId}` },
+                { text: '↩️ Mégse', callback_data: 'menu:adminok' }
+            ]
+        ]
+    });
+}
+
+async function adminTorol(chatId: number, celChatId: number): Promise<void> {
+    const adminok = await listAdmins();
+    if (adminok.length <= 1) {
+        await sendMessage(chatId, '⚠️ Az utolsó admin nem távolítható el.', { keyboard: [[{ text: '⬅️ Adminok', callback_data: 'menu:adminok' }]] });
+        return;
+    }
+    await unlinkAdmin(celChatId);
+    await sendMessage(chatId, '✅ Az admin eltávolítva.');
+    await adminokMenu(chatId);
 }
 
 async function arakSzovegekMenu(chatId: number): Promise<void> {
@@ -558,6 +620,24 @@ export async function kezelMenuCallback(chatId: number, data: string): Promise<b
     }
     if (data === 'menu:limit') {
         await limitMenu(chatId);
+        return true;
+    }
+    if (data === 'menu:adminok') {
+        await adminokMenu(chatId);
+        return true;
+    }
+    if (data === 'admin:uj') {
+        await adminUjLink(chatId);
+        return true;
+    }
+    if (data.startsWith('admin:torolMegerosit:')) {
+        const cel = Number.parseInt(data.slice('admin:torolMegerosit:'.length), 10);
+        if (Number.isFinite(cel)) await adminTorol(chatId, cel);
+        return true;
+    }
+    if (data.startsWith('admin:torol:')) {
+        const cel = Number.parseInt(data.slice('admin:torol:'.length), 10);
+        if (Number.isFinite(cel)) await adminTorolMegerosites(chatId, cel);
         return true;
     }
     if (data === 'menu:arak') {
