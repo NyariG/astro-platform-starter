@@ -6,7 +6,7 @@ import { betoltKuponok, mentsdKuponok } from './kupon-store';
 import { kuponHiba, kuponNormalizal, kuponTeljesKod, type Coupon } from './coupons';
 import { ujAjanlatUzenet } from './telegram-uzenet';
 import { csakSzamjegy, forint } from './format';
-import { auditHozzaad, auditNaplo, dateKey, getRequest, listaKerelmek, patchRequest, readEnv, type QuoteRecord, type QuoteStatus } from './store';
+import { auditHozzaad, auditNaplo, dateKey, deleteRequest, getRequest, listaKerelmek, patchRequest, readEnv, type QuoteRecord, type QuoteStatus } from './store';
 import { ezresPont } from './pdf/format';
 
 const OLDAL_MERET = 6;
@@ -530,7 +530,10 @@ async function ajanlatReszletek(chatId: number, id: string): Promise<void> {
             { text: '⏰ Lejárt', callback_data: `ajanlat:status:${id}:lejart` },
             { text: '🔒 Lezárás', callback_data: `ajanlat:confirm:${id}` }
         ],
-        [{ text: '🧾 Napló', callback_data: `ajanlat:audit:${id}` }],
+        [
+            { text: '🧾 Napló', callback_data: `ajanlat:audit:${id}` },
+            { text: '🗑 Törlés', callback_data: `ajanlat:torol:${id}` }
+        ],
         [
             { text: '⬅️ Lista', callback_data: 'ajanlat:lista:0' },
             { text: '🏠 Főmenü', callback_data: 'menu:fo' }
@@ -561,6 +564,28 @@ async function ajanlatAudit(chatId: number, id: string): Promise<void> {
     const naplo = await auditNaplo(id);
     const sorok = naplo.length === 0 ? ['(nincs napló-bejegyzés)'] : naplo.map((b) => `• ${idopontRovid(b.mikor)} — ${b.mit}`);
     await sendMessage(chatId, `🧾 <b>Napló</b>\n\n${sorok.join('\n')}`, { keyboard: [[{ text: '⬅️ Vissza az ajánlathoz', callback_data: `ajanlat:reszlet:${id}` }]] });
+}
+
+async function ajanlatTorlesMegerosites(chatId: number, id: string): Promise<void> {
+    const r = await getRequest(id);
+    if (!r) {
+        await sendMessage(chatId, '⚠️ Az ajánlat nem található.', { keyboard: [[{ text: '⬅️ Lista', callback_data: 'ajanlat:lista:0' }]] });
+        return;
+    }
+    await sendMessage(chatId, `🗑 Biztosan <b>véglegesen törlöd</b> ezt az ajánlatot?\n\n<b>${escHtml(r.nev)}</b> · ${osszegLeiras(r)}\n\n⚠️ Ez nem visszavonható — a rekord, a PDF és a napló is törlődik.`, {
+        keyboard: [
+            [
+                { text: '🗑 Igen, véglegesen törlöm', callback_data: `ajanlat:torolMegerosit:${id}` },
+                { text: '↩️ Mégse', callback_data: `ajanlat:reszlet:${id}` }
+            ]
+        ]
+    });
+}
+
+async function ajanlatTorles(chatId: number, id: string): Promise<void> {
+    await deleteRequest(id);
+    await sendMessage(chatId, '✅ Az ajánlat véglegesen törölve.');
+    await ajanlatokMenu(chatId, 0);
 }
 
 const STATUSZ_VALTHATO: QuoteStatus[] = ['elfogadva', 'elutasitva', 'lejart', 'lezarva'];
@@ -697,6 +722,14 @@ export async function kezelMenuCallback(chatId: number, data: string): Promise<b
     }
     if (data.startsWith('ajanlat:confirm:')) {
         await lezarasMegerosites(chatId, data.slice('ajanlat:confirm:'.length));
+        return true;
+    }
+    if (data.startsWith('ajanlat:torolMegerosit:')) {
+        await ajanlatTorles(chatId, data.slice('ajanlat:torolMegerosit:'.length));
+        return true;
+    }
+    if (data.startsWith('ajanlat:torol:')) {
+        await ajanlatTorlesMegerosites(chatId, data.slice('ajanlat:torol:'.length));
         return true;
     }
     if (data.startsWith('ajanlat:status:')) {

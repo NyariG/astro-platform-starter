@@ -338,6 +338,12 @@ export async function getPdf(id: string): Promise<ArrayBuffer | null> {
     return (await store().get(pdfKey(id), { type: 'arrayBuffer' })) as ArrayBuffer | null;
 }
 
+export async function deleteRequest(id: string): Promise<void> {
+    await store().delete(requestKey(id));
+    await store().delete(pdfKey(id));
+    await store().delete(`audit/${id}`);
+}
+
 /** Az árajánlat-sablon két változata a Blobsban. */
 export type SablonTipus = 'nyers' | 'normalizalt';
 
