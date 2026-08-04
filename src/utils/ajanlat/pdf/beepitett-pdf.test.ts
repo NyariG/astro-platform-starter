@@ -35,6 +35,8 @@ function rekord(felulir: Partial<QuoteRecord> = {}): QuoteRecord {
         hotermelok,
         mennyezetHutes,
         hutesOpciok: [],
+        egyediLeiras: null,
+        softLock: false,
         kuponKod: null,
         jogiNyilatkozatVerzio: '1.0',
         tetelek: arazas.tetelek,

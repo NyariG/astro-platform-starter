@@ -8,6 +8,10 @@ export const ENERGETIKAI_TANUSITVANY_DIJ = 30_000;
 
 export const LAKOEPULET_MAX_ALAPTERULET = 200;
 
+export const EGYEDI_LEIRAS_MIN = 15;
+
+export const EGYEDI_LEIRAS_MAX = 500;
+
 export type TeruletFajta = 'epulet' | 'telek' | 'ontozes';
 
 export type Sav = {

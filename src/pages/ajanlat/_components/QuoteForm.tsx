@@ -5,7 +5,7 @@ import { DebugPanel } from './DebugPanel';
 import { Stepper } from './FormControls';
 import { ResultPanel, type Eredmeny } from './ResultPanel';
 import { fieldErrors, quoteInputSchema, teruletSzam } from '../../../utils/ajanlat/schema';
-import { calculateQuote } from '../../../utils/ajanlat/pricing';
+import { calculateQuote, softLockAktiv } from '../../../utils/ajanlat/pricing';
 import { effektivUrlap, kliensExtraHibak, normalizalAllapot } from '../../../utils/ajanlat/lathatosag';
 
 const VEGPONT = '/api/ajanlat';
@@ -101,7 +101,8 @@ export default function QuoteForm() {
                 ontozendoTerulet: teruletSzam(eff.ontozendoTerulet),
                 hotermelok: eff.hotermelok,
                 nincsHutes: eff.mennyezetHutes === 'nem',
-                ingatlanJelleg: values.ingatlanJelleg
+                ingatlanJelleg: values.ingatlanJelleg,
+                egyediLeiras: values.egyediLeiras
             },
             undefined,
             kupon ? { kod: kupon.kod, szazalek: kupon.szazalek, hatokorSzolgaltatasok: kupon.hatokorSzolgaltatasok } : null
@@ -124,7 +125,8 @@ export default function QuoteForm() {
         const eff = effektivUrlap(values);
         const sema = quoteInputSchema.safeParse(eff);
         const semaHibak = sema.success ? {} : fieldErrors(sema.error);
-        const osszes: Record<string, string> = { ...semaHibak, ...kliensExtraHibak(values) };
+        const extra = softLockAktiv(values.egyediLeiras) ? {} : kliensExtraHibak(values);
+        const osszes: Record<string, string> = { ...semaHibak, ...extra };
         if (!mezok) return osszes;
         return Object.fromEntries(Object.entries(osszes).filter(([mezo]) => mezok.includes(mezo)));
     };

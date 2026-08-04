@@ -251,31 +251,49 @@ export function lakoepuletUgyfelLevel(record: QuoteRecord, vanPdf = true): Email
 }
 
 export function altalanosUgyfelLevel(record: QuoteRecord): EmailTorzs {
+    const softLock = record.softLock && !!record.egyediLeiras;
+
+    const bevezeto = softLock
+        ? 'Ön egyedi igényt fogalmazott meg, amelyet kollégánk személyesen mér fel és áraz — ezért erre a megkeresésre nem automatikus, hanem személyre szabott árajánlattal válaszolunk.'
+        : 'Az ipari és egyedi jellegű projektek minden esetben személyre szabott tervezői megközelítést igényelnek, ezért ezekre az igények alapos felmérését követően, egyedi árajánlattal válaszolunk.';
+
+    const kozepHtml = softLock
+        ? `<p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Az Ön leírása</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background:${HATTER};border:1px solid ${KERET};border-radius:10px;margin:0 0 18px;">
+      <tr><td style="padding:14px 18px;font-size:14px;color:${SZOVEG};line-height:1.7;white-space:pre-wrap;">${esc(record.egyediLeiras ?? '')}</td></tr>
+    </table>
+    <p style="margin:0 0 18px;">Munkatársunk hamarosan felveszi Önnel a kapcsolatot a részletek egyeztetése és a személyre szabott árajánlat elkészítése céljából. Terveink szerint néhány munkanapon belül jelentkezünk; ha időközben bármi kiegészítése lenne, elég válaszolnia erre a levélre.</p>`
+        : `<p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Az Ön kérése röviden</p>
+    ${osszefoglaloHtml(record)}`;
+
     const html = `
     <p style="margin:0 0 16px;font-size:16px;">Kedves ${esc(record.nev)}!</p>
     <p style="margin:0 0 16px;">
       Köszönjük, hogy ajánlatkérésével megtisztelte a Nyári Tervet. Megkeresését megkaptuk.
     </p>
-    <p style="margin:0 0 18px;">
-      Az ipari és egyedi jellegű projektek minden esetben személyre szabott tervezői megközelítést igényelnek,
-      ezért ezekre az igények alapos felmérését követően, egyedi árajánlattal válaszolunk.
-    </p>
-    <p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Az Ön kérése röviden</p>
-    ${osszefoglaloHtml(record)}
+    <p style="margin:0 0 18px;">${bevezeto}</p>
+    ${kozepHtml}
     ${jogiLevelHtml()}
     <p style="margin:20px 0 0;color:${HALVANY};font-size:13px;">
       Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a
       <a href="tel:+36703187843" style="color:${MARKA};text-decoration:none;">+36 70 318 7843</a> számon.
     </p>`;
 
+    const kozepText = softLock
+        ? `Az Ön leírása:
+${record.egyediLeiras ?? ''}
+
+Munkatársunk hamarosan felveszi Önnel a kapcsolatot a részletek egyeztetése és a személyre szabott árajánlat elkészítése céljából. Terveink szerint néhány munkanapon belül jelentkezünk; ha időközben bármi kiegészítése lenne, elég válaszolnia erre a levélre.`
+        : `Az Ön kérése röviden:
+${osszefoglaloText(record)}`;
+
     const text = `Kedves ${record.nev}!
 
 Köszönjük, hogy ajánlatkérésével megtisztelte a Nyári Tervet. Megkeresését megkaptuk.
 
-Az ipari és egyedi jellegű projektek minden esetben személyre szabott tervezői megközelítést igényelnek, ezért ezekre az igények alapos felmérését követően, egyedi árajánlattal válaszolunk.
+${bevezeto}
 
-Az Ön kérése röviden:
-${osszefoglaloText(record)}
+${kozepText}
 ${jogiLevelText()}
 
 Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a +36 70 318 7843 számon.
@@ -283,9 +301,12 @@ Kérdése van? Válaszoljon erre a levélre, vagy hívjon minket a +36 70 318 78
 Nyári Terv — épületgépészeti tervezés
 info@nyariterv.hu · +36 70 318 7843`;
 
+    const cim = softLock ? 'Egyedi igényét rögzítettük' : 'Megkeresését rögzítettük';
+    const elonezet = softLock ? `${record.nev}, megkaptuk az egyedi igényét — kollégánk személyre szabott árajánlattal jelentkezik.` : `${record.nev}, megkaptuk a megkeresését — kollégánk hamarosan jelentkezik.`;
+
     return {
-        subject: 'Megkeresését rögzítettük — Nyári Terv',
-        html: keret('Megkeresését rögzítettük', html, `${record.nev}, megkaptuk a megkeresését — kollégánk hamarosan jelentkezik.`),
+        subject: `${cim} — Nyári Terv`,
+        html: keret(cim, html, elonezet),
         text
     };
 }
@@ -310,6 +331,9 @@ export function uzemeltetoiAdatlap(record: QuoteRecord): EmailTorzs {
     <p style="margin:0 0 6px;font-size:18px;font-weight:800;color:${SZOVEG};">Új árajánlatkérés érkezett</p>
     <p style="margin:0 0 18px;color:${HALVANY};font-size:13px;">${esc(jelleg)} · Azonosító: <code style="font-size:12px;">${esc(record.id)}</code></p>
     ${record.vanEgyediArazas ? `<p style="margin:0 0 18px;padding:12px 16px;background:#fef3c7;border-left:4px solid #b45309;color:${SZOVEG};font-size:14px;font-weight:700;border-radius:0 8px 8px 0;">Egyedi árazás szükséges — a végösszeg nem számolható automatikusan.</p>` : ''}
+    ${record.egyediLeiras ? `<p style="margin:0 0 8px;font-weight:700;color:${SZOVEG};">Ügyfél egyedi leírása${record.softLock ? ' (soft-lock — a menük gépi árazása kihagyva)' : ''}</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;margin:0 0 8px;"><tr><td style="padding:14px 18px;font-size:14px;color:${SZOVEG};line-height:1.7;white-space:pre-wrap;">${esc(record.egyediLeiras)}</td></tr></table>
+    ${record.softLock && record.szolgaltatasok.length ? `<p style="margin:0 0 18px;color:${HALVANY};font-size:13px;">Nézegetett/kiválasztott opciók (kontextus, nem árazva): ${esc(labelsOf(SZOLGALTATAS_OPCIOK, record.szolgaltatasok).join(', '))}</p>` : '<div style="margin:0 0 18px;"></div>'}` : ''}
     ${kapcsolatBlokkHtml(record)}
     <p style="margin:0 0 10px;font-weight:700;color:${SZOVEG};">Árajánlat tételei (pontos)</p>
     ${arTablaHtml(record)}
@@ -318,7 +342,7 @@ export function uzemeltetoiAdatlap(record: QuoteRecord): EmailTorzs {
     <p style="margin:20px 0 0;color:${HALVANY};font-size:12px;line-height:1.6;">Forrás: ${esc(record.sourceUrl)}</p>`;
 
     const text = `ÚJ ÁRAJÁNLATKÉRÉS — ${jelleg}
-Azonosító: ${record.id}${record.vanEgyediArazas ? '\n\n!!! EGYEDI ÁRAZÁS SZÜKSÉGES — a végösszeg nem számolható automatikusan !!!' : ''}
+Azonosító: ${record.id}${record.vanEgyediArazas ? '\n\n!!! EGYEDI ÁRAZÁS SZÜKSÉGES — a végösszeg nem számolható automatikusan !!!' : ''}${record.egyediLeiras ? `\n\nÜGYFÉL EGYEDI LEÍRÁSA${record.softLock ? ' (soft-lock — a menük gépi árazása kihagyva)' : ''}:\n${record.egyediLeiras}${record.softLock && record.szolgaltatasok.length ? `\n\nNézegetett/kiválasztott opciók (kontextus, nem árazva): ${labelsOf(SZOLGALTATAS_OPCIOK, record.szolgaltatasok).join(', ')}` : ''}` : ''}
 
 Ügyfél: ${record.nev}
 E-mail: ${record.email}${record.telefon ? `\nTelefon: ${record.telefon}` : ''}

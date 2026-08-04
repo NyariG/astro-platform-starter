@@ -1,8 +1,9 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode, type RefObject } from 'react';
 import { CheckboxGroup, Collapsible, Field, NestedBlock, RadioGroup, SingleCheckbox, TeruletInput, TextInput } from './FormControls';
 import { CouponField, type AlkalmazottKupon } from './CouponField';
 import { HOTERMELOK, HUTES_OPCIOK, INGATLAN_JELLEG, MENNYEZET_HUTES, PINCE, SZOLGALTATAS_OPCIOK, TERV_CELJA, labelOf, labelsOf } from '../../../utils/ajanlat/options';
 import { effektivUrlap, mezoLathato } from '../../../utils/ajanlat/lathatosag';
+import { EGYEDI_LEIRAS_MAX, EGYEDI_LEIRAS_MIN } from '../../../utils/ajanlat/pricing-config';
 import { SZOLGALTATAS_FA } from '../../../utils/ajanlat/szolgaltatas-fa';
 import { negyzetmeter } from '../../../utils/ajanlat/format';
 import { GDPR_KONSZENT_SZOVEG, JOGI_CIM, JOGI_ROVID, JOGI_TELJES } from '../../../utils/ajanlat/legal-notice';
@@ -71,6 +72,7 @@ export type FormValues = {
     hutesOpciok: string[];
     /** A „Kertépítés" vizuális csoport nyitott állapota (UI-only). */
     kertepitesAktiv: boolean;
+    egyediLeiras: string;
     kuponKod: string;
     gdprConsent: boolean;
     _cegnev: string;
@@ -93,6 +95,7 @@ export const URES_URLAP: FormValues = {
     mennyezetHutes: '',
     hutesOpciok: [],
     kertepitesAktiv: false,
+    egyediLeiras: '',
     kuponKod: '',
     gdprConsent: false,
     _cegnev: ''
@@ -333,6 +336,68 @@ function KertBlokk({ values, errors, set, onBlur, toggleSzolg }: StepProps & { t
     );
 }
 
+function EgyediLeirasSzekcio({
+    nyitva,
+    softLock,
+    ertek,
+    onMegadom,
+    onChange,
+    onBlur,
+    onMegis,
+    textareaRef
+}: {
+    nyitva: boolean;
+    softLock: boolean;
+    ertek: string;
+    onMegadom: () => void;
+    onChange: (v: string) => void;
+    onBlur: () => void;
+    onMegis: () => void;
+    textareaRef: RefObject<HTMLTextAreaElement | null>;
+}) {
+    return (
+        <section className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-slate-900">Egyedi leírás megadása!</h3>
+            <p className="mt-1 text-sm text-slate-500">Ha nem biztos benne, hogy mit szeretne, ossza meg gondolatait velünk, segítünk választani!</p>
+
+            {!nyitva ? (
+                <button type="button" onClick={onMegadom} className="btn btn-secondary mt-3 min-h-11 sm:w-auto">
+                    Megadom
+                </button>
+            ) : (
+                <div className="mt-3 flex flex-col gap-2">
+                    {softLock && (
+                        <div role="status" className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm leading-relaxed text-slate-700">
+                            Egyedi igényt adott meg — ezt kollégánk személyesen árazza, ezért a fenti opciókat nem szerepeltetjük az automatikus árajánlatban.
+                        </div>
+                    )}
+                    <textarea
+                        ref={textareaRef}
+                        id="egyediLeiras"
+                        name="egyediLeiras"
+                        value={ertek}
+                        onChange={(e) => onChange(e.target.value)}
+                        onBlur={onBlur}
+                        maxLength={EGYEDI_LEIRAS_MAX}
+                        rows={4}
+                        placeholder="Írja le néhány mondatban, mire lenne szüksége…"
+                        aria-describedby="egyediLeiras-szamlalo"
+                        className="field-input min-h-28 resize-y"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <button type="button" onClick={onMegis} className="min-h-11 text-left text-sm font-medium text-primary underline hover:text-primary/80">
+                            Mégis opciókból kérek ajánlatot
+                        </button>
+                        <span id="egyediLeiras-szamlalo" aria-live="polite" className="text-xs tabular-nums text-slate-400">
+                            {ertek.length}/{EGYEDI_LEIRAS_MAX}
+                        </span>
+                    </div>
+                </div>
+            )}
+        </section>
+    );
+}
+
 export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
     const panelRef = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -354,6 +419,28 @@ export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
 
     const latszik = mezoLathato(values);
 
+    const [egyediNyitva, setEgyediNyitva] = useState(values.egyediLeiras.trim() !== '');
+    const [softLock, setSoftLock] = useState(values.egyediLeiras.trim().length >= EGYEDI_LEIRAS_MIN);
+    const egyediRef = useRef<HTMLTextAreaElement | null>(null);
+
+    const egyediMegadom = () => {
+        setEgyediNyitva(true);
+        window.setTimeout(() => egyediRef.current?.focus(), 60);
+    };
+    const egyediValtozott = (v: string) => {
+        const vagott = v.slice(0, EGYEDI_LEIRAS_MAX);
+        set('egyediLeiras', vagott);
+        if (vagott.trim() === '') setSoftLock(false);
+    };
+    const egyediBlur = () => {
+        setSoftLock(values.egyediLeiras.trim().length >= EGYEDI_LEIRAS_MIN);
+    };
+    const egyediMegis = () => {
+        set('egyediLeiras', '');
+        setSoftLock(false);
+        setEgyediNyitva(false);
+    };
+
     return (
         <div className="flex flex-col gap-6">
             {/* Az épület alapterülete MINDIG látható, a szolgáltatáslista fölött. */}
@@ -363,12 +450,24 @@ export function StepSzolgaltatasok({ values, errors, set, onBlur }: StepProps) {
                 </Field>
             </div>
 
-            <fieldset className="flex flex-col gap-2">
+            <EgyediLeirasSzekcio
+                nyitva={egyediNyitva}
+                softLock={softLock}
+                ertek={values.egyediLeiras}
+                onMegadom={egyediMegadom}
+                onChange={egyediValtozott}
+                onBlur={egyediBlur}
+                onMegis={egyediMegis}
+                textareaRef={egyediRef}
+            />
+
+            <fieldset disabled={softLock} className={`flex flex-col gap-2 transition-opacity duration-300 ${softLock ? 'opacity-45' : ''}`}>
                 <legend className="block text-sm font-medium text-slate-700">
                 Milyen tervezési munkát kér?
                 <span className="text-primary" aria-hidden="true">
                     {' *'}
                 </span>
+                {softLock && <span className="ml-2 inline-block rounded-full bg-slate-200 px-2 py-0.5 align-middle text-xs font-medium text-slate-600">nem kerül automatikus árazásra</span>}
             </legend>
             <p className="mb-2 text-sm text-slate-500">Több lehetőség is választható. Kerttel kapcsolatos tervek lentebb, a lenyíló menüben, a Kertépítés témában.</p>
 
@@ -467,10 +566,19 @@ export function StepAttekintes({ values, set, onKuponBevaltva }: StepProps & { o
     if (eff.hotermelok.length > 0) sorok.push(['Hőtermelők', labelsOf(HOTERMELOK, eff.hotermelok).join(', ')]);
     if (eff.mennyezetHutes) sorok.push(['Hűtés', labelOf(MENNYEZET_HUTES, eff.mennyezetHutes)]);
     if (eff.hutesOpciok.length > 0) sorok.push(['Hűtési igények', labelsOf(HUTES_OPCIOK, eff.hutesOpciok).join(', ')]);
+    if (values.egyediLeiras.trim() !== '') sorok.push(['Egyedi leírás', values.egyediLeiras.trim()]);
+
+    const softLock = values.egyediLeiras.trim().length >= EGYEDI_LEIRAS_MIN;
 
     return (
         <div className="flex flex-col gap-8">
-            <CouponField ertek={values.kuponKod} onValtozik={(kod) => set('kuponKod', kod)} onBevaltva={onKuponBevaltva} />
+            {softLock && (
+                <div role="status" className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-slate-700">
+                    Egyedi igényt adott meg, ezért <strong className="font-semibold">személyre szabott, kézi árajánlatot</strong> készítünk — a fenti opciók nem szerepelnek automatikus árazással. Kollégánk hamarosan jelentkezik.
+                </div>
+            )}
+
+            {!softLock && <CouponField ertek={values.kuponKod} onValtozik={(kod) => set('kuponKod', kod)} onBevaltva={onKuponBevaltva} />}
 
             <div>
                 <h2 className="mb-4 text-xl font-bold text-slate-900">A megadott adatok</h2>

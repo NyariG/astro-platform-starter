@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { HOTERMELOK_VALUES, HUTES_OPCIOK_VALUES, INGATLAN_JELLEG_VALUES, MENNYEZET_HUTES_VALUES, PINCE_VALUES, SZOLGALTATAS_VALUES, TERV_CELJA_VALUES } from './options';
-import { FUTESI_TERV, szuksegesTeruletek, type TeruletFajta } from './pricing-config';
+import { EGYEDI_LEIRAS_MAX, EGYEDI_LEIRAS_MIN, FUTESI_TERV, szuksegesTeruletek, type TeruletFajta } from './pricing-config';
 
 type EnumValues = [string, ...string[]];
 
@@ -105,7 +105,9 @@ export const quoteObjectSchema = z.object({
         .array(z.enum(szolgaltatasValues, { errorMap: () => ({ message: 'Ismeretlen szolgáltatás.' }) }), {
             invalid_type_error: 'Válasszon legalább egy szolgáltatást.'
         })
-        .min(1, 'Válasszon legalább egy szolgáltatást.'),
+        .default([]),
+
+    egyediLeiras: z.string().trim().max(EGYEDI_LEIRAS_MAX, `Az egyedi leírás legfeljebb ${EGYEDI_LEIRAS_MAX} karakter lehet.`).optional().default(''),
 
     hotermelok: z.array(z.enum(hotermelokValues, { errorMap: () => ({ message: 'Ismeretlen hőtermelő.' }) })).default([]),
 
@@ -132,12 +134,32 @@ export const quoteObjectSchema = z.object({
 });
 
 export const quoteInputSchema = quoteObjectSchema.superRefine((data, ctx) => {
-    // Területmezők: csak akkor kötelezőek, ha van rájuk támaszkodó szolgáltatás.
-    for (const fajta of szuksegesTeruletek(data.szolgaltatasok)) {
-        const mezo = TERULET_MEZO[fajta];
-        const eredmeny: TeruletEredmeny = teruletErtelmezes(String(data[mezo] ?? ''));
-        if (eredmeny.ok === false) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, path: [mezo], message: eredmeny.uzenet });
+    const softLock = (data.egyediLeiras ?? '').trim().length >= EGYEDI_LEIRAS_MIN;
+
+    // Soft-lock (egyedi szöveges igény) esetén a menü-alapú árazási mezők
+    // nem kötelezők — a menük csak kontextus, gépből nem árazzuk őket.
+    if (!softLock) {
+        if (data.szolgaltatasok.length === 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['szolgaltatasok'], message: 'Válasszon legalább egy szolgáltatást, vagy adjon meg egyedi leírást.' });
+        }
+
+        // Területmezők: csak akkor kötelezőek, ha van rájuk támaszkodó szolgáltatás.
+        for (const fajta of szuksegesTeruletek(data.szolgaltatasok)) {
+            const mezo = TERULET_MEZO[fajta];
+            const eredmeny: TeruletEredmeny = teruletErtelmezes(String(data[mezo] ?? ''));
+            if (eredmeny.ok === false) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, path: [mezo], message: eredmeny.uzenet });
+            }
+        }
+
+        // Fűtési terv esetén a hőtermelő megadása kötelező.
+        if (data.szolgaltatasok.includes(FUTESI_TERV) && data.hotermelok.length === 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['hotermelok'], message: 'Fűtési terv esetén válasszon legalább egy hőtermelőt.' });
+        }
+
+        // Hőtermelő fűtési terv nélkül értelmezhetetlen.
+        if (!data.szolgaltatasok.includes(FUTESI_TERV) && data.hotermelok.length > 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['hotermelok'], message: 'Hőtermelő csak fűtési terv igénylése esetén választható.' });
         }
     }
 
@@ -151,30 +173,6 @@ export const quoteInputSchema = quoteObjectSchema.superRefine((data, ctx) => {
                 message: 'A szintek száma 1 és 50 között lehet.'
             });
         }
-    }
-
-    // A „Szeretne hűtést?" kérdés kötelezőségét a kliens kapuzza
-    // (csak hőszivattyú esetén — lásd lathatosag.ts).
-    // Szerveroldalon ezért opcionális: üres = nincs kedvezmény. Így a csak
-    // fűtést kérő beküldés nem bukik el egy rejtett mező miatt.
-
-    // Fűtési terv esetén a hőtermelő megadása kötelező.
-    if (data.szolgaltatasok.includes(FUTESI_TERV) && data.hotermelok.length === 0) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['hotermelok'],
-            message: 'Fűtési terv esetén válasszon legalább egy hőtermelőt.'
-        });
-    }
-
-    // Hőtermelő fűtési terv nélkül értelmezhetetlen — a kliens ilyet nem küld,
-    // de a végpont közvetlen hívásánál előfordulhat.
-    if (!data.szolgaltatasok.includes(FUTESI_TERV) && data.hotermelok.length > 0) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['hotermelok'],
-            message: 'Hőtermelő csak fűtési terv igénylése esetén választható.'
-        });
     }
 
     // A telefonszám opcionális, de ha kitöltötték, legyen értelmezhető.

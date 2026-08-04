@@ -34,6 +34,9 @@ export type QuoteRecord = {
 
     hutesOpciok: string[];
 
+    egyediLeiras: string | null;
+    softLock: boolean;
+
     kuponKod: string | null;
 
     jogiNyilatkozatVerzio: string | null;

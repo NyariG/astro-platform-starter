@@ -1,5 +1,6 @@
 import {
     ARLISTA_VERZIO,
+    EGYEDI_LEIRAS_MIN,
     ENERGETIKAI_TANUSITVANY_DIJ,
     FUTESI_TERV,
     HOTERMELO_FELAR,
@@ -35,7 +36,13 @@ export type QuoteInput = {
     nincsHutes: boolean;
 
     ingatlanJelleg?: string;
+
+    egyediLeiras?: string;
 };
+
+export function softLockAktiv(egyediLeiras: string | null | undefined): boolean {
+    return (egyediLeiras ?? '').trim().length >= EGYEDI_LEIRAS_MIN;
+}
 
 export type Tetel = {
     kod: string;
@@ -300,7 +307,7 @@ export function calculateQuote(
     const kedvezmeny = jeloltek.reduce<Kedvezmeny | null>((legjobb, jelolt) => (legjobb === null || jelolt.osszeg > legjobb.osszeg ? jelolt : legjobb), null);
 
     const nagyLakoepulet = input.ingatlanJelleg === 'lakoepulet' && ervenyesTerulet(input.epuletTerulet) && input.epuletTerulet > LAKOEPULET_MAX_ALAPTERULET;
-    const vanEgyediArazas = nagyLakoepulet || tetelek.some((t) => t.status === 'CUSTOM_QUOTE');
+    const vanEgyediArazas = softLockAktiv(input.egyediLeiras) || nagyLakoepulet || tetelek.some((t) => t.status === 'CUSTOM_QUOTE');
     const figyelmeztetesek = tetelek.map((t) => t.uzenet).filter((uzenet): uzenet is string => Boolean(uzenet));
 
     return {

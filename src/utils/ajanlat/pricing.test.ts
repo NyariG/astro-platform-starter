@@ -549,3 +549,17 @@ describe('lakóépület 200 m² feletti alapterület — egyedi árazás', () =>
         expect(e.vanEgyediArazas).toBe(false);
     });
 });
+
+describe('soft-lock — egyedi szöveges igény', () => {
+    it('elég hosszú egyedi leírás egyedivé teszi az ajánlatot', () => {
+        const e = calculateQuote(bemenet({ szolgaltatasok: [], egyediLeiras: 'Komplett gépészeti felmérést szeretnék a régi családi házamhoz.' }));
+        expect(e.vanEgyediArazas).toBe(true);
+        expect(e.vegosszeg).toBeNull();
+    });
+
+    it('rövid (küszöb alatti) szöveg nem vált ki egyedit', () => {
+        const e = calculateQuote(bemenet({ szolgaltatasok: ['klimaterv'], egyediLeiras: 'köszi' }));
+        expect(e.vanEgyediArazas).toBe(false);
+        expect(e.vegosszeg).toBe(50_000);
+    });
+});

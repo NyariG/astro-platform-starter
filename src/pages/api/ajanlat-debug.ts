@@ -70,6 +70,8 @@ function elonezetiRekord(ertekek: Record<string, unknown>): QuoteRecord {
         hotermelok,
         mennyezetHutes,
         hutesOpciok: strTomb(ertekek.hutesOpciok),
+        egyediLeiras: str(ertekek.egyediLeiras) || null,
+        softLock: false,
         kuponKod: null,
         jogiNyilatkozatVerzio: JOGI_NYILATKOZAT_VERZIO,
         tetelek: arazas.tetelek,

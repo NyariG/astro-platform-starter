@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { fieldErrors, quoteInputSchema, teruletSzam } from '../../utils/ajanlat/schema';
-import { calculateQuote } from '../../utils/ajanlat/pricing';
+import { calculateQuote, softLockAktiv } from '../../utils/ajanlat/pricing';
 import { betoltArak, betoltKapcsolok, SEED_KAPCSOLOK, type ArazasKonfig, type KapcsoloKonfig } from '../../utils/ajanlat/admin-config';
 import { kuponKeres, kuponNormalizal, kuponTeljesKod } from '../../utils/ajanlat/coupons';
 import { betoltKuponokBiztonsagos } from '../../utils/ajanlat/kupon-store';
@@ -90,15 +90,18 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
     const telekMeret = teruletSzam(input.telekMeret);
     const ontozendoTerulet = teruletSzam(input.ontozendoTerulet);
 
+    const softLock = softLockAktiv(input.egyediLeiras);
+
     const arInput = {
-        szolgaltatasok: input.szolgaltatasok,
+        szolgaltatasok: softLock ? [] : input.szolgaltatasok,
         epuletTerulet: alapterulet,
         telekMeret,
         ontozendoTerulet,
-        hotermelok: input.hotermelok,
+        hotermelok: softLock ? [] : input.hotermelok,
 
         nincsHutes: input.mennyezetHutes === 'nem',
-        ingatlanJelleg: input.ingatlanJelleg
+        ingatlanJelleg: input.ingatlanJelleg,
+        egyediLeiras: input.egyediLeiras
     };
 
     let arak: ArazasKonfig | undefined;
@@ -131,6 +134,8 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
         hotermelok: input.hotermelok,
         mennyezetHutes: input.mennyezetHutes === '' ? null : input.mennyezetHutes,
         hutesOpciok: input.hutesOpciok,
+        egyediLeiras: input.egyediLeiras.trim() === '' ? null : input.egyediLeiras.trim(),
+        softLock,
         kuponKod: null,
         jogiNyilatkozatVerzio: JOGI_NYILATKOZAT_VERZIO,
         tetelek: arazas.tetelek,
@@ -204,7 +209,7 @@ export const POST: APIRoute = async ({ request, clientAddress, url }) => {
 
         let arazasVegleges = arazas;
         let bevaltottKupon: string | null = null;
-        if (input.kuponKod.trim() !== '') {
+        if (!softLock && input.kuponKod.trim() !== '') {
             const { kupon, allapot } = kuponKeres(input.kuponKod, datum, await betoltKuponokBiztonsagos());
             if (allapot === 'ervenyes' && kupon) {
                 const kod = kuponNormalizal(kuponTeljesKod(kupon));

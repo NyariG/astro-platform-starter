@@ -1,7 +1,7 @@
 import type { QuoteRecord } from './store';
 import type { InlineButton } from './telegram';
 import { ezresPont, kerekitEzresre } from './pdf/format';
-import { INGATLAN_JELLEG, labelOf } from './options';
+import { INGATLAN_JELLEG, SZOLGALTATAS_OPCIOK, labelOf, labelsOf } from './options';
 
 const SEP = '────────────────';
 const MAX_HOSSZ = 4096;
@@ -81,8 +81,16 @@ export function ujAjanlatUzenet(record: QuoteRecord, opciok: UzenetOpciok = {}):
 
     const lablec = [`🕒 ${idopontBudapest(record.createdAt)} · #${esc(record.id.slice(0, 8))}`];
 
+    const egyediBlokk: string[] = [];
+    if (record.egyediLeiras) {
+        egyediBlokk.push(SEP, `✍️ <b>Ügyfél egyedi leírása</b>${record.softLock ? ' (soft-lock — gépi árazás kihagyva)' : ''}`, esc(record.egyediLeiras));
+        if (record.softLock && record.szolgaltatasok.length > 0) {
+            egyediBlokk.push(`<i>Nézegetett opciók (kontextus): ${esc(labelsOf(SZOLGALTATAS_OPCIOK, record.szolgaltatasok).join(', '))}</i>`);
+        }
+    }
+
     const felso = [...fejlec, SEP, ...ugyfel, SEP, ...tetelFejlec];
-    const also = [SEP, ...osszegzes, SEP, ...lablec];
+    const also = [...egyediBlokk, SEP, ...osszegzes, SEP, ...lablec];
     const szoveg = osszeallit(felso, tetelSorok, also, maxHossz);
 
     const baseUrl = opciok.baseUrl ? opciok.baseUrl.replace(/\/+$/, '') : null;

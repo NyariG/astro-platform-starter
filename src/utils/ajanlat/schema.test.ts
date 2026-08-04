@@ -62,8 +62,19 @@ describe('kötelező mezők', () => {
         expect(hibak(ervenyes({ gdprConsent: false })).gdprConsent).toBe('Az adatkezelési hozzájárulás megadása kötelező.');
     });
 
-    it('elutasítja az üres szolgáltatáslistát', () => {
-        expect(hibak(ervenyes({ szolgaltatasok: [], hotermelok: [] })).szolgaltatasok).toBe('Válasszon legalább egy szolgáltatást.');
+    it('elutasítja az üres szolgáltatáslistát egyedi leírás nélkül', () => {
+        expect(hibak(ervenyes({ szolgaltatasok: [], hotermelok: [] })).szolgaltatasok).toBe('Válasszon legalább egy szolgáltatást, vagy adjon meg egyedi leírást.');
+    });
+
+    it('üres szolgáltatáslistát elfogad, ha van elég hosszú egyedi leírás (soft-lock)', () => {
+        const h = hibak(ervenyes({ szolgaltatasok: [], hotermelok: [], egyediLeiras: 'Szeretnék egy komplett gépészeti felmérést a régi házamhoz.' }));
+        expect(h.szolgaltatasok).toBeUndefined();
+    });
+
+    it('soft-lockban a hőtermelő/terület sem kötelező', () => {
+        const h = hibak(ervenyes({ szolgaltatasok: ['futesi_terv'], hotermelok: [], alapterulet: '', egyediLeiras: 'Egyedi fűtési rendszert szeretnék, kérem a segítségüket a tervezésben.' }));
+        expect(h.hotermelok).toBeUndefined();
+        expect(h.alapterulet).toBeUndefined();
     });
 });
 
