@@ -368,7 +368,7 @@ function EgyediLeirasSzekcio({
                 <div className="mt-3 flex flex-col gap-2">
                     {softLock && (
                         <div role="status" className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm leading-relaxed text-slate-700">
-                            Egyedi igényt adott meg — ezt kollégánk személyesen árazza, ezért a fenti opciókat nem szerepeltetjük az automatikus árajánlatban.
+                            Egyedi igényt adott meg — ezt kollégánk személyesen fogja megnézni és a megadott leírás alapján megkeressünk az Ön számára legjobb lehetőséget és ajánlatot.
                         </div>
                     )}
                     <textarea
@@ -574,7 +574,7 @@ export function StepAttekintes({ values, set, onKuponBevaltva }: StepProps & { o
         <div className="flex flex-col gap-8">
             {softLock && (
                 <div role="status" className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-slate-700">
-                    Egyedi igényt adott meg, ezért <strong className="font-semibold">személyre szabott, kézi árajánlatot</strong> készítünk — a fenti opciók nem szerepelnek automatikus árazással. Kollégánk hamarosan jelentkezik.
+                    Egyedi igényt adott meg, ezért <strong className="font-semibold">személyre szabott, kézi árajánlatot</strong> készítünk. Kollégánk hamarosan jelentkezni fog.
                 </div>
             )}
 
