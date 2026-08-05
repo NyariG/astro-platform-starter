@@ -368,7 +368,7 @@ function EgyediLeirasSzekcio({
                 <div className="mt-3 flex flex-col gap-2">
                     {softLock && (
                         <div role="status" className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm leading-relaxed text-slate-700">
-                            Egyedi igényt adott meg — ezt kollégánk személyesen fogja megnézni és a megadott leírás alapján megkeressünk az Ön számára legjobb lehetőséget és ajánlatot.
+                            Egyedi igényt adott meg — ezt kollégánk személyesen fogja megnézni, és a megadott leírás alapján megkeressük az Ön számára a legjobb lehetőséget és ajánlatot.
                         </div>
                     )}
                     <textarea
