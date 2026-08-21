@@ -4,23 +4,24 @@ import QuoteForm from './_components/QuoteForm.tsx';
 ---
 
 <Layout
-    title="Árajánlatkérés – Nyári Terv"
-    description="Kérjen árajánlatot épületgépészeti tervezésre. Töltse ki az űrlapot, és tervezőnk hamarosan jelentkezik."
+    title="Azonnali Árajánlatkérés – Nyári Terv"
+    description="Kérjen azonnali árajánlatot épületgépészeti tervezésre PDF-ben, mindössze 2 perc alatt."
     minimal
 >
-    <section class="section bg-slate-50">
+    <section class="section bg-slate-50 py-6 sm:py-8">
         <div class="container-custom">
             <div class="mx-auto max-w-2xl text-center">
-                <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Árajánlatkérés</h1>
-                <p class="mt-6 text-lg leading-8 text-slate-600">
-                    Néhány kérdés az ingatlanról és a tervezési igényeiről, és összeállítjuk Önnek a személyre szabott ajánlatot.
-                    A kitöltés körülbelül két percet vesz igénybe.
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                    Azonnali épületgépészeti árajánlat PDF-ben 2 perc alatt!
+                </h1>
+                <p class="mt-2 text-base text-slate-600 sm:text-lg">
+                    Válaszoljon pár egyszerű kérdésre az ingatlanról, és a rendszerünk azonnal kiállítja a személyre szabott ajánlatot.
                 </p>
             </div>
         </div>
     </section>
 
-    <section class="section pt-0">
+    <section class="section pt-2 sm:pt-4">
         <div class="container-custom">
             <div class="mx-auto max-w-6xl">
                 <QuoteForm client:load />
