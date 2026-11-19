@@ -62,9 +62,9 @@ async function regiKeretekTorlese(tar: ReturnType<typeof getStore>, mai: string)
     }
 }
 
-export async function ipKeretFoglalas(ipHash: string, datum: string): Promise<boolean> {
+export async function ipKeretFoglalas(ipHash: string, datum: string, tarNev = 'tanusitvany'): Promise<boolean> {
     try {
-        const tar = getStore({ name: 'tanusitvany', consistency: 'strong' });
+        const tar = getStore({ name: tarNev, consistency: 'strong' });
         await regiKeretekTorlese(tar, datum);
         const kulcs = `ip/${datum}/${ipHash}`;
         for (let i = 0; i < 3; i++) {

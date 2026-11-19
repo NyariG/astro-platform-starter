@@ -58,38 +58,102 @@ const phone = "+36 70 318 7843";
 
                 <!-- Contact Form -->
                 <div class="p-8 sm:p-12 bg-white">
-                    <form action="https://formsubmit.co/a5c18b689fef0eb768998c1e3a6e292b" method="POST" class="space-y-6">
-                        <input type="hidden" name="_subject" value="Új üzenet a weboldalról - Nyári Terv" />
-                        <input type="hidden" name="_captcha" value="true" />
-                        <input type="hidden" name="_template" value="table" />
-                        <input type="text" name="_honey" style="display:none" />
+                    <form id="kapcsolat-urlap" class="space-y-6" novalidate>
+                        <div class="hidden" aria-hidden="true">
+                            <label>Weboldal <input name="weboldal" tabindex="-1" autocomplete="off" /></label>
+                        </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-slate-700 mb-2">Név</label>
-                                <input type="text" name="name" id="name" required class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition" placeholder="Az Ön neve" />
+                                <label for="k-nev" class="block text-sm font-medium text-slate-700 mb-2">Név</label>
+                                <input type="text" name="nev" id="k-nev" required autocomplete="name" class="field-input" placeholder="Az Ön neve" />
+                                <p class="field-error mt-1" data-hiba="nev"></p>
                             </div>
                             <div>
-                                <label for="phone" class="block text-sm font-medium text-slate-700 mb-2">Telefonszám</label>
-                                <input type="tel" name="phone" id="phone" class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition" placeholder="+36 20 123 4567" />
+                                <label for="k-telefon" class="block text-sm font-medium text-slate-700 mb-2">Telefonszám</label>
+                                <input type="tel" name="telefon" id="k-telefon" autocomplete="tel" class="field-input" placeholder="+36 20 123 4567" />
+                                <p class="field-error mt-1" data-hiba="telefon"></p>
                             </div>
                         </div>
 
                         <div>
-                            <label for="email" class="block text-sm font-medium text-slate-700 mb-2">Email cím</label>
-                            <input type="email" name="email" id="email" required class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition" placeholder="pelda@email.com" />
+                            <label for="k-email" class="block text-sm font-medium text-slate-700 mb-2">Email cím</label>
+                            <input type="email" name="email" id="k-email" required autocomplete="email" class="field-input" placeholder="pelda@email.com" />
+                            <p class="field-error mt-1" data-hiba="email"></p>
                         </div>
 
                         <div>
-                            <label for="message" class="block text-sm font-medium text-slate-700 mb-2">Üzenet</label>
-                            <textarea name="message" id="message" rows="4" required class="w-full rounded-lg border-slate-300 focus:border-primary focus:ring-primary shadow-sm transition resize-none" placeholder="Miben segíthetünk?"></textarea>
+                            <label for="k-uzenet" class="block text-sm font-medium text-slate-700 mb-2">Üzenet</label>
+                            <textarea name="uzenet" id="k-uzenet" rows="4" required maxlength="5000" class="field-input resize-none" placeholder="Miben segíthetünk?"></textarea>
+                            <p class="field-error mt-1" data-hiba="uzenet"></p>
+                        </div>
+
+                        <div>
+                            <label class="flex items-start gap-3 text-sm text-slate-700">
+                                <input type="checkbox" name="adatkezeles" class="mt-0.5 h-4 w-4 accent-primary" required />
+                                <span>Elolvastam és elfogadom az <a href="/adatkezelesi/" target="_blank" class="underline">adatkezelési tájékoztatót</a>.</span>
+                            </label>
+                            <p class="field-error mt-1" data-hiba="adatkezeles"></p>
                         </div>
 
                         <button type="submit" class="btn w-full py-3 text-base shadow-lg hover:shadow-xl transition-all">
                             Üzenet küldése
                         </button>
+                        <p class="text-sm" role="status" data-allapot></p>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    const urlapElem = document.getElementById('kapcsolat-urlap') as HTMLFormElement | null;
+
+    if (urlapElem) {
+        const urlap: HTMLFormElement = urlapElem;
+        const allapot = urlap.querySelector<HTMLElement>('[data-allapot]')!;
+        const gomb = urlap.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+        const ertek = (nev: string) => (urlap.elements.namedItem(nev) as HTMLInputElement | null)?.value ?? '';
+
+        urlap.addEventListener('submit', async (esemeny) => {
+            esemeny.preventDefault();
+            urlap.querySelectorAll<HTMLElement>('[data-hiba]').forEach((el) => (el.textContent = ''));
+            urlap.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+            allapot.className = 'text-sm text-slate-500';
+            allapot.textContent = 'Küldés folyamatban…';
+            gomb.disabled = true;
+
+            const adat = {
+                nev: ertek('nev'),
+                telefon: ertek('telefon'),
+                email: ertek('email'),
+                uzenet: ertek('uzenet'),
+                adatkezeles: Boolean((urlap.elements.namedItem('adatkezeles') as HTMLInputElement | null)?.checked),
+                weboldal: ertek('weboldal')
+            };
+
+            try {
+                const valasz = await fetch('/api/kapcsolat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(adat) });
+                const json = (await valasz.json().catch(() => ({}))) as { ok?: boolean; uzenet?: string; hibak?: Record<string, string> };
+                if (valasz.ok && json.ok) {
+                    urlap.reset();
+                    allapot.className = 'text-sm font-semibold text-emerald-700';
+                    allapot.textContent = 'Köszönjük, üzenetét megkaptuk! Hamarosan válaszolunk.';
+                    return;
+                }
+                for (const [kulcs, uzenet] of Object.entries(json.hibak ?? {})) {
+                    const hely = urlap.querySelector<HTMLElement>(`[data-hiba="${kulcs}"]`);
+                    if (hely) hely.textContent = uzenet;
+                    urlap.querySelector(`[name="${kulcs}"]`)?.setAttribute('aria-invalid', 'true');
+                }
+                allapot.className = 'text-sm font-semibold text-red-700';
+                allapot.textContent = json.uzenet ?? 'Az elküldés nem sikerült. Kérjük, próbálja újra.';
+            } catch {
+                allapot.className = 'text-sm font-semibold text-red-700';
+                allapot.textContent = 'Hálózati hiba. Kérjük, próbálja újra, vagy hívjon telefonon.';
+            } finally {
+                gomb.disabled = false;
+            }
+        });
+    }
+</script>

@@ -35,6 +35,11 @@ npx vitest run         # teljes teszt-suite
 - Az `/ajanlat` modulból csak meghív (`sendMessage`, `listAdmins`, `readEnv`, `hashIp`, `dateKey`), nem módosítja.
 - Env: `TANUSITVANY_NOTIFY_EMAIL` (alapértelmezés: tanusitvany@nyariterv.hu), opcionális `TANUSITVANY_SENDER_EMAIL` (különben `QUOTE_SENDER_EMAIL`).
 
+## Kapcsolati űrlap és adatkezelés
+
+- `Contact.astro` → `POST /api/kapcsolat` (`src/utils/kapcsolat.ts`, zod, SMTP2GO a `tanusitvany/kuldes.ts` `emailKuldes`-én át, napi 5/IP a `kapcsolat` Blobs-store-ban). Címzett: `KAPCSOLAT_NOTIFY_EMAIL` (alap: info@nyariterv.hu). Külső űrlapszolgáltatás (formsubmit) nincs.
+- Egyetlen adatkezelési tájékoztató van: `/adatkezelesi` (`src/pages/adatkezelesi.astro`), erre mutat minden űrlap, a lábléc, a sütibanner és az `/ajanlat` is. Új űrlapnál vagy adatfeldolgozónál ezt kell bővíteni.
+
 ## `/ajanlat` árajánlat-modul (kész, éles)
 
 - Beküldés: `POST /api/ajanlat` → validáció (zod) → árazás → Blobs mentés → PDF → 2 e-mail → Telegram-ping.
