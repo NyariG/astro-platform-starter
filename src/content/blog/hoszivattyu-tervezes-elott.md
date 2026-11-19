@@ -51,4 +51,4 @@ Sok hőszivattyú nyáron hűtésre is használható. Ezt a tervezés elején é
 
 Ezekre a kérdésekre számítással lehet felelősen válaszolni. Egy épületgépészeti terv pontosan rögzíti a rendszer felépítését és méreteit, így a kivitelezők ajánlatai is összehasonlíthatók lesznek.
 
-Ha most tervez, [kérjen ajánlatot két perc alatt](/ajanlat/), vagy olvassa el, [mi kerül egy épületgépészeti tervbe](/blog/mit-tartalmaz-egy-epuletgepeszeti-terv/).
+Ha most tervez, [kérjen ajánlatot](/ajanlat/), és 24 órán belül megkapja PDF-ben. Azt is érdemes elolvasnia, [mi kerül egy épületgépészeti tervbe](/blog/mit-tartalmaz-egy-epuletgepeszeti-terv/).

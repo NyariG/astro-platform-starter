@@ -30,7 +30,7 @@ export const KATEGORIAK = {
         nev: 'Tervezés',
         leiras: 'Mit tartalmaz egy épületgépészeti terv, és hogyan készüljön fel a tervezésre.',
         cta: {
-            cim: 'Nézze meg két perc alatt, mennyibe kerül a terv az Ön házára.',
+            cim: 'Kérjen ajánlatot, és 24 órán belül megkapja, mennyibe kerül a terv az Ön házára.',
             gomb: 'Ajánlatot kérek',
             href: '/ajanlat/'
         }

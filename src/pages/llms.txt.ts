@@ -17,7 +17,7 @@ export async function GET(_context: APIContext) {
         '',
         `- [Kezdőlap](${CEG.url}/): szolgáltatások áttekintése`,
         `- [Energetikai tanúsítvány](${CEG.url}/energetikai-tanusitvany/): mikor kell, hogyan készül, ajánlatkérés`,
-        `- [Online árajánlat](${CEG.url}/ajanlat/): azonnali árajánlat PDF-ben`,
+        `- [Online árajánlat](${CEG.url}/ajanlat/): épületgépészeti árajánlat PDF-ben, 24 órán belül`,
         `- [Blog](${CEG.url}/blog/): gyakorlati cikkek`,
         '',
         '## Cikkek',

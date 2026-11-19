@@ -67,4 +67,4 @@ Egy jól méretezett rendszer kevesebb energiát fogyaszt és ritkábban hibáso
 
 Minél korábban, lehetőleg már az építészeti tervezés idején. Ekkor még könnyű helyet találni a gépháznak, a légcsatornáknak és a vezetékeknek. Felújításnál a burkolatok bontása előtt érdemes elkészíttetni a tervet.
 
-A [kétperces online ajánlatkérővel](/ajanlat/) azonnal látja, mennyibe kerül a tervezés az Ön ingatlanára. Ha hőszivattyúban gondolkodik, olvassa el azt is, [mit tisztázzon a tervezés előtt](/blog/hoszivattyu-tervezes-elott/).
+Az [online ajánlatkérőn](/ajanlat/) 24 órán belül megkapja, mennyibe kerül a tervezés az Ön ingatlanára. Ha hőszivattyúban gondolkodik, olvassa el azt is, [mit tisztázzon a tervezés előtt](/blog/hoszivattyu-tervezes-elott/).
