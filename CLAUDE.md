@@ -19,6 +19,22 @@ npx vitest run         # teljes teszt-suite
 - Env-olvasás egységesen `readEnv(name)` (`src/utils/ajanlat/store.ts`): előbb `process.env`, majd `import.meta.env`.
 - Magyar felhasználói szövegek, magyar függvény-/változónevek.
 
+## SEO és blog
+
+- `Layout.astro` adja minden oldalnak a kanonikus címet (perjellel végződő), az OG/Twitter metát, az opcionális `noindex`-et és a JSON-LD-t (`semak` prop). Sémák: `src/utils/seo.ts`.
+- Sitemap: `@astrojs/sitemap` → `/sitemap-index.xml`; `public/robots.txt`; `/rss.xml`; `/llms.txt` (AI-keresőknek, a cikkek „Röviden” mezőjéből).
+- Blog: content collection (`src/content/blog/*.md`, séma: `src/content.config.ts`, kategóriák és szerző: `src/data/blog.ts`). Új cikk: frontmatter `cim`, `leiras` (50–165 karakter), `kategoria`, `megjelent`, ajánlott `roviden` (2–3 mondatos közvetlen válasz), `gyik` (FAQPage-séma), `kep`, `ogKep` (1200×630 PNG a `public/images/blog/` alatt).
+- Belső linkek perjellel végződjenek (`/blog/`, `/energetikai-tanusitvany/`), mert a Netlify a perjel nélküli URL-t 301-gyel irányítja át.
+- Domain-átirányítás: `public/_redirects` (hitelesenergetikaitanusitvany.hu → `/energetikai-tanusitvany/`).
+
+## Energetikai tanúsítvány árajánlatkérő (`/energetikai-tanusitvany/#arajanlat`)
+
+- Űrlap: `src/components/TanusitvanyArajanlat.astro` (vanilla JS, élő ár). Végpont: `POST /api/tanusitvany-ajanlat`. Logika: `src/utils/tanusitvany/` (`arazas.ts` alapdíjak + kiszállás, `schema.ts` zod, `uzenetek.ts` levelek/Telegram, `kuldes.ts` SMTP2GO + Telegram + napi 5/IP limit a `tanusitvany` Blobs-store-ban).
+- Árak: lakás 30 000, sorház 35 000, egyszintes ház 35 000, többszintes ház 42 000 Ft; 200 m² felett egyedi. Kiszállás: Abdától közúton 15 km-ig 0, felette minden megkezdett 5 km 2000 Ft. A szerver mindig újraszámol.
+- Távolságok: `src/data/telepulesek-abda.json` (753 település, 100 km-es kör, OSM/OSRM, egyszer generálva: `node scripts/tanusitvany-telepulesek.mjs`). Listán kívüli település: egyedi ár.
+- Az `/ajanlat` modulból csak meghív (`sendMessage`, `listAdmins`, `readEnv`, `hashIp`, `dateKey`), nem módosítja.
+- Env: `TANUSITVANY_NOTIFY_EMAIL` (alapértelmezés: tanusitvany@nyariterv.hu), opcionális `TANUSITVANY_SENDER_EMAIL` (különben `QUOTE_SENDER_EMAIL`).
+
 ## `/ajanlat` árajánlat-modul (kész, éles)
 
 - Beküldés: `POST /api/ajanlat` → validáció (zod) → árazás → Blobs mentés → PDF → 2 e-mail → Telegram-ping.

@@ -1,0 +1,186 @@
+---
+import telepulesek from '../data/telepulesek-abda.json';
+import { EPULET_TIPUSOK, EPULET_TIPUS_KODOK, KISZALLAS, NAGY_ALAPTERULET_M2, forint } from '../utils/tanusitvany/arazas';
+
+const mezo = 'w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none';
+const cimke = 'mb-1.5 block text-sm font-semibold text-slate-800';
+---
+
+<section id="arajanlat" class="section scroll-mt-16 bg-white">
+    <div class="container-custom">
+        <div class="mx-auto max-w-2xl text-center">
+            <h2>Kérjen árajánlatot energetikai tanúsítványra</h2>
+            <p class="mt-4 text-lg text-slate-600">
+                Válassza ki az épület típusát és a települést, és azonnal látja a végösszeget. Abdától {KISZALLAS.ingyenesKm} km-en belül nincs kiszállási díj, azon túl minden megkezdett {KISZALLAS.savKm} km {forint(KISZALLAS.savDij)}.
+            </p>
+        </div>
+
+        <form id="tanusitvany-urlap" class="mx-auto mt-12 grid max-w-5xl gap-8 lg:grid-cols-[1fr_22rem]" novalidate>
+            <div class="space-y-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+                <fieldset>
+                    <legend class={cimke}>Milyen épületről van szó?</legend>
+                    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                        {
+                            EPULET_TIPUS_KODOK.map((kod, i) => (
+                                <label class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white p-4 transition has-checked:border-primary has-checked:ring-2 has-checked:ring-primary/30">
+                                    <span class="flex items-center gap-3">
+                                        <input type="radio" name="tipus" value={kod} checked={i === 0} class="h-4 w-4 accent-primary" />
+                                        <span class="font-semibold text-slate-900">{EPULET_TIPUSOK[kod].nev}</span>
+                                    </span>
+                                    <span class="text-sm whitespace-nowrap text-slate-500">{forint(EPULET_TIPUSOK[kod].ar)}</span>
+                                </label>
+                            ))
+                        }
+                    </div>
+                    <label class="mt-4 flex items-center gap-3 text-slate-700">
+                        <input type="checkbox" name="nagy" class="h-4 w-4 accent-primary" />
+                        Az alapterület nagyobb, mint {NAGY_ALAPTERULET_M2} m² (egyedi ár)
+                    </label>
+                    <p class="field-error mt-2" data-hiba="tipus"></p>
+                </fieldset>
+
+                <div>
+                    <label for="ta-telepules" class={cimke}>Település</label>
+                    <input id="ta-telepules" name="telepules" list="ta-telepulesek" autocomplete="address-level2" placeholder="Kezdje el gépelni, pl. Győr" class={mezo} required />
+                    <datalist id="ta-telepulesek">
+                        {telepulesek.map((t) => <option value={t.nev} />)}
+                    </datalist>
+                    <p class="mt-1.5 text-sm text-slate-500" data-tavolsag></p>
+                    <p class="field-error mt-1" data-hiba="telepules"></p>
+                </div>
+
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div>
+                        <label for="ta-nev" class={cimke}>Név</label>
+                        <input id="ta-nev" name="nev" autocomplete="name" class={mezo} required />
+                        <p class="field-error mt-1" data-hiba="nev"></p>
+                    </div>
+                    <div>
+                        <label for="ta-telefon" class={cimke}>Telefonszám</label>
+                        <input id="ta-telefon" name="telefon" type="tel" autocomplete="tel" placeholder="+36 30 123 4567" class={mezo} required />
+                        <p class="field-error mt-1" data-hiba="telefon"></p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="ta-email" class={cimke}>E-mail-cím</label>
+                        <input id="ta-email" name="email" type="email" autocomplete="email" class={mezo} required />
+                        <p class="mt-1.5 text-sm text-slate-500">Ide küldjük a visszaigazolást az árral.</p>
+                        <p class="field-error mt-1" data-hiba="email"></p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="ta-mikor" class={cimke}>Körülbelül mikor lenne jó a felmérés?</label>
+                        <textarea id="ta-mikor" name="mikor" rows="3" maxlength="500" placeholder="pl. jövő héten délután, vagy november végéig bármikor" class={mezo}></textarea>
+                        <p class="field-error mt-1" data-hiba="mikor"></p>
+                    </div>
+                </div>
+
+                <div class="hidden" aria-hidden="true">
+                    <label>Weboldal <input name="weboldal" tabindex="-1" autocomplete="off" /></label>
+                </div>
+
+                <div>
+                    <label class="flex items-start gap-3 text-sm text-slate-700">
+                        <input type="checkbox" name="adatkezeles" class="mt-0.5 h-4 w-4 accent-primary" required />
+                        <span>Elolvastam és elfogadom az <a href="/adatkezelesi/" target="_blank" class="underline">adatkezelési tájékoztatót</a>.</span>
+                    </label>
+                    <p class="field-error mt-1" data-hiba="adatkezeles"></p>
+                </div>
+            </div>
+
+            <aside class="h-fit rounded-2xl bg-slate-900 p-6 text-white sm:p-8 lg:sticky lg:top-24">
+                <p class="text-sm font-semibold tracking-wider text-slate-400 uppercase">Az Ön ára</p>
+                <dl class="mt-5 space-y-3 text-sm">
+                    <div class="flex justify-between gap-4"><dt class="text-slate-400">Alapdíj</dt><dd data-ar="alapdij">–</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-slate-400">Kiszállás</dt><dd data-ar="kiszallas">–</dd></div>
+                </dl>
+                <div class="mt-5 border-t border-slate-700 pt-5">
+                    <p class="text-slate-400">Végösszeg</p>
+                    <p class="mt-1 text-4xl font-bold tracking-tight" data-ar="vegosszeg">–</p>
+                    <p class="mt-2 text-xs text-slate-400" data-ar-megjegyzes></p>
+                </div>
+                <button type="submit" class="btn mt-6 w-full py-3 text-base">Ajánlatkérés elküldése</button>
+                <p class="mt-4 text-sm" role="status" data-allapot></p>
+            </aside>
+        </form>
+    </div>
+</section>
+
+<script>
+    import { arajanlat, forint, type EpuletTipus } from '../utils/tanusitvany/arazas';
+
+    const urlapElem = document.getElementById('tanusitvany-urlap') as HTMLFormElement | null;
+
+    if (urlapElem) {
+        const urlap: HTMLFormElement = urlapElem;
+        const mezoErtek = (nev: string) => (urlap.elements.namedItem(nev) as HTMLInputElement | null)?.value ?? '';
+        const jelolt = (nev: string) => Boolean((urlap.elements.namedItem(nev) as HTMLInputElement | null)?.checked);
+        const tipus = () => (urlap.querySelector<HTMLInputElement>('input[name="tipus"]:checked')?.value ?? 'lakas') as EpuletTipus;
+        const ki = (kulcs: string) => urlap.querySelector<HTMLElement>(`[data-ar="${kulcs}"]`)!;
+        const tavolsag = urlap.querySelector<HTMLElement>('[data-tavolsag]')!;
+        const megjegyzes = urlap.querySelector<HTMLElement>('[data-ar-megjegyzes]')!;
+        const allapot = urlap.querySelector<HTMLElement>('[data-allapot]')!;
+        const gomb = urlap.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+        function frissit() {
+            const telepules = mezoErtek('telepules');
+            const ar = arajanlat(tipus(), telepules, jelolt('nagy'));
+            ki('alapdij').textContent = ar.alapdij === null ? 'egyedi' : forint(ar.alapdij);
+            ki('kiszallas').textContent = ar.kiszallas === null ? (telepules.trim() ? 'egyedi' : '–') : forint(ar.kiszallas);
+            ki('vegosszeg').textContent = ar.vegosszeg === null ? (ar.nagy || (telepules.trim() && !ar.telepulesIsmert) ? 'Egyedi ár' : '–') : forint(ar.vegosszeg);
+            tavolsag.textContent = ar.km !== null ? `Közúti távolság Abdától: kb. ${ar.km.toLocaleString('hu-HU')} km` : telepules.trim().length > 2 ? 'Ezt a települést nem találjuk a listában. Küldje el így is, egyedi árat adunk.' : '';
+            megjegyzes.textContent = ar.vegosszeg !== null ? 'A végösszeg a kiszállási díjat is tartalmazza.' : '';
+        }
+
+        function hibakTorlese() {
+            urlap.querySelectorAll<HTMLElement>('[data-hiba]').forEach((el) => (el.textContent = ''));
+            urlap.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+        }
+
+        urlap.addEventListener('input', frissit);
+        urlap.addEventListener('change', frissit);
+        frissit();
+
+        urlap.addEventListener('submit', async (esemeny) => {
+            esemeny.preventDefault();
+            hibakTorlese();
+            allapot.className = 'mt-4 text-sm text-slate-300';
+            allapot.textContent = 'Küldés folyamatban…';
+            gomb.disabled = true;
+
+            const adat = {
+                tipus: tipus(),
+                nagy: jelolt('nagy'),
+                telepules: mezoErtek('telepules'),
+                nev: mezoErtek('nev'),
+                telefon: mezoErtek('telefon'),
+                email: mezoErtek('email'),
+                mikor: mezoErtek('mikor'),
+                adatkezeles: jelolt('adatkezeles'),
+                weboldal: mezoErtek('weboldal')
+            };
+
+            try {
+                const valasz = await fetch('/api/tanusitvany-ajanlat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(adat) });
+                const json = (await valasz.json().catch(() => ({}))) as { ok?: boolean; uzenet?: string; hibak?: Record<string, string>; visszaigazolas?: boolean };
+                if (valasz.ok && json.ok) {
+                    urlap.reset();
+                    frissit();
+                    allapot.className = 'mt-4 text-sm font-semibold text-emerald-300';
+                    allapot.textContent = json.visszaigazolas === false ? 'Köszönjük, megkaptuk! Hamarosan hívjuk a megadott számon.' : 'Köszönjük, megkaptuk! A visszaigazolást elküldtük e-mailben, és hamarosan hívjuk.';
+                    return;
+                }
+                for (const [kulcs, uzenet] of Object.entries(json.hibak ?? {})) {
+                    const hely = urlap.querySelector<HTMLElement>(`[data-hiba="${kulcs}"]`);
+                    if (hely) hely.textContent = uzenet;
+                    urlap.querySelector(`[name="${kulcs}"]`)?.setAttribute('aria-invalid', 'true');
+                }
+                allapot.className = 'mt-4 text-sm font-semibold text-red-300';
+                allapot.textContent = json.uzenet ?? 'Az elküldés nem sikerült. Kérjük, próbálja újra.';
+            } catch {
+                allapot.className = 'mt-4 text-sm font-semibold text-red-300';
+                allapot.textContent = 'Hálózati hiba. Kérjük, próbálja újra, vagy hívjon telefonon.';
+            } finally {
+                gomb.disabled = false;
+            }
+        });
+    }
+</script>

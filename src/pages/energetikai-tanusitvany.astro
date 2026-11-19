@@ -2,9 +2,24 @@
 import Layout from '../layouts/Layout.astro';
 import Contact from '../components/Contact.astro';
 import { Image } from 'astro:assets';
-// Reuse existing assets or placeholders if specific ones aren't available yet
+import heroBg from '../assets/tanusitvanyl.png';
+import Megosztas from '../components/Megosztas.astro';
+import TanusitvanyArajanlat from '../components/TanusitvanyArajanlat.astro';
+import { morzsaSema, szervezetSema, szolgaltatasSema } from '../utils/seo';
 
-import heroBg from '../assets/tanusitvanyl.png'; 
+const semak = [
+    szervezetSema(),
+    szolgaltatasSema({
+        nev: 'Energetikai tanúsítvány készítése',
+        leiras: 'Hiteles energetikai tanúsítvány adásvételhez, bérbeadáshoz és új épület használatbavételéhez, helyszíni felméréssel.',
+        utvonal: '/energetikai-tanusitvany/',
+        terulet: ['Győr', 'Abda', 'Győr-Moson-Sopron vármegye']
+    }),
+    morzsaSema([
+        { nev: 'Kezdőlap', utvonal: '/' },
+        { nev: 'Energetikai tanúsítvány', utvonal: '/energetikai-tanusitvany/' }
+    ])
+];
 
 const features = [
     {
@@ -53,7 +68,12 @@ const processSteps = [
 ];
 ---
 
-<Layout title="Hiteles Energetikai Tanúsítvány - Nyári Terv" description="Hivatalos energetikai tanúsítvány készítése. Gyors, rejtett költségek nélkül.">
+<Layout
+    title="Energetikai tanúsítvány Győrben és környékén – Nyári Terv"
+    description="Hiteles energetikai tanúsítvány eladáshoz, bérbeadáshoz és új épülethez Győrben és környékén. Helyszíni felmérés, gyors ügyintézés, előre egyeztetett ár."
+    ogKep="/images/og-energetikai-tanusitvany.png"
+    semak={semak}
+>
     
     <section class="relative bg-slate-900 overflow-hidden text-white">
         <div class="absolute inset-0">
@@ -77,7 +97,7 @@ const processSteps = [
                     <strong>Gyors ügyintézés, garantált minőség</strong>.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a href="#kapcsolat" class="btn bg-primary hover:bg-primary-dark text-white text-base px-8 py-3 border-none">
+                    <a href="#arajanlat" class="btn bg-primary hover:bg-primary-dark text-white text-base px-8 py-3 border-none">
                         Ajánlatkérés
                     </a>
                     <a href="#folyamat" class="text-sm font-semibold leading-6 text-white hover:text-primary-light transition">
@@ -163,7 +183,7 @@ const processSteps = [
                             <svg class="h-6 w-6 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span><strong>Bérbeadáskor:</strong> Egy évnél hosszabb bérleti szerződés esetén szükséges.</span>
+                            <span><strong>Bérbeadáskor:</strong> A bérleti szerződés időtartamától függetlenül szükséges.</span>
                         </li>
                         <li class="flex items-start gap-3">
                             <svg class="h-6 w-6 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -182,13 +202,21 @@ const processSteps = [
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-100">
                     <h3 class="text-xl font-bold text-slate-900 mb-4">Mennyibe kerül?</h3>
                     <p class="text-slate-600 mb-6">
-                        Az ár függ az ingatlan típusától (lakás/családi ház), méretétől és elhelyezkedésétől. Kérjen pontos árajánlatot kötelezettségek nélkül!
+                        Az ár függ az ingatlan típusától (lakás/családi ház), méretétől és elhelyezkedésétől. Számolja ki azonnal, kötelezettségek nélkül!
                     </p>
-                    <a href="#kapcsolat" class="btn w-full">Ajánlatkérés</a>
+                    <a href="#arajanlat" class="btn w-full">Árkalkuláció</a>
                 </div>
+            </div>
+            <div class="mt-12 flex flex-col items-start gap-4 border-t border-blue-100 pt-8 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-slate-700">
+                    Részletesen: <a href="/blog/energetikai-tanusitvany-mikor-kotelezo/" class="font-semibold underline underline-offset-4">Energetikai tanúsítvány: mikor kötelező és meddig érvényes?</a>
+                </p>
+                <Megosztas cim="Energetikai tanúsítvány Győrben és környékén" utvonal="/energetikai-tanusitvany/" />
             </div>
         </div>
     </section>
+
+    <TanusitvanyArajanlat />
 
     <!-- Contact Section -->
     <Contact />

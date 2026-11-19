@@ -171,6 +171,27 @@ const szakaszok: Szakasz[] = [
                 ]
             },
             {
+                cim: 'Energetikai tanúsítvány árajánlatkérő űrlap',
+                blokkok: [
+                    {
+                        t: 'p',
+                        v: 'Cél: Az energetikai tanúsítvány díjának kiszámítása és megküldése, valamint a helyszíni felmérés időpontjának egyeztetése az érintett kérésére. Jogalap: a szerződés megkötését megelőző, az érintett kérésére történő lépések megtétele (GDPR 6. cikk (1) bekezdés b) pont).'
+                    },
+                    {
+                        t: 'dl',
+                        v: [
+                            ['Kezelt adatok', 'Név, telefonszám, e-mail-cím, az épület típusa, a település neve, a felmérés kívánt időpontjára vonatkozó megjegyzés.'],
+                            [
+                                'Továbbítás',
+                                'Az űrlap adatait a weboldal nem tárolja: e-mailben (az SMTP2GO levélküldő szolgáltatáson keresztül) eljutnak az Adatkezelőhöz és visszaigazolásként az érintetthez, valamint értesítésként az Adatkezelő Telegram-fiókjába.'
+                            ],
+                            ['Visszaélés elleni védelem', 'A túlzott számú beküldés kiszűrésére az IP-cím egyirányú lenyomatát (nem magát az IP-címet) napi számlálóként tároljuk; a lejárt napok számlálóit a rendszer a következő beküldéskor automatikusan törli.'],
+                            ['Megőrzés', 'Az e-mailben érkezett ajánlatkérést szerződéskötés hiányában legfeljebb 1 évig őrizzük meg, szerződés esetén a szerződéses adatokra vonatkozó szabályok szerint.']
+                        ]
+                    }
+                ]
+            },
+            {
                 cim: 'Megrendelések kezelése',
                 blokkok: [
                     { t: 'p', v: 'Cél: A megrendelések feldolgozása, a szerződés teljesítése, számlázás és kiszállítás.' },
