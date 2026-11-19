@@ -5,6 +5,7 @@ import { Image } from 'astro:assets';
 import heroBg from '../assets/tanusitvanyl.png';
 import Megosztas from '../components/Megosztas.astro';
 import TanusitvanyArajanlat from '../components/TanusitvanyArajanlat.astro';
+import WekerleSav from '../components/WekerleSav.astro';
 import { morzsaSema, szervezetSema, szolgaltatasSema } from '../utils/seo';
 
 const semak = [
@@ -215,6 +216,8 @@ const processSteps = [
             </div>
         </div>
     </section>
+
+    <WekerleSav sotet />
 
     <TanusitvanyArajanlat />
 

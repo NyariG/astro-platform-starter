@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" font-family="Inter, Segoe UI, Arial, sans-serif">
+  <rect width="1200" height="630" fill="#F5F8FC"/>
+  <g stroke="#E2E8F0" stroke-width="1">
+    <path d="M0 90H1200M0 180H1200M0 270H1200M0 360H1200M0 450H1200M0 540H1200"/>
+    <path d="M100 0V630M200 0V630M300 0V630M400 0V630M500 0V630M600 0V630M700 0V630M800 0V630M900 0V630M1000 0V630M1100 0V630"/>
+  </g>
+  <text x="70" y="88" font-size="22" font-weight="700" fill="#0A5AD1" letter-spacing="2">WEKERLE+ ENERGETIKAI FELÚJÍTÁS – A MENETE</text>
+  <g font-size="22" fill="#0B1626">
+    <g transform="translate(70 150)">
+      <rect width="240" height="200" rx="16" fill="#FFFFFF" stroke="#0A5AD1" stroke-width="3"/>
+      <circle cx="40" cy="44" r="22" fill="#0A5AD1"/><text x="40" y="52" text-anchor="middle" fill="#FFFFFF" font-weight="700">1</text>
+      <text x="24" y="110" font-weight="700">Kiinduló</text>
+      <text x="24" y="140" font-weight="700">tanúsítvány</text>
+      <text x="24" y="176" font-size="17" fill="#4A5668">besorolás → 30 / 50%</text>
+    </g>
+    <g transform="translate(350 150)">
+      <rect width="240" height="200" rx="16" fill="#FFFFFF" stroke="#94A3B8" stroke-width="2"/>
+      <circle cx="40" cy="44" r="22" fill="#0B1626"/><text x="40" y="52" text-anchor="middle" fill="#FFFFFF" font-weight="700">2</text>
+      <text x="24" y="110" font-weight="700">Terv és</text>
+      <text x="24" y="140" font-weight="700">pályázati anyag</text>
+      <text x="24" y="176" font-size="17" fill="#4A5668">min. 30% megtakarítás</text>
+    </g>
+    <g transform="translate(630 150)">
+      <rect width="240" height="200" rx="16" fill="#FFFFFF" stroke="#94A3B8" stroke-width="2"/>
+      <circle cx="40" cy="44" r="22" fill="#0B1626"/><text x="40" y="52" text-anchor="middle" fill="#FFFFFF" font-weight="700">3</text>
+      <text x="24" y="110" font-weight="700">Felújítás</text>
+      <text x="24" y="140" font-weight="700">kivitelezése</text>
+      <text x="24" y="176" font-size="17" fill="#4A5668">szigetelés, gépészet</text>
+    </g>
+    <g transform="translate(910 150)">
+      <rect width="240" height="200" rx="16" fill="#FFFFFF" stroke="#0A5AD1" stroke-width="3"/>
+      <circle cx="40" cy="44" r="22" fill="#0A5AD1"/><text x="40" y="52" text-anchor="middle" fill="#FFFFFF" font-weight="700">4</text>
+      <text x="24" y="110" font-weight="700">Záró</text>
+      <text x="24" y="140" font-weight="700">tanúsítvány</text>
+      <text x="24" y="176" font-size="17" fill="#4A5668">megtakarítás igazolása</text>
+    </g>
+  </g>
+  <g stroke="#0A5AD1" stroke-width="3" fill="none">
+    <path d="M314 250H344M594 250H624M874 250H904"/>
+    <path d="M336 242l10 8-10 8M616 242l10 8-10 8M896 242l10 8-10 8"/>
+  </g>
+  <g transform="translate(70 410)">
+    <rect width="1080" height="150" rx="16" fill="#0B1626"/>
+    <text x="40" y="58" font-size="22" fill="#94A3B8">Hitel</text>
+    <text x="40" y="104" font-size="34" font-weight="700" fill="#FFFFFF">max. 15 M Ft · 3%</text>
+    <text x="420" y="58" font-size="22" fill="#94A3B8">Támogatás (felújítás előtti besorolás)</text>
+    <text x="420" y="104" font-size="34" font-weight="700" fill="#FFFFFF">D–G: 30% · H–I: 50%</text>
+    <text x="830" y="58" font-size="22" fill="#94A3B8">Indulás</text>
+    <text x="830" y="104" font-size="32" font-weight="700" fill="#FFFFFF">2027. február</text>
+  </g>
+</svg>

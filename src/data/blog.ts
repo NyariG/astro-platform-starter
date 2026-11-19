@@ -17,6 +17,15 @@ export const KATEGORIAK = {
             href: '/ajanlat/'
         }
     },
+    tamogatasok: {
+        nev: 'Pályázatok és támogatások',
+        leiras: 'Felújítási támogatások és hitelek: feltételek, határidők, és hogyan készüljön fel a pályázatra.',
+        cta: {
+            cim: 'Felújítási támogatásra készül? Tanúsítvány, pályázati anyag és gépészeti felújítás egy kézben.',
+            gomb: 'Kérem a kiinduló tanúsítványt',
+            href: '/energetikai-tanusitvany/#arajanlat'
+        }
+    },
     tervezes: {
         nev: 'Tervezés',
         leiras: 'Mit tartalmaz egy épületgépészeti terv, és hogyan készüljön fel a tervezésre.',

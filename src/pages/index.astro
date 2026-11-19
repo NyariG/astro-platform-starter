@@ -6,6 +6,7 @@ import heroBg from '../assets/hatterkep_jo.png';
 import planningImg from '../assets/planning.jpg';
 import { getCollection } from 'astro:content';
 import CikkKartyak from '../components/CikkKartyak.astro';
+import WekerleSav from '../components/WekerleSav.astro';
 import { szervezetSema, webhelySema } from '../utils/seo';
 
 const legujabbCikkek = (await getCollection('blog', ({ data }) => !data.vazlat)).sort((a, b) => b.data.megjelent.getTime() - a.data.megjelent.getTime()).slice(0, 3);
@@ -141,6 +142,8 @@ const systems = [
             </div>
         </div>
     </section>
+
+    <WekerleSav />
 
     {
         legujabbCikkek.length > 0 && (

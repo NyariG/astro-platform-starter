@@ -1,0 +1,44 @@
+---
+interface Props {
+    sotet?: boolean;
+}
+
+const { sotet = false } = Astro.props;
+
+const pontok = [
+    { cim: 'Kiinduló és záró tanúsítvány', szoveg: 'A felújítás előtti besorolás dönti el, hogy 30 vagy 50% támogatás jár. A záró tanúsítvány igazolja a 30%-os megtakarítást.' },
+    { cim: 'Pályázati anyag', szoveg: 'Elkészítjük a szükséges energetikai számításokat és dokumentumokat. A tervezés és a pályázati tanácsadás elszámolható költség.' },
+    { cim: 'Gépészeti felújítás', szoveg: 'Hőszivattyú, melegvízrendszer, termosztatikus szelepek, split klíma: megtervezzük és kivitelezzük.' }
+];
+---
+
+<section class:list={['section', sotet ? 'bg-slate-900' : 'bg-blue-50']} aria-labelledby="wekerle-cim">
+    <div class="container-custom">
+        <div class="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+            <div>
+                <p class:list={['text-sm font-semibold tracking-wider uppercase', sotet ? 'text-blue-300' : 'text-primary']}>Wekerle+ felújítási program · 2027</p>
+                <h2 id="wekerle-cim" class:list={['mt-3', sotet && 'text-white']}>Akár 50% vissza nem térítendő támogatás energetikai felújításra</h2>
+                <p class:list={['mt-5 text-lg leading-relaxed', sotet ? 'text-slate-300' : 'text-slate-600']}>
+                    Legfeljebb 15 millió Ft fix 3%-os hitel, amelyből a ház besorolásától függően 30 vagy 50% vissza nem térítendő. A feltétel legalább 30% energiamegtakarítás, ezt két energetikai tanúsítvány igazolja.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-4">
+                    <a href="/energetikai-tanusitvany/#arajanlat" class="btn px-6">Kiinduló tanúsítványt kérek</a>
+                    <a href="/blog/wekerle-plusz-energetikai-felujitas/" class="btn btn-secondary px-6">Feltételek részletesen</a>
+                </div>
+            </div>
+            <ul class="grid gap-4">
+                {
+                    pontok.map((pont, i) => (
+                        <li class:list={['flex gap-4 rounded-2xl border p-5', sotet ? 'border-slate-700 bg-slate-800/60' : 'border-blue-100 bg-white shadow-sm']}>
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white">{i + 1}</span>
+                            <div>
+                                <p class:list={['font-semibold', sotet ? 'text-white' : 'text-slate-900']}>{pont.cim}</p>
+                                <p class:list={['mt-1 text-sm leading-relaxed', sotet ? 'text-slate-300' : 'text-slate-600']}>{pont.szoveg}</p>
+                            </div>
+                        </li>
+                    ))
+                }
+            </ul>
+        </div>
+    </div>
+</section>
