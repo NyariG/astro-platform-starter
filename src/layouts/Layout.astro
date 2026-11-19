@@ -7,15 +7,31 @@ import Footer from '../components/Footer.astro';
 import MinimalHeader from '../components/MinimalHeader.astro';
 import MinimalFooter from '../components/MinimalFooter.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import { CEG } from '../data/ceg';
+import { jsonLd, kanonikusUrl } from '../utils/seo';
 
 interface Props {
     title: string;
     description?: string;
-
     minimal?: boolean;
+    ogKep?: string;
+    ogTipus?: 'website' | 'article';
+    noindex?: boolean;
+    semak?: unknown[];
 }
 
-const { title, description = "Nyári Terv - Precíz épületgépészeti tervezés", minimal = false } = Astro.props;
+const {
+    title,
+    description = 'Nyári Terv - Precíz épületgépészeti tervezés',
+    minimal = false,
+    ogKep = '/images/og-nyariterv.png',
+    ogTipus = 'website',
+    noindex = false,
+    semak = []
+} = Astro.props;
+
+const kanonikus = kanonikusUrl(Astro.url.pathname);
+const ogKepUrl = new URL(ogKep, CEG.url).href;
 
 const metaPixelId = (import.meta.env.META_PIXEL_ID as string | undefined) ?? (process.env.META_PIXEL_ID as string | undefined) ?? '';
 ---
@@ -26,10 +42,26 @@ const metaPixelId = (import.meta.env.META_PIXEL_ID as string | undefined) ?? (pr
         <meta charset="UTF-8" />
         <title>{title}</title>
         <meta name="description" content={description} />
-        <meta name="viewport" content="width=device-width" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="generator" content={Astro.generator} />
+        <link rel="canonical" href={kanonikus} />
+        {noindex && <meta name="robots" content="noindex, follow" />}
+        <meta property="og:type" content={ogTipus} />
+        <meta property="og:locale" content="hu_HU" />
+        <meta property="og:site_name" content={CEG.nev} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={kanonikus} />
+        <meta property="og:image" content={ogKepUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/images/nt-logo-48.png" />
+        <link rel="apple-touch-icon" href="/images/nt-logo-180.png" />
+        <link rel="alternate" type="application/rss+xml" title={`${CEG.nev} blog`} href="/rss.xml" />
         <link rel="preload" as="font" type="font/woff2" href={interWoff2} crossorigin />
+        {semak.map((sema) => <script type="application/ld+json" set:html={jsonLd(sema)} />)}
     </head>
     <body class="flex flex-col min-h-screen">
         {metaPixelId && <CookieConsent pixelId={metaPixelId} />}

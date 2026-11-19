@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import CikkKartyak from '../../../components/CikkKartyak.astro';
+import { KATEGORIAK, KATEGORIA_KODOK, type KategoriaKod } from '../../../data/blog';
+import { morzsaSema } from '../../../utils/seo';
+
+export async function getStaticPaths() {
+    const cikkek = await getCollection('blog', ({ data }) => !data.vazlat);
+    return KATEGORIA_KODOK.filter((kod) => cikkek.some((cikk) => cikk.data.kategoria === kod)).map((kod) => ({
+        params: { kategoria: kod },
+        props: {
+            kod,
+            cikkek: cikkek.filter((cikk) => cikk.data.kategoria === kod).sort((a, b) => b.data.megjelent.getTime() - a.data.megjelent.getTime())
+        }
+    }));
+}
+
+interface Props {
+    kod: KategoriaKod;
+    cikkek: Awaited<ReturnType<typeof getCollection<'blog'>>>;
+}
+
+const { kod, cikkek } = Astro.props;
+const kategoria = KATEGORIAK[kod];
+const utvonal = `/blog/kategoria/${kod}/`;
+const semak = [
+    morzsaSema([
+        { nev: 'Kezdőlap', utvonal: '/' },
+        { nev: 'Blog', utvonal: '/blog/' },
+        { nev: kategoria.nev, utvonal }
+    ])
+];
+---
+
+<Layout title={`${kategoria.nev} – Blog – Nyári Terv`} description={kategoria.leiras} semak={semak}>
+    <section class="bg-slate-50 border-b border-slate-200">
+        <div class="container-custom py-16 sm:py-20">
+            <div class="mx-auto max-w-3xl text-center">
+                <nav class="text-sm text-slate-500" aria-label="Morzsamenü">
+                    <a href="/blog/">Blog</a>
+                    <span aria-hidden="true"> / </span>
+                    <span>{kategoria.nev}</span>
+                </nav>
+                <h1 class="mt-3">{kategoria.nev}</h1>
+                <p class="mt-5 text-lg text-slate-600">{kategoria.leiras}</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container-custom">
+            <CikkKartyak cikkek={cikkek} />
+            <div class="mt-12 text-center">
+                <a href="/blog/" class="font-semibold">← Összes cikk</a>
+            </div>
+        </div>
+    </section>
+</Layout>

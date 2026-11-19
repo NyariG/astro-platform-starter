@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import CikkKartyak from '../../components/CikkKartyak.astro';
+import Megosztas from '../../components/Megosztas.astro';
+import { KATEGORIAK, KATEGORIA_KODOK } from '../../data/blog';
+import { morzsaSema, szervezetSema } from '../../utils/seo';
+
+const cikkek = (await getCollection('blog', ({ data }) => !data.vazlat)).sort((a, b) => b.data.megjelent.getTime() - a.data.megjelent.getTime());
+const hasznaltKategoriak = KATEGORIA_KODOK.filter((kod) => cikkek.some((cikk) => cikk.data.kategoria === kod));
+
+const semak = [
+    szervezetSema(),
+    morzsaSema([
+        { nev: 'Kezdőlap', utvonal: '/' },
+        { nev: 'Blog', utvonal: '/blog/' }
+    ])
+];
+---
+
+<Layout
+    title="Blog: épületgépészet és energetikai tanúsítás – Nyári Terv"
+    description="Gyakorlati cikkek fűtésről, hőszivattyúról, gépészeti tervezésről és az energetikai tanúsítványról, érthetően, jogszabályi hivatkozásokkal."
+    semak={semak}
+>
+    <section class="bg-slate-50 border-b border-slate-200">
+        <div class="container-custom py-16 sm:py-20">
+            <div class="mx-auto max-w-3xl text-center">
+                <p class="text-sm font-semibold tracking-wider text-primary uppercase">Blog</p>
+                <h1 class="mt-3">Épületgépészet és energetika, érthetően</h1>
+                <p class="mt-5 text-lg text-slate-600">
+                    Rövid, gyakorlati válaszok azokra a kérdésekre, amelyek építkezés, felújítás vagy ingatlaneladás előtt felmerülnek.
+                </p>
+                <nav class="mt-8 flex flex-wrap justify-center gap-2" aria-label="Kategóriák">
+                    {
+                        hasznaltKategoriak.map((kod) => (
+                            <a href={`/blog/kategoria/${kod}/`} class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700! hover:border-primary hover:text-primary!">
+                                {KATEGORIAK[kod].nev}
+                            </a>
+                        ))
+                    }
+                </nav>
+                <Megosztas cim="Nyári Terv blog: épületgépészet és energetika, érthetően" utvonal="/blog/" class="mt-8 justify-center" />
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container-custom">
+            <CikkKartyak cikkek={cikkek} />
+        </div>
+    </section>
+</Layout>

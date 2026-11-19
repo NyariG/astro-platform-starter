@@ -1,0 +1,177 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Layout from '../../layouts/Layout.astro';
+import CikkKartyak from '../../components/CikkKartyak.astro';
+import Megosztas from '../../components/Megosztas.astro';
+import portre from '../../assets/telefonalos2.png';
+import { KATEGORIAK, SZERZO, datumSzoveg, olvasasiIdo } from '../../data/blog';
+import { cikkSema, gyikSema, morzsaSema, szervezetSema } from '../../utils/seo';
+
+export async function getStaticPaths() {
+    const cikkek = await getCollection('blog', ({ data }) => !data.vazlat);
+    return cikkek.map((cikk) => {
+        const tobbi = cikkek.filter((masik) => masik.id !== cikk.id).sort((a, b) => b.data.megjelent.getTime() - a.data.megjelent.getTime());
+        const kapcsolodo = [...tobbi.filter((m) => m.data.kategoria === cikk.data.kategoria), ...tobbi.filter((m) => m.data.kategoria !== cikk.data.kategoria)].slice(0, 3);
+        return { params: { cikk: cikk.id }, props: { cikk, kapcsolodo } };
+    });
+}
+
+interface Props {
+    cikk: CollectionEntry<'blog'>;
+    kapcsolodo: CollectionEntry<'blog'>[];
+}
+
+const { cikk, kapcsolodo } = Astro.props;
+const { Content, headings } = await render(cikk);
+const { cim, leiras, kategoria, megjelent, frissitve, roviden, kep, kepAlt, ogKep, gyik } = cikk.data;
+const utvonal = `/blog/${cikk.id}/`;
+const kategoriaAdat = KATEGORIAK[kategoria];
+const cta = kategoriaAdat.cta;
+const fejezetek = headings.filter((fejezet) => fejezet.depth === 2);
+
+const semak: unknown[] = [
+    szervezetSema(),
+    cikkSema({ cim, leiras, utvonal, megjelent, frissitve, kep: ogKep, szerzo: SZERZO }),
+    morzsaSema([
+        { nev: 'Kezdőlap', utvonal: '/' },
+        { nev: 'Blog', utvonal: '/blog/' },
+        { nev: kategoriaAdat.nev, utvonal: `/blog/kategoria/${kategoria}/` },
+        { nev: cim, utvonal }
+    ])
+];
+if (gyik?.length) semak.push(gyikSema(gyik));
+---
+
+<Layout title={cim.length > 55 ? cim : `${cim} – Nyári Terv`} description={leiras} ogTipus="article" ogKep={ogKep} semak={semak}>
+    <article>
+        <header class="bg-slate-50 border-b border-slate-200">
+            <div class="container-custom py-12 sm:py-16">
+                <div class="mx-auto max-w-3xl">
+                    <nav class="flex flex-wrap items-center gap-2 text-sm text-slate-500" aria-label="Morzsamenü">
+                        <a href="/blog/">Blog</a>
+                        <span aria-hidden="true">/</span>
+                        <a href={`/blog/kategoria/${kategoria}/`} class="font-semibold">{kategoriaAdat.nev}</a>
+                    </nav>
+                    <h1 class="mt-4 leading-tight">{cim}</h1>
+                    <p class="mt-5 text-lg leading-relaxed text-slate-600">{leiras}</p>
+                    <div class="mt-8 flex flex-col gap-5 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-3">
+                            <Image src={portre} alt="" width={96} height={96} class="h-11 w-11 rounded-full object-cover object-top" />
+                            <div class="text-sm">
+                                <p class="font-semibold text-slate-900">{SZERZO.nev}</p>
+                                <p class="text-slate-500">
+                                    <time datetime={megjelent.toISOString()}>{datumSzoveg(megjelent)}</time>
+                                    {frissitve && <span> · Frissítve: <time datetime={frissitve.toISOString()}>{datumSzoveg(frissitve)}</time></span>}
+                                    <span> · {olvasasiIdo(cikk.body ?? '')} perc olvasás</span>
+                                </p>
+                            </div>
+                        </div>
+                        <Megosztas cim={cim} utvonal={utvonal} />
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-custom py-12 sm:py-16">
+            <div class="mx-auto max-w-3xl">
+                {
+                    roviden && (
+                        <aside class="mb-10 rounded-xl border-l-4 border-primary bg-blue-50 p-5 sm:p-6" aria-label="Röviden">
+                            <p class="text-xs font-bold tracking-wider text-primary uppercase">Röviden</p>
+                            <p class="mt-2 text-lg leading-relaxed text-slate-800">{roviden}</p>
+                        </aside>
+                    )
+                }
+
+                {
+                    kep && (
+                        <figure class="mb-10 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-6">
+                            {kep.format === 'svg' ? (
+                                <img src={kep.src} alt={kepAlt ?? ''} width={kep.width} height={kep.height} class="mx-auto h-auto w-full rounded-lg" />
+                            ) : (
+                                <Image src={kep} alt={kepAlt ?? ''} widths={[640, 960, 1280]} sizes="(min-width: 768px) 720px, 100vw" class="mx-auto h-auto max-h-[28rem] w-auto max-w-full rounded-lg shadow-md" loading="eager" />
+                            )}
+                        </figure>
+                    )
+                }
+
+                {
+                    fejezetek.length > 2 && (
+                        <nav class="mb-10 rounded-2xl border border-slate-200 bg-slate-50 p-6" aria-label="Tartalomjegyzék">
+                            <p class="text-xs font-semibold tracking-wider text-slate-500 uppercase">A cikk tartalma</p>
+                            <ol class="mt-4 grid gap-2 sm:grid-cols-2 sm:gap-x-8">
+                                {fejezetek.map((fejezet, index) => (
+                                    <li class="flex gap-3">
+                                        <span class="font-semibold text-primary">{index + 1}.</span>
+                                        <a href={`#${fejezet.slug}`} class="text-slate-800! hover:text-primary!">
+                                            {fejezet.text}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ol>
+                        </nav>
+                    )
+                }
+
+                <div class="cikk">
+                    <Content />
+                </div>
+
+                {
+                    gyik?.length && (
+                        <section class="mt-14" aria-labelledby="gyakori-kerdesek">
+                            <h2 id="gyakori-kerdesek" class="mb-6 scroll-mt-24">
+                                Gyakori kérdések
+                            </h2>
+                            <div class="divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+                                {gyik.map((elem) => (
+                                    <details class="group p-5 sm:p-6">
+                                        <summary class="flex cursor-pointer list-none items-start justify-between gap-4 font-semibold text-slate-900">
+                                            <span>{elem.kerdes}</span>
+                                            <span class="text-primary transition group-open:rotate-45" aria-hidden="true">+</span>
+                                        </summary>
+                                        <p class="mt-3 leading-relaxed text-slate-600">{elem.valasz}</p>
+                                    </details>
+                                ))}
+                            </div>
+                        </section>
+                    )
+                }
+
+                <div class="mt-12 flex flex-col items-start gap-4 rounded-2xl bg-slate-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="font-semibold text-slate-900">Hasznos volt? Küldje el annak, akinek segíthet.</p>
+                    <Megosztas cim={cim} utvonal={utvonal} />
+                </div>
+
+                <aside class="mt-8 flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 sm:flex-row sm:items-center" aria-label="A szerzőről">
+                    <Image src={portre} alt={SZERZO.nev} width={160} height={160} class="h-20 w-20 shrink-0 rounded-full object-cover object-top" />
+                    <div>
+                        <p class="text-xs font-semibold tracking-wider text-slate-500 uppercase">A cikk szerzője</p>
+                        <p class="mt-1 text-xl font-bold text-slate-900">{SZERZO.nev}</p>
+                        <p class="text-sm font-semibold text-primary">{SZERZO.beosztas}</p>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">{SZERZO.bemutatas}</p>
+                    </div>
+                </aside>
+
+                <div class="mt-8 rounded-2xl bg-slate-900 p-8 text-center sm:p-10">
+                    <p class="text-2xl font-bold text-white">{cta.cim}</p>
+                    <a href={cta.href} class="btn mt-6 px-8">{cta.gomb}</a>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    {
+        kapcsolodo.length > 0 && (
+            <section class="section border-t border-slate-200 bg-slate-50" aria-labelledby="kapcsolodo-cikkek">
+                <div class="container-custom">
+                    <h2 id="kapcsolodo-cikkek" class="mb-10">
+                        Kapcsolódó cikkek
+                    </h2>
+                    <CikkKartyak cikkek={kapcsolodo} cimSzint="h3" />
+                </div>
+            </section>
+        )
+    }
+</Layout>
