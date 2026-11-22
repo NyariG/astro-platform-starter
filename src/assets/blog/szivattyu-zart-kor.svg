@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-label="Zárt fűtési kör: az előremenő ágban a víz 8 métert emelkedik, a visszatérő ágban 8 métert süllyed, a magasság hatása kiegyenlítődik, a szivattyú csak a súrlódási veszteséget fedezi" font-family="Inter, 'Inter Variable', 'Segoe UI', Arial, sans-serif">
+<rect width="800" height="400" fill="#F5F8FC"/>
+<g stroke="#0B1626" stroke-opacity="0.05"><path d="M0 0V400"/><path d="M32 0V400"/><path d="M64 0V400"/><path d="M96 0V400"/><path d="M128 0V400"/><path d="M160 0V400"/><path d="M192 0V400"/><path d="M224 0V400"/><path d="M256 0V400"/><path d="M288 0V400"/><path d="M320 0V400"/><path d="M352 0V400"/><path d="M384 0V400"/><path d="M416 0V400"/><path d="M448 0V400"/><path d="M480 0V400"/><path d="M512 0V400"/><path d="M544 0V400"/><path d="M576 0V400"/><path d="M608 0V400"/><path d="M640 0V400"/><path d="M672 0V400"/><path d="M704 0V400"/><path d="M736 0V400"/><path d="M768 0V400"/><path d="M0 0H800"/><path d="M0 32H800"/><path d="M0 64H800"/><path d="M0 96H800"/><path d="M0 128H800"/><path d="M0 160H800"/><path d="M0 192H800"/><path d="M0 224H800"/><path d="M0 256H800"/><path d="M0 288H800"/><path d="M0 320H800"/><path d="M0 352H800"/><path d="M0 384H800"/></g>
+<text x="40" y="48" font-size="13" font-weight="700" fill="#0A5AD1" letter-spacing="1.6">ZÁRT FŰTÉSI KÖR: A MAGASSÁG KIEGYENLÍTŐDIK</text><path d="M40 62H760" stroke="#E2E8F0" stroke-width="1"/>
+
+<rect x="90" y="84" width="270" height="270" fill="#FFFFFF" stroke="#0B1626" stroke-width="1.6"/>
+<path d="M90 164H360M90 264H360" stroke="#0B1626" stroke-width="1.2" stroke-dasharray="5 4"/>
+<text x="100" y="106" font-size="12.5" font-weight="700" fill="#4A5668">Tetőtér</text>
+<text x="100" y="186" font-size="12.5" font-weight="700" fill="#4A5668">Földszint</text>
+<text x="100" y="286" font-size="12.5" font-weight="700" fill="#4A5668">Pince</text>
+
+<path d="M170 312V120H290" fill="none" stroke="#C0392B" stroke-width="4"/>
+<path d="M290 120V312H236" fill="none" stroke="#3B82F6" stroke-width="4"/>
+<path d="M170 312H190" fill="none" stroke="#C0392B" stroke-width="4"/>
+
+<rect x="190" y="296" width="46" height="32" fill="#F5F8FC" stroke="#0B1626" stroke-width="2"/>
+<text x="213" y="317" font-size="12" font-weight="700" fill="#0B1626" text-anchor="middle">kazán</text>
+
+<circle cx="290" cy="240" r="13" fill="#FFFFFF" stroke="#0B1626" stroke-width="2"/>
+<path d="M283 233L290 247L297 233Z" fill="#0B1626"/>
+<text x="270" y="244" font-size="12.5" font-weight="700" fill="#0B1626" text-anchor="end">szivattyú</text>
+
+<path d="M214 105v30M232 105v30M250 105v30M268 105v30" stroke="#C0392B" stroke-width="2.4"/>
+<text x="240" y="150" font-size="12" font-weight="700" fill="#4A5668" text-anchor="middle">radiátor</text>
+
+<path d="M64 312V120" stroke="#0B1626" stroke-width="1.6"/>
+<path d="M58 128l6 -8l6 8M58 304l6 8l6 -8" fill="none" stroke="#0B1626" stroke-width="1.6"/>
+<text x="52" y="222" font-size="13" font-weight="700" fill="#0B1626" text-anchor="middle" transform="rotate(-90 52 222)">Δz = 8 m</text>
+
+<rect x="400" y="92" width="360" height="262" fill="#FFFFFF" stroke="#0B1626" stroke-width="1.6"/>
+<text x="420" y="124" font-size="13" font-weight="700" fill="#0A5AD1" letter-spacing="1.2">MIT „LÁT” A SZIVATTYÚ?</text>
+<rect x="420" y="142" width="12" height="12" fill="#C0392B"/>
+<text x="442" y="153" font-size="14.5" font-weight="700" fill="#0B1626">Előremenő: felfelé</text>
+<text x="442" y="173" font-size="13.5" fill="#4A5668">a magasság miatt −8 m nyomásesés</text>
+<rect x="420" y="196" width="12" height="12" fill="#3B82F6"/>
+<text x="442" y="207" font-size="14.5" font-weight="700" fill="#0B1626">Visszatérő: lefelé</text>
+<text x="442" y="227" font-size="13.5" fill="#4A5668">a magasság miatt +8 m nyomásnövekedés</text>
+<path d="M420 246H740" stroke="#E2E8F0" stroke-width="1"/>
+<text x="420" y="274" font-size="15" font-weight="700" fill="#0B1626">Összesen: −8 m + 8 m = 0 m</text>
+<rect x="420" y="292" width="320" height="42" fill="#F5F8FC" stroke="#3B82F6" stroke-width="2.4"/>
+<text x="580" y="318" font-size="15.5" font-weight="700" fill="#0A5AD1" text-anchor="middle">H = hv (csak a súrlódási veszteség)</text>
+</svg>
