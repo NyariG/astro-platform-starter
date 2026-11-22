@@ -39,7 +39,7 @@ A pontos tartalom a feladattól és a tervfázistól függ, de egy kiviteli szin
 
 - **Műszaki leírás:** a választott rendszerek ismertetése és indoklása.
 - **Méretezési számítások:** hőszükséglet, csőméretek, szivattyúk és egyéb berendezések.
-- **Alaprajzok és metszetek:** a vezetékek és berendezések pontos helye.
+- **Alaprajzok :** a vezetékek és berendezések pontos helye.
 - **Kapcsolási sémák:** hogyan kapcsolódnak egymáshoz a rendszer elemei.
 - **Anyagjegyzék:** a beépítendő anyagok és mennyiségek listája.
 
