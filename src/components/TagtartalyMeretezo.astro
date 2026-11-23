@@ -1,0 +1,448 @@
+﻿---
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+import { PSV_ERTEKEK } from '../utils/tagtartaly/szamitas';
+
+const p0Html = katex.renderToString('p_0', { throwOnError: false });
+
+const mezo = 'w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none';
+const cimke = 'mb-1.5 block text-sm font-semibold text-slate-800';
+---
+
+<section id="meretezo" class="section scroll-mt-16 bg-white">
+    <div class="container-custom">
+        <form id="tagtartaly-urlap" class="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[1fr_24rem]" novalidate>
+            <div class="space-y-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
+                <fieldset>
+                    <legend class={cimke}>Milyen tágulási tartályt méretez?</legend>
+                    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-300 bg-white p-4 transition has-checked:border-primary has-checked:ring-2 has-checked:ring-primary/30">
+                            <input type="radio" name="tipus" value="futes" checked class="mt-1 h-4 w-4 accent-primary" />
+                            <span>
+                                <span class="block font-semibold text-slate-900">Fűtés / hűtés</span>
+                                <span class="block text-sm text-slate-500">zárt, membrános tartályos rendszer</span>
+                            </span>
+                        </label>
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-300 bg-white p-4 transition has-checked:border-primary has-checked:ring-2 has-checked:ring-primary/30">
+                            <input type="radio" name="tipus" value="ivoviz" class="mt-1 h-4 w-4 accent-primary" />
+                            <span>
+                                <span class="block font-semibold text-slate-900">Ivóvíz / HMV</span>
+                                <span class="block text-sm text-slate-500">melegvíz-tároló vagy bojler hidegvíz-ága</span>
+                            </span>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div id="futes-mezok" class="space-y-6">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="tm-viz" class={cimke}>Víz a rendszerben (liter)</label>
+                            <input id="tm-viz" name="viz" type="number" inputmode="decimal" min="1" step="1" value="300" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">A teljes víztartalom: csövek, hőleadók, puffer, hőtermelő.</p>
+                        </div>
+                        <div>
+                            <label for="tm-magassag" class={cimke}>Statikus magasság (m)</label>
+                            <input id="tm-magassag" name="magassag" type="number" inputmode="decimal" min="0" max="150" step="0.1" value="6" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">A tartály közepe és a rendszer legmagasabb pontja közötti szintkülönbség.</p>
+                        </div>
+                        <div>
+                            <label for="tm-tmin" class={cimke}>Leghidegebb állapot (°C)</label>
+                            <input id="tm-tmin" name="tMin" type="number" inputmode="decimal" min="0" max="100" step="1" value="10" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">A víz legalacsonyabb hőmérséklete (pl. kikapcsolt, kihűlt rendszer).</p>
+                        </div>
+                        <div>
+                            <label for="tm-tmax" class={cimke}>Legmelegebb állapot (°C)</label>
+                            <input id="tm-tmax" name="tMax" type="number" inputmode="decimal" min="0" max="100" step="1" value="60" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">A víz legmagasabb átlagos hőmérséklete üzem közben.</p>
+                        </div>
+                        <div>
+                            <label for="tm-ttolt" class={cimke}>Töltési hőmérséklet (°C)</label>
+                            <input id="tm-ttolt" name="tTolt" type="number" inputmode="decimal" min="0" max="100" step="1" placeholder="üresen: leghidegebb állapot" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">Milyen hőmérsékletű vízzel tölti fel a rendszert? Melegebb vízzel magasabb a töltési nyomás.</p>
+                        </div>
+                        <div>
+                            <label for="tm-psv-futes" class={cimke}>Biztonsági szelep nyitónyomása (bar)</label>
+                            <select id="tm-psv-futes" name="psvFutes" class={mezo}>
+                                {PSV_ERTEKEK.map((ertek) => <option value={ertek} selected={ertek === 3}>{ertek.toLocaleString('hu-HU')} bar</option>)}
+                            </select>
+                            <p class="mt-1.5 text-sm text-slate-500">A leggyengébb elem megengedett nyomásánál 0,5 bar-ral kisebb.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hmv-mezok" class="hidden space-y-6">
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="tm-hmv-terfogat" class={cimke}>Melegvíz-tároló térfogata (liter)</label>
+                            <input id="tm-hmv-terfogat" name="hmvTerfogat" type="number" inputmode="decimal" min="1" step="1" value="150" class={mezo} />
+                        </div>
+                        <div>
+                            <label for="tm-hmv-nyomas" class={cimke}>Hidegvíz-hálózat nyomása (bar)</label>
+                            <input id="tm-hmv-nyomas" name="hmvNyomas" type="number" inputmode="decimal" min="1" max="9" step="0.1" value="4" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">Nyomáscsökkentő után a beállított nyomás.</p>
+                        </div>
+                        <div>
+                            <label for="tm-hmv-hideg" class={cimke}>Hidegvíz hőmérséklete (°C)</label>
+                            <input id="tm-hmv-hideg" name="hmvHideg" type="number" inputmode="decimal" min="0" max="100" step="1" value="10" class={mezo} />
+                        </div>
+                        <div>
+                            <label for="tm-hmv-max" class={cimke}>Legmagasabb tárolóhőmérséklet (°C)</label>
+                            <input id="tm-hmv-max" name="hmvMax" type="number" inputmode="decimal" min="0" max="100" step="1" value="60" class={mezo} />
+                            <p class="mt-1.5 text-sm text-slate-500">Legionella elleni felfűtésnél 70 °C.</p>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="tm-psv-hmv" class={cimke}>Biztonsági szelep nyitónyomása (bar)</label>
+                            <select id="tm-psv-hmv" name="psvHmv" class={mezo}>
+                                {PSV_ERTEKEK.map((ertek) => <option value={ertek} selected={ertek === 6}>{ertek.toLocaleString('hu-HU')} bar</option>)}
+                            </select>
+                            <p class="mt-1.5 text-sm text-slate-500">A leggyengébb elem megengedett nyomásánál 0,5 bar-ral kisebb.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="h-fit rounded-2xl bg-slate-900 p-6 text-white sm:p-8 lg:sticky lg:top-24" aria-live="polite">
+                <div id="eredmeny-hiba" class="hidden rounded-lg bg-red-950/60 p-4 text-sm text-red-200"></div>
+                <div id="eredmeny">
+                    <p class="text-sm font-semibold tracking-wider text-slate-400 uppercase">Szükséges tartálytérfogat</p>
+                    <p class="mt-1 text-4xl font-bold tracking-tight"><span data-ki="vmin">–</span> <span class="text-xl font-semibold text-slate-400">liter</span></p>
+
+                    <div class="mt-5" data-ki="muszer" role="img" aria-label="Nyomásmérő a töltési nyomással, az üzemi tartománnyal és a biztonsági szelep nyitónyomásával"></div>
+                    <ul class="mt-2 space-y-1.5 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="inline-block h-2.5 w-5 rounded-sm bg-emerald-500"></span>üzemi tartomány (a végnyomásig)</li>
+                        <li class="flex items-center gap-2"><span class="inline-block h-2.5 w-5 rounded-sm bg-amber-400"></span>végnyomás és lefúvási nyomás között (tartalék)</li>
+                        <li class="flex items-center gap-2"><span class="inline-block h-2.5 w-5 rounded-sm bg-red-500"></span>a lefúvási nyomás fölött a biztonsági szelep nyit</li>
+                        <li class="flex items-center gap-2"><span class="inline-block h-2.5 w-5 rounded-sm bg-sky-400"></span><span>kék jel: a tartály előfeszítése (<span set:html={p0Html}></span>)</span></li>
+                        <li class="flex items-center gap-2" data-csak="futes"><span class="inline-block h-2.5 w-5 rounded-sm bg-white"></span><span>fehér jel: nyomás a leghidegebb állapotban</span></li>
+                        <li class="flex items-center gap-2" data-csak="futes"><span class="inline-block h-2.5 w-5 rounded-sm bg-orange-400"></span><span>narancs jel: nyomás a legmelegebb állapotban</span></li>
+                    </ul>
+
+                    <dl class="mt-6 space-y-3 text-sm">
+                        <div class="flex justify-between gap-4"><dt class="text-slate-400">Előfeszítési nyomás (<span set:html={p0Html}></span>)</dt><dd class="font-semibold whitespace-nowrap" data-ki="p0">–</dd></div>
+                        <div class="flex justify-between gap-4" data-csak="futes"><dt class="text-slate-400"><span data-ki="toltes-cimke">Töltési nyomás</span></dt><dd class="font-semibold whitespace-nowrap" data-ki="toltes">–</dd></div>
+                        <div class="flex justify-between gap-4" data-csak="ivoviz"><dt class="text-slate-400">Üzemi nyomás (hálózat)</dt><dd class="font-semibold whitespace-nowrap" data-ki="uzemi">–</dd></div>
+                        <div class="flex justify-between gap-4"><dt class="text-slate-400">Végnyomás (megengedett)</dt><dd class="font-semibold whitespace-nowrap" data-ki="vegnyomas">–</dd></div>
+                        <div class="flex justify-between gap-4"><dt class="text-slate-400">Lefúvási nyomás (szelep)</dt><dd class="font-semibold whitespace-nowrap" data-ki="psv">–</dd></div>
+                    </dl>
+
+                    <div class="mt-6 border-t border-slate-700 pt-5">
+                        <p class="text-sm font-semibold tracking-wider text-slate-400 uppercase">Ajánlott tartály</p>
+                        <p class="mt-2 text-lg font-bold" data-ki="ajanlott">–</p>
+                        <div class="mt-2 space-y-1 text-sm text-slate-300" data-ki="ajanlott-reszlet"></div>
+                        <div class="mt-4 hidden" data-ki="alternativak-blokk">
+                            <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">Más lehetőségek</p>
+                            <ul class="mt-2 space-y-1 text-sm text-slate-300" data-ki="alternativak"></ul>
+                        </div>
+                    </div>
+
+                    <ul class="mt-5 space-y-2 text-sm text-amber-200" data-ki="figyelmeztetesek"></ul>
+                </div>
+            </aside>
+        </form>
+
+        <div id="reszletek" class="mx-auto mt-8 hidden max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+            <h2 class="text-xl font-bold text-slate-900">Hogyan jött ki?</h2>
+            <ol class="mt-4 list-decimal space-y-2 pl-6 text-slate-700 marker:font-semibold marker:text-primary" data-ki="lepesek"></ol>
+        </div>
+
+        <div class="mx-auto mt-8 max-w-5xl rounded-2xl border border-slate-200 bg-slate-50 p-6 text-sm leading-relaxed text-slate-600">
+            <p class="font-semibold text-slate-800">Tudnivalók</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5 marker:text-primary">
+                <li>A méretező tájékoztató jellegű. Kivitelezés előtt a rendszer adatait tervezőnek ellenőriznie kell.</li>
+                <li>A víz tágulását a sűrűségének változásából számoljuk. Fagyállós (glikolos) rendszernél a tágulás más.</li>
+                <li>Az ajánlott tartály a legkisebb olyan típus, amelynek névleges térfogata eléri a szükségeset, a megengedett nyomása legalább akkora, mint a biztonsági szelepé, és a hőmérséklethatára megfelel.</li>
+                <li>A tartályt a gyári előfeszítésről a kapott <span set:html={p0Html}></span> értékre kell állítani, hideg, víztelenített állapotban, a tartály szelepén át.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<script>
+    import katex from 'katex';
+    import { ajanl, tartalyNev, type Tartaly } from '../utils/tagtartaly/ajanlas';
+    import { futesMeretezes, hmvMeretezes, type FutesEredmeny, type HmvEredmeny } from '../utils/tagtartaly/szamitas';
+
+    type Sav = { tol: number; ig: number; szin: string };
+    type Jel = { p: number; szin: string };
+
+    const urlap = document.getElementById('tagtartaly-urlap') as HTMLFormElement | null;
+
+    if (urlap) {
+        const futesMezok = document.getElementById('futes-mezok')!;
+        const hmvMezok = document.getElementById('hmv-mezok')!;
+        const hibaElem = document.getElementById('eredmeny-hiba')!;
+        const eredmenyElem = document.getElementById('eredmeny')!;
+        const reszletekElem = document.getElementById('reszletek')!;
+        const ki = (kulcs: string) => document.querySelector<HTMLElement>(`[data-ki="${kulcs}"]`)!;
+
+        function nyers(nev: string): string {
+            const elem = urlap!.elements.namedItem(nev) as HTMLInputElement | HTMLSelectElement | null;
+            return (elem?.value ?? '').trim();
+        }
+
+        function szam(nev: string): number {
+            return Number(nyers(nev).replace(',', '.'));
+        }
+
+        function tipus(): 'futes' | 'ivoviz' {
+            return (urlap!.querySelector<HTMLInputElement>('input[name="tipus"]:checked')?.value ?? 'futes') as 'futes' | 'ivoviz';
+        }
+
+        function barSzoveg(ertek: number): string {
+            return `${ertek.toLocaleString('hu-HU', { maximumFractionDigits: 2 })} bar`;
+        }
+
+        function literSzoveg(ertek: number): string {
+            return ertek.toLocaleString('hu-HU', { maximumFractionDigits: 1 });
+        }
+
+        function szamSzoveg(ertek: number, jegy = 2): string {
+            return ertek.toLocaleString('hu-HU', { maximumFractionDigits: jegy });
+        }
+
+        function sorokTorlese(elem: HTMLElement) {
+            while (elem.firstChild) elem.removeChild(elem.firstChild);
+        }
+
+        function kep(keplet: string, kijelzes = false): string {
+            return katex.renderToString(keplet, { throwOnError: false, displayMode: kijelzes });
+        }
+
+        function szamTex(ertek: number, jegy = 2): string {
+            return szamSzoveg(ertek, jegy).replace(',', '{,}');
+        }
+
+        function listaElem(szoveg: string): HTMLLIElement {
+            const li = document.createElement('li');
+            li.textContent = szoveg;
+            return li;
+        }
+
+        function muszerSvg(max: number, savok: Sav[], ertek: number, felirat: string, p0: number, jelek: Jel[]): string {
+            const cx = 160;
+            const cy = 184;
+            const r = 120;
+            const szog = (p: number) => Math.PI * (1 - Math.min(Math.max(p, 0), max) / max);
+            const hely = (p: number, sugar: number) => `${(cx + sugar * Math.cos(szog(p))).toFixed(1)} ${(cy - sugar * Math.sin(szog(p))).toFixed(1)}`;
+            const iv = (tol: number, ig: number, szin: string, vastag: number) =>
+                tol >= ig ? '' : `<path d="M ${hely(tol, r)} A ${r} ${r} 0 0 1 ${hely(ig, r)}" fill="none" stroke="${szin}" stroke-width="${vastag}"/>`;
+
+            let svg = `<svg viewBox="-30 0 380 264" class="mx-auto h-auto w-full max-w-sm" aria-hidden="true">`;
+            svg += iv(0, max, '#334155', 16);
+            savok.forEach((sav) => (svg += iv(sav.tol, sav.ig, sav.szin, 16)));
+
+            const lepes = max > 10 ? 2 : 1;
+            for (let p = 0; p <= max + 1e-9; p += 0.5) {
+                const fo = Math.abs(p - Math.round(p)) < 1e-9;
+                svg += `<path d="M ${hely(p, r + 11)} L ${hely(p, r + (fo ? 19 : 15))}" stroke="#cbd5e1" stroke-width="${fo ? 2 : 1}"/>`;
+                if (fo && Math.round(p) % lepes === 0) {
+                    const [x, y] = hely(p, r + 30).split(' ');
+                    svg += `<text x="${x}" y="${Number(y) + 4}" font-size="12" fill="#e2e8f0" text-anchor="middle">${Math.round(p)}</text>`;
+                }
+            }
+
+            svg += `<path d="M ${hely(p0, r - 11)} L ${hely(p0, r + 11)}" stroke="#38bdf8" stroke-width="3.5"/>`;
+            jelek.forEach((jel) => {
+                svg += `<path d="M ${hely(jel.p, r - 12)} L ${hely(jel.p, r + 14)}" stroke="${jel.szin}" stroke-width="4"/>`;
+                const [x, y] = hely(jel.p, r + 46).split(' ');
+                svg += `<text x="${x}" y="${Number(y) + 4}" font-size="13" font-weight="700" fill="${jel.szin}" text-anchor="middle">${szamSzoveg(jel.p, 1)}</text>`;
+            });
+
+            svg += `<path d="M ${cx} ${cy} L ${hely(ertek, r - 22)}" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>`;
+            svg += `<circle cx="${cx}" cy="${cy}" r="8" fill="#ffffff"/>`;
+            svg += `<text x="${cx}" y="${cy + 38}" font-size="26" font-weight="700" fill="#ffffff" text-anchor="middle">${barSzoveg(ertek)}</text>`;
+            svg += `<text x="${cx}" y="${cy + 56}" font-size="11.5" fill="#94a3b8" text-anchor="middle">${felirat}</text>`;
+            svg += '</svg>';
+            return svg;
+        }
+
+        function tartalyReszlet(t: Tartaly, p0: number): HTMLElement[] {
+            const sorok: string[] = [`Megengedett üzemi nyomás: ${barSzoveg(t.ps)}`];
+            if (t.p0Gyari !== null) sorok.push(`Gyári előfeszítés: ${barSzoveg(t.p0Gyari)} (állítsa ${barSzoveg(p0)}-ra)`);
+            if (t.atmero && t.magassag) sorok.push(`Méret: Ø${t.atmero} × ${t.magassag} mm`);
+            if (t.atfolyasos !== null) sorok.push(t.atfolyasos ? 'Átáramlásos kialakítás' : 'Hagyományos (nem átáramlásos) kialakítás');
+            if (t.megjegyzes) sorok.push(t.megjegyzes);
+            return sorok.map((s) => {
+                const p = document.createElement('p');
+                p.textContent = s;
+                return p;
+            });
+        }
+
+        function ajanlasMegjelenit(vMin: number, psv: number, tMax: number, p0: number, alkalmazas: 'futes' | 'ivoviz'): Tartaly | null {
+            const ajanlas = ajanl({ alkalmazas, vMin, psv, tMax });
+            const reszlet = ki('ajanlott-reszlet');
+            sorokTorlese(reszlet);
+            const alternativak = ki('alternativak');
+            sorokTorlese(alternativak);
+            ki('alternativak-blokk').classList.add('hidden');
+            if (!ajanlas.legjobb) {
+                ki('ajanlott').textContent = 'Nincs találat';
+                const p = document.createElement('p');
+                p.textContent = ajanlas.nincsTalalat ?? '';
+                reszlet.appendChild(p);
+                return null;
+            }
+            ki('ajanlott').textContent = tartalyNev(ajanlas.legjobb);
+            tartalyReszlet(ajanlas.legjobb, p0).forEach((p) => reszlet.appendChild(p));
+            if (ajanlas.alternativak.length > 0) {
+                ki('alternativak-blokk').classList.remove('hidden');
+                ajanlas.alternativak.forEach((a) => alternativak.appendChild(listaElem(`${tartalyNev(a)} (PS ${a.ps} bar)`)));
+            }
+            return ajanlas.legjobb;
+        }
+
+        function lepesek(sorok: string[]) {
+            const lista = ki('lepesek');
+            sorokTorlese(lista);
+            sorok.forEach((html) => {
+                const li = document.createElement('li');
+                li.innerHTML = html;
+                lista.appendChild(li);
+            });
+            reszletekElem.classList.toggle('hidden', sorok.length === 0);
+        }
+
+        function figyelmeztetesek(sorok: string[]) {
+            const figy = ki('figyelmeztetesek');
+            sorokTorlese(figy);
+            sorok.forEach((f) => figy.appendChild(listaElem(f)));
+        }
+
+        function futesKiir(e: FutesEredmeny, be: { terfogat: number; tMin: number; tMax: number }, tartaly: Tartaly | null) {
+            const max = Math.ceil(e.psv + 0.5);
+            ki('vmin').textContent = literSzoveg(e.vMin);
+            ki('p0').textContent = barSzoveg(e.p0);
+            ki('toltes-cimke').textContent = `Töltési nyomás (${szamSzoveg(e.toltesiHomerseklet, 1)} °C-os vízzel)`;
+            ki('toltes').textContent = barSzoveg(e.toltesiNyomas);
+            ki('vegnyomas').textContent = barSzoveg(e.vegnyomas);
+            ki('psv').textContent = barSzoveg(e.psv);
+
+            ki('muszer').innerHTML = muszerSvg(
+                max,
+                [
+                    { tol: e.hidegNyomas, ig: e.vegnyomas, szin: '#10b981' },
+                    { tol: e.vegnyomas, ig: e.psv, szin: '#fbbf24' },
+                    { tol: e.psv, ig: max, szin: '#ef4444' }
+                ],
+                e.toltesiNyomas,
+                `töltési nyomás ${szamSzoveg(e.toltesiHomerseklet, 1)} °C-os vízzel`,
+                e.p0,
+                [
+                    { p: e.hidegNyomas, szin: '#ffffff' },
+                    { p: e.maxNyomas, szin: '#fb923c' }
+                ]
+            );
+
+            figyelmeztetesek(e.figyelmeztetesek);
+
+            const n = szamTex;
+            const deltaVegnyomas = Math.max(be.psv * 0.1, 0.5);
+            lepesek([
+                `Víz tágulása a sűrűségéből: ${kep(String.raw`e = \frac{\rho_{\text{hideg}}}{\rho_{\text{meleg}}} - 1 = \frac{${n(e.surusegMin)}}{${n(e.surusegMax)}} - 1 = ${n(e.tagulasSzazalek, 3)}\,\%`)} ${kep(String.raw`V_e = V \cdot e = ${n(be.terfogat, 0)}\ \text{l} \cdot ${n(e.tagulasSzazalek, 3)}\,\% = ${n(e.tagulas)}\ \text{l}`)}`,
+                `Biztonsági térfogat (víztartalék): ${kep(String.raw`V_{\text{bizt}} = \max\left(0{,}5\,\% \cdot V;\ 3\ \text{l}\right) = ${n(e.biztonsagiTerfogat)}\ \text{l}`)}`,
+                `Előfeszítés (a legmagasabb ponton hidegen is legalább 0,5 bar, 0,1 bar-ra kerekítve): ${kep(String.raw`p_0 = \frac{h}{10} + 0{,}5 \approx \frac{${n(be.magassag, 1)}}{10} + 0{,}5 = ${n(e.p0, 1)}\ \text{bar}`)}`,
+                `Végnyomás (a lefúvási nyomás 90%-a, de legalább 0,5 bar-ral alatta): ${kep(String.raw`p_e = p_{sv} - \max\left(0{,}1\,p_{sv};\ 0{,}5\ \text{bar}\right) = ${n(be.psv, 1)} - ${n(deltaVegnyomas, 1)} = ${n(e.vegnyomas, 1)}\ \text{bar}`)}`,
+                `Tartálytérfogat: ${kep(String.raw`V_{\min} = \frac{(V_e + V_{\text{bizt}}) \cdot (p_e + 1)}{p_e - p_0} = \frac{(${n(e.tagulas)} + ${n(e.biztonsagiTerfogat)}) \cdot (${n(e.vegnyomas, 1)} + 1)}{${n(e.vegnyomas, 1)} - ${n(e.p0, 1)}} = ${n(e.vMin, 1)}\ \text{l}`, true)}`,
+                `Töltési nyomás a ${n(e.toltesiHomerseklet, 1)} °C-os vízzel (gáztörvény): ${kep(String.raw`(p_0 + 1) \cdot V_t = (p + 1) \cdot (V_t - V_{\text{víz}}) \quad \Rightarrow \quad p = ${n(e.toltesiNyomas, 1)}\ \text{bar}`)}`
+            ]);
+        }
+
+        function hmvKiir(e: HmvEredmeny, tMax: number) {
+            const max = Math.ceil(e.psv + 0.5);
+            ki('vmin').textContent = literSzoveg(e.vMin);
+            ki('p0').textContent = barSzoveg(e.elofeszites);
+            ki('uzemi').textContent = barSzoveg(e.pHideg);
+            ki('vegnyomas').textContent = barSzoveg(e.vegnyomas);
+            ki('psv').textContent = barSzoveg(e.psv);
+            ajanlasMegjelenit(e.vMin, e.psv, tMax, e.elofeszites, 'ivoviz');
+
+            ki('muszer').innerHTML = muszerSvg(
+                max,
+                [
+                    { tol: e.pHideg, ig: e.vegnyomas, szin: '#10b981' },
+                    { tol: e.vegnyomas, ig: e.psv, szin: '#fbbf24' },
+                    { tol: e.psv, ig: max, szin: '#ef4444' }
+                ],
+                e.pHideg,
+                'hálózati nyomás',
+                e.elofeszites,
+                []
+            );
+
+            const kiegeszites = e.figyelmeztetesek.slice();
+            kiegeszites.push('Átáramlásos tartályt a hidegvíz-ágba, a melegvíz-tároló és a visszacsapó szelep közé kell építeni.');
+            figyelmeztetesek(kiegeszites);
+
+            const n = szamTex;
+            lepesek([
+                `Tágulás a víz sűrűségéből: ${kep(String.raw`V_e = V \cdot e = ${n(e.tagulas)}\ \text{l}`)}`,
+                `Előfeszítés (a hálózati nyomásnál 0,2 bar-ral kisebb): ${kep(String.raw`p_0 = p_{\text{hideg}} - 0{,}2 = ${n(e.pHideg, 1)} - 0{,}2 = ${n(e.elofeszites, 1)}\ \text{bar}`)}`,
+                `Végnyomás (a lefúvási nyomás 90%-a): ${kep(String.raw`p_e = 0{,}9 \cdot p_{sv} = 0{,}9 \cdot ${n(e.psv, 1)} = ${n(e.vegnyomas, 1)}\ \text{bar}`)}`,
+                `Kihasználtság: ${kep(String.raw`m = 1 - \frac{(p_{\text{hideg}} + 1) - (p_0 + 1)}{p_{\text{hideg}} + 1} = ${n(e.maradvanyTenyezo, 4)}`)} ${kep(String.raw`\eta = \frac{(p_e + 1) - (p_{\text{hideg}} + 1)}{p_e + 1} \cdot m = ${n(e.kihasznalas, 4)}`)}`,
+                `Tartálytérfogat: ${kep(String.raw`V_{\min} = \frac{V_e}{\eta} = \frac{${n(e.tagulas)}}{${n(e.kihasznalas, 4)}} = ${n(e.vMin, 1)}\ \text{l}`, true)}`
+            ]);
+        }
+
+        function hibaMegjelenit(uzenet: string) {
+            hibaElem.textContent = uzenet;
+            hibaElem.classList.remove('hidden');
+            eredmenyElem.classList.add('hidden');
+            reszletekElem.classList.add('hidden');
+        }
+
+        function frissit() {
+            const mod = tipus();
+            futesMezok.classList.toggle('hidden', mod !== 'futes');
+            hmvMezok.classList.toggle('hidden', mod !== 'ivoviz');
+            urlap!.querySelectorAll<HTMLElement>('[data-csak]').forEach((elem) => elem.classList.toggle('hidden', elem.dataset.csak !== mod));
+
+            if (mod === 'futes') {
+                const toltesNyers = nyers('tTolt');
+                const be = {
+                    terfogat: szam('viz'),
+                    tMin: szam('tMin'),
+                    tMax: szam('tMax'),
+                    tTolt: toltesNyers === '' ? undefined : szam('tTolt'),
+                    magassag: szam('magassag'),
+                    psv: szam('psvFutes')
+                };
+                const alap = futesMeretezes(be);
+                if ('hiba' in alap) {
+                    hibaMegjelenit(alap.hiba);
+                    return;
+                }
+                hibaElem.classList.add('hidden');
+                eredmenyElem.classList.remove('hidden');
+                const tartaly = ajanlasMegjelenit(alap.vMin, alap.psv, be.tMax, alap.p0, 'futes');
+                const vegleges = tartaly ? futesMeretezes({ ...be, tartaly: tartaly.terfogat }) : alap;
+                if ('hiba' in vegleges) {
+                    hibaMegjelenit(vegleges.hiba);
+                    return;
+                }
+                futesKiir(vegleges, be, tartaly);
+            } else {
+                const tMax = szam('hmvMax');
+                const eredmeny = hmvMeretezes({ terfogat: szam('hmvTerfogat'), tHideg: szam('hmvHideg'), tMax, pHideg: szam('hmvNyomas'), psv: szam('psvHmv') });
+                if ('hiba' in eredmeny) {
+                    hibaMegjelenit(eredmeny.hiba);
+                    return;
+                }
+                hibaElem.classList.add('hidden');
+                eredmenyElem.classList.remove('hidden');
+                hmvKiir(eredmeny, tMax);
+            }
+        }
+
+        const kezdoTipus = new URLSearchParams(window.location.search).get('tipus');
+        if (kezdoTipus === 'futes' || kezdoTipus === 'ivoviz') {
+            const valaszto = urlap.querySelector<HTMLInputElement>(`input[name="tipus"][value="${kezdoTipus}"]`);
+            if (valaszto) valaszto.checked = true;
+        }
+
+        urlap.addEventListener('input', frissit);
+        urlap.addEventListener('change', frissit);
+        urlap.addEventListener('submit', (esemeny) => esemeny.preventDefault());
+        frissit();
+    }
+</script>

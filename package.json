@@ -25,10 +25,13 @@
         "@tailwindcss/vite": "^4.1.16",
         "astro": "^5.16.10",
         "docxtemplater": "^3.69.3",
+        "katex": "^0.16.47",
         "pdf-lib": "^1.17.1",
         "pizzip": "^3.2.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
+        "rehype-katex": "^7.0.1",
+        "remark-math": "^6.0.0",
         "tailwindcss": "^4.1.16",
         "zod": "^3.25.76"
     },

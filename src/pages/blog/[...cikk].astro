@@ -8,6 +8,7 @@ import portre from '../../assets/telefonalos2.png';
 import { KATEGORIAK, SZERZO, datumSzoveg, olvasasiIdo } from '../../data/blog';
 import { cikkSema, gyikSema, morzsaSema, szervezetSema } from '../../utils/seo';
 import { linkesit } from '../../utils/linkesit';
+import 'katex/dist/katex.min.css';
 
 export async function getStaticPaths() {
     const cikkek = await getCollection('blog', ({ data }) => !data.vazlat);

@@ -18,6 +18,7 @@ export async function GET(_context: APIContext) {
         `- [Kezdőlap](${CEG.url}/): szolgáltatások áttekintése`,
         `- [Energetikai tanúsítvány](${CEG.url}/energetikai-tanusitvany/): mikor kell, hogyan készül, ajánlatkérés`,
         `- [Online árajánlat](${CEG.url}/ajanlat/): épületgépészeti árajánlat PDF-ben, 24 órán belül`,
+        `- [Tágulási tartály méretező](${CEG.url}/tagtartaly-meretezo/): fűtési és ivóvíz/HMV tágulási tartály térfogata, előfeszítési, töltési és lefúvási nyomása, ajánlott típus`,
         `- [Blog](${CEG.url}/blog/): gyakorlati cikkek`,
         '',
         '## Cikkek',

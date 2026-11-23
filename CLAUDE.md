@@ -35,6 +35,16 @@ npx vitest run         # teljes teszt-suite
 - Az `/ajanlat` modulból csak meghív (`sendMessage`, `listAdmins`, `readEnv`, `hashIp`, `dateKey`), nem módosítja.
 - Env: `TANUSITVANY_NOTIFY_EMAIL` (alapértelmezés: tanusitvany@nyariterv.hu), opcionális `TANUSITVANY_SENDER_EMAIL` (különben `QUOTE_SENDER_EMAIL`).
 
+## Tágulási tartály méretező (`/tagtartaly-meretezo/`)
+
+- Oldal: `src/pages/tagtartaly-meretezo.astro`, komponens: `src/components/TagtartalyMeretezo.astro` (vanilla JS, `?tipus=futes|ivoviz`). Cikk: `src/content/blog/tagtartaly-meretezese.md`.
+- Logika: `src/utils/tagtartaly/szamitas.ts` (fűtés: MSZ EN 12828 szerinti `Vmin = (ΣVe + Vbizt)·(pe+1)/(pe−p0)`; HMV: Flamco Airfix-eljárás `Vn = Ve/(η·m)`; a hőtágulás a víz sűrűségtáblájából), `ajanlas.ts` (legkisebb megfelelő tartály: térfogat ≥ Vmin, PS ≥ psv, hőmérséklet), tesztek: `tagtartaly.test.ts`.
+- Fűtés: egy kör (víztérfogat, leghidegebb és legmelegebb hőmérséklet, opcionális töltési hőmérséklet); a tágulás a sűrűségarányból (ρ(hideg)/ρ(meleg) − 1). Előfeszítés: p0 = h/10 + legalább 0,5 bar (hogy a legmagasabb ponton hidegen se essen 0,5 bar alá), **0,1 bar-ra** felfelé kerekítve (helyszínen könnyen beállítható érték). Végnyomás: fűtésnél pe = psv − max(0,1·psv; 0,5 bar); ivóvíznél pe = 0,9·psv. A hideg nyomás és a töltési nyomás a gáztörvényből jön az ajánlott tartály térfogatával (a tartályban hidegen a Vbizt víztartalék van; Vn = Vmin esetén a legmelegebb állapot nyomása pontosan pe, nagyobb tartálynál kisebb; a legmelegebb vízzel töltve ez a töltési nyomás). Nincs külön „pa ≥ p0 + 0,3 bar” feltétel, a Vmin csak a tanult képlet. A felület manométert rajzol (zöld üzemi, sárga pe–psv, piros psv fölött).
+- Termékadat: `src/data/tagtartalyok.json`, csak gyártói/magyar katalógusban igazolt, független ügynökkel is ellenőrzött sorok (Reflex N/NG/Refix DD/DT, Flamco Contra-Flex/Flexcon R/Top/Airfix A/D, Gitral MB, Aquasystem VR). Ellentmondó forrásnál a kisebb PS szerepel. Bővítés előtt a ps és p0Gyari értékeket gyártói forrással ellenőrizni kell.
+- A vitest Git Bash alól a meghajtóbetű kis/nagybetűs eltérése miatt elszáll, **PowerShellből** futtatandó.
+
+- Képletek: KaTeX. A blogcikkekben `$...$` / `$$...$$` (remark-math + rehype-katex, `astro.config.mjs`); a méretező komponensben `katex.renderToString` (build-időben és a kliens oldali számolásnál is). Új képletet mindig LaTeX-ben írj, sima szövegként (pl. `p0`, `Vmin`) ne.
+
 ## Kapcsolati űrlap és adatkezelés
 
 - `Contact.astro` → `POST /api/kapcsolat` (`src/utils/kapcsolat.ts`, zod, SMTP2GO a `tanusitvany/kuldes.ts` `emailKuldes`-én át, napi 5/IP a `kapcsolat` Blobs-store-ban). Címzett: `KAPCSOLAT_NOTIFY_EMAIL` (alap: info@nyariterv.hu). Külső űrlapszolgáltatás (formsubmit) nincs.

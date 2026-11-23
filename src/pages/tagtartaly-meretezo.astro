@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TagtartalyMeretezo from '../components/TagtartalyMeretezo.astro';
+import { morzsaSema, szervezetSema } from '../utils/seo';
+
+const semak = [
+    szervezetSema(),
+    morzsaSema([
+        { nev: 'Kezdőlap', utvonal: '/' },
+        { nev: 'Blog', utvonal: '/blog/' },
+        { nev: 'Tágulási tartály méretező', utvonal: '/tagtartaly-meretezo/' }
+    ])
+];
+---
+
+<Layout
+    title="Tágulási tartály méretező: fűtés és HMV – Nyári Terv"
+    description="Ingyenes tágulási tartály méretező fűtési és ivóvíz-rendszerhez: tartálytérfogat, előfeszítési és töltési nyomás, lefúvási nyomás, és ajánlott típus."
+    semak={semak}
+>
+    <section class="bg-slate-900 text-white">
+        <div class="container-custom py-16 sm:py-20">
+            <div class="mx-auto max-w-3xl text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Tágulási tartály méretező</h1>
+                <p class="mt-5 text-lg leading-8 text-slate-200">
+                    Válassza ki a rendszer típusát, adja meg az adatokat, és megkapja a szükséges tartálytérfogatot, az előfeszítési és a töltési nyomást, a végnyomást és a lefúvási nyomást, valamint egy ajánlott tartályt.
+                </p>
+                <p class="mt-6">
+                    <a href="/blog/tagtartaly-meretezese/" class="font-semibold text-white underline underline-offset-4 hover:text-primary-light">Hogyan működik a méretezés? Olvassa el a cikket →</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <TagtartalyMeretezo />
+</Layout>
