@@ -13,9 +13,9 @@ const phone = "+36 70 318 7843";
             <div class="grid grid-cols-1 lg:grid-cols-2">
                 <!-- Contact Info & Photo -->
                 <div class="p-8 sm:p-12 bg-slate-50 flex flex-col justify-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 mb-6">Vegye fel velünk a kapcsolatot!</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 mb-6">Vegye fel velem a kapcsolatot!</h2>
                     <p class="text-slate-600 mb-8">
-                        Kérjen ajánlatot vagy egyeztessen időpontot. Állunk rendelkezésére.
+                        Kérjen ajánlatot vagy egyeztessen időpontot. Rendelkezésére állok.
                     </p>
 
                     <div class="flex items-center gap-6 mb-8">
@@ -83,7 +83,7 @@ const phone = "+36 70 318 7843";
 
                         <div>
                             <label for="k-uzenet" class="block text-sm font-medium text-slate-700 mb-2">Üzenet</label>
-                            <textarea name="uzenet" id="k-uzenet" rows="4" required maxlength="5000" class="field-input resize-none" placeholder="Miben segíthetünk?"></textarea>
+                            <textarea name="uzenet" id="k-uzenet" rows="4" required maxlength="5000" class="field-input resize-none" placeholder="Miben segíthetek?"></textarea>
                             <p class="field-error mt-1" data-hiba="uzenet"></p>
                         </div>
 
@@ -138,7 +138,7 @@ const phone = "+36 70 318 7843";
                 if (valasz.ok && json.ok) {
                     urlap.reset();
                     allapot.className = 'text-sm font-semibold text-emerald-700';
-                    allapot.textContent = 'Köszönjük, üzenetét megkaptuk! Hamarosan válaszolunk.';
+                    allapot.textContent = 'Köszönöm, üzenetét megkaptam! Hamarosan válaszolok.';
                     return;
                 }
                 for (const [kulcs, uzenet] of Object.entries(json.hibak ?? {})) {
@@ -147,10 +147,10 @@ const phone = "+36 70 318 7843";
                     urlap.querySelector(`[name="${kulcs}"]`)?.setAttribute('aria-invalid', 'true');
                 }
                 allapot.className = 'text-sm font-semibold text-red-700';
-                allapot.textContent = json.uzenet ?? 'Az elküldés nem sikerült. Kérjük, próbálja újra.';
+                allapot.textContent = json.uzenet ?? 'Az elküldés nem sikerült. Kérem, próbálja újra.';
             } catch {
                 allapot.className = 'text-sm font-semibold text-red-700';
-                allapot.textContent = 'Hálózati hiba. Kérjük, próbálja újra, vagy hívjon telefonon.';
+                allapot.textContent = 'Hálózati hiba. Kérem, próbálja újra, vagy hívjon telefonon.';
             } finally {
                 gomb.disabled = false;
             }

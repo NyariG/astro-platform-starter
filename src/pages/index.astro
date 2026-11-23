@@ -14,13 +14,13 @@ const legujabbCikkek = (await getCollection('blog', ({ data }) => !data.vazlat))
 const services = [
     {
         title: "Családi Házak",
-        description: "Teljes körű gépészeti tervezés új építésű és felújítandó családi házakhoz. Energiahatékony, modern megoldások személyre szabva.",
+        description: "Teljes körű gépészeti tervezés új építésű és felújítandó családi házakhoz. A ház adottságaihoz, a nyílászárókhoz és a szigeteléshez igazítva, akár a meglévő gázkazán megtartásával, hibrid rendszerben.",
         iconPath: "M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25",
         features: ["Fűtés és hűtés", "Szellőztető rendszerek", "Víz- és csatornahálózat", "Hőszivattyús rendszerek"]
     },
     {
         title: "Társasházak",
-        description: "Többlakásos épületek komplex gépészeti tervezése. Rendszerszintű gondolkodás, gazdaságos üzemeltetés és precíz kivitelezési tervek.",
+        description: "Többlakásos épületek komplex gépészeti tervezése. Lakásonkénti hőmennyiségmérés, hidraulikai beszabályozás, valamint központi kazánház vagy hőszivattyús kaszkád méretezése és tervezése.",
         iconPath: "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5M12 6.75h1.5M15 6.75h1.5M9 10.5h1.5M12 10.5h1.5M15 10.5h1.5M9 14.25h1.5M12 14.25h1.5M15 14.25h1.5M9 18h1.5M12 18h1.5M15 18h1.5",
         features: ["Központi gépészet", "Egyedi mérési megoldások", "Tűzvédelmi rendszerek", "Szennyvíz elvezetés"]
     },
@@ -33,7 +33,7 @@ const services = [
     },
     {
         title: "Tervezés és Kivitelezés",
-        description: "Új építésű és felújítási munkálatokat is vállalunk: először elkészítjük a mérnöki terveket, majd ezek alapján profi kivitelezést biztosítunk teljes körű garanciával.",
+        description: "Új építésű és felújítási munkákat is vállalok: először elkészítem a gépészeti terveket, majd ezek alapján a kivitelezést is elvégzem, teljes körű garanciával.",
         iconPath: "M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z",
         features: ["Új építésű ingatlanok", "Felújítási munkálatok", "Mérnöki tervek alapján", "Teljes körű garancia"]
     }
@@ -61,7 +61,7 @@ const systems = [
                     Nyári Terv <span class="block text-primary text-2xl sm:text-4xl mt-2 font-medium">Precíz épületgépészeti tervezés</span>
                 </h1>
                 <p class="mt-6 text-lg leading-8 text-slate-600">
-                    Fűtés, hűtés, szellőzés, víz, szennyvíz és esővíz rendszerek tervezése, <strong>profi kivitelezése</strong>, valamint hiteles energetikai tanúsítványok készítése.
+                    Fűtés, hűtés, szellőzés, víz, szennyvíz és esővíz rendszerek tervezése és <strong>kivitelezése</strong>, valamint hiteles energetikai tanúsítványok készítése.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     <a href="/ajanlat" class="btn text-base px-8 py-3">
@@ -79,9 +79,9 @@ const systems = [
     <section id="szolgaltatasok" class="section bg-white">
         <div class="container-custom">
             <div class="mx-auto max-w-2xl text-center mb-16">
-                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Szolgáltatásaink</h2>
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Szolgáltatások</h2>
                 <p class="mt-4 text-lg text-slate-600">
-                    Mérnöki precizitással tervezünk, és a tervekre építve teljes körű kivitelezést is vállalunk magánszemélyeknek és beruházóknak.
+                    Magánszemélyeknek és beruházóknak készítek engedélyezési és kivitelezési gépészeti terveket, hőtechnikai számításokkal és tételes költségvetési kiírással. Ezekből a kivitelező félreértések és pótmunkák nélkül tud dolgozni.
                 </p>
             </div>
             
@@ -125,7 +125,7 @@ const systems = [
                         Korszerű Rendszerek Tervezése
                     </h2>
                     <p class="text-slate-300 text-lg mb-8 leading-relaxed">
-                        A modern épületgépészet nem csak a csövekről szól. Energiahatékony, fenntartható és kényelmes otthonokat tervezünk. Kiemelt figyelmet fordítunk a <strong>hőszivattyús megoldásokra</strong>, melyek a jövő zálogai.
+                        Hőveszteség-számítással kezdek, erre épül a padló- és falfűtési körök kiosztása és a <strong>hőszivattyú kiválasztása</strong>. Az alulméretezett gép a leghidegebb napokon elektromos fűtőpatronnal pótolja a hiányt, és ez drága. A túlméretezett gép sűrűn ki-be kapcsol, és hamarabb elhasználódik. A pontos méretezés mindkettőt megelőzi.
                     </p>
                     <div class="grid grid-cols-2 gap-4">
                         {systems.map((system) => (
