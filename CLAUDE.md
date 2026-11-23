@@ -25,6 +25,9 @@ npx vitest run         # teljes teszt-suite
 - Sitemap: `@astrojs/sitemap` → `/sitemap-index.xml`; `public/robots.txt`; `/rss.xml`; `/llms.txt` (AI-keresőknek, a cikkek „Röviden” mezőjéből).
 - Blog: content collection (`src/content/blog/*.md`, séma: `src/content.config.ts`, kategóriák és szerző: `src/data/blog.ts`). Új cikk: frontmatter `cim`, `leiras` (50–165 karakter), `kategoria`, `megjelent`, ajánlott `roviden` (2–3 mondatos közvetlen válasz), `gyik` (FAQPage-séma), `kep`, `ogKep` (1200×630 PNG a `public/images/blog/` alatt).
 - Belső linkek perjellel végződjenek (`/blog/`, `/energetikai-tanusitvany/`), mert a Netlify a perjel nélküli URL-t 301-gyel irányítja át.
+- Biztonsági fejlécek (CSP, nosniff, X-Frame-Options, Referrer-/Permissions-Policy): `public/_headers`. Új külső script/kép/iframe forrásnál a CSP-t bővíteni kell (most csak a Meta Pixel engedélyezett).
+- Sitemap `lastmod`: `src/utils/sitemap-datumok.mjs` (cikk: `frissitve` ?? `megjelent`; statikus oldal: a forrásfájl utolsó git-commitja). Új statikus oldalnál az `OLDAL_FORRASOK`-ba fel kell venni.
+- `sameAs`-profilok: `CEG.profilok` (`src/data/ceg.ts`); `/.well-known/security.txt` `Expires` mezőjét évente frissíteni kell.
 - Domain-átirányítás: `public/_redirects` (hitelesenergetikaitanusitvany.hu → `/energetikai-tanusitvany/`).
 
 ## Energetikai tanúsítvány árajánlatkérő (`/energetikai-tanusitvany/#arajanlat`)

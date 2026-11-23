@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { NAVIGACIO } from '../data/ceg';
+---
+
+<Layout title="Az oldal nem található – Nyári Terv" description="A keresett oldal nem található. Innen visszajuthat a Nyári Terv főoldalára, a blogra vagy az energetikai tanúsítvány oldalára." noindex>
+    <section class="section bg-slate-50">
+        <div class="container-custom py-24 text-center">
+            <p class="text-sm font-semibold text-primary mb-2">404</p>
+            <h1 class="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6">Az oldal nem található</h1>
+            <p class="text-lg text-slate-600 mb-10 max-w-xl mx-auto">Lehet, hogy elírás van a címben, vagy az oldal időközben máshová került.</p>
+            <a href="/" class="inline-block rounded-md bg-primary px-6 py-3 text-white font-semibold hover:bg-primary/90 transition no-underline">Vissza a főoldalra</a>
+            <ul class="mt-10 flex flex-wrap justify-center gap-6 text-sm">
+                {NAVIGACIO.map((elem) => <li><a href={elem.href}>{elem.felirat}</a></li>)}
+            </ul>
+        </div>
+    </section>
+</Layout>

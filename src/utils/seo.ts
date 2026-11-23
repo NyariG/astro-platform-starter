@@ -1,5 +1,12 @@
 import { CEG } from '../data/ceg';
 
+const SZOLGALTATASOK = [
+    { nev: 'Családi házak épületgépészeti tervezése', leiras: 'Fűtés, hűtés, szellőzés, víz- és csatornahálózat, hőszivattyús rendszerek tervezése új és felújítandó családi házakhoz.', utvonal: '/' },
+    { nev: 'Társasházak épületgépészeti tervezése', leiras: 'Központi gépészet, egyedi mérés, tűzvédelmi rendszerek és szennyvízelvezetés tervezése többlakásos épületekhez.', utvonal: '/' },
+    { nev: 'Energetikai tanúsítvány', leiras: 'Hiteles energetikai tanúsítvány helyszíni felméréssel adásvételhez, bérbeadáshoz és pályázathoz Győrben és környékén.', utvonal: '/energetikai-tanusitvany/' },
+    { nev: 'Tágulási tartály méretezés', leiras: 'Ingyenes online tágulási tartály méretező fűtési és ivóvizes rendszerekhez.', utvonal: '/tagtartaly-meretezo/' }
+] as const;
+
 export type Morzsa = { nev: string; utvonal: string };
 export type GyikElem = { kerdes: string; valasz: string };
 
@@ -35,7 +42,22 @@ export function szervezetSema() {
             { '@type': 'Country', name: 'Magyarország' },
             { '@type': 'AdministrativeArea', name: 'Győr-Moson-Sopron vármegye' }
         ],
-        knowsAbout: ['Épületgépészeti tervezés', 'Energetikai tanúsítás', 'Hőszivattyús rendszerek']
+        knowsAbout: ['Épületgépészeti tervezés', 'Energetikai tanúsítás', 'Hőszivattyús rendszerek'],
+        sameAs: [...CEG.profilok],
+        hasOfferCatalog: {
+            '@type': 'OfferCatalog',
+            name: 'Szolgáltatások',
+            itemListElement: SZOLGALTATASOK.map((szolgaltatas) => ({
+                '@type': 'Offer',
+                itemOffered: {
+                    '@type': 'Service',
+                    name: szolgaltatas.nev,
+                    description: szolgaltatas.leiras,
+                    url: kanonikusUrl(szolgaltatas.utvonal),
+                    provider: { '@id': `${CEG.url}/#szervezet` }
+                }
+            }))
+        }
     };
 }
 

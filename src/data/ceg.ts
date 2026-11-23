@@ -8,7 +8,12 @@ export const CEG = {
     iranyitoszam: '9151',
     varos: 'Abda',
     utca: 'Bécsi utca 2/c',
-    tanusitasiTerulet: 'Győr és környéke'
+    tanusitasiTerulet: 'Győr és környéke',
+    profilok: [
+        'https://share.google/V4QHdJHU3fVDC6tvQ',
+        'https://www.facebook.com/nyariterv/',
+        'https://www.linkedin.com/company/145368120/'
+    ]
 } as const;
 
 export const NAVIGACIO = [

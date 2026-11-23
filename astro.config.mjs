@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 import rehypeEkezetmentesId from './src/utils/rehype-ekezetmentes-id.mjs';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { sitemapLastmod } from './src/utils/sitemap-datumok.mjs';
 
 export default defineConfig({
     site: 'https://nyariterv.hu',
@@ -16,7 +17,7 @@ export default defineConfig({
     vite: {
         plugins: [tailwindcss()]
     },
-    integrations: [react(), sitemap()],
+    integrations: [react(), sitemap({ serialize: sitemapLastmod(), filter: (oldal) => !oldal.includes('/404') })],
     adapter: netlify({
         devFeatures: {
             environmentVariables: true
